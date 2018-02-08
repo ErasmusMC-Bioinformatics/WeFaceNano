@@ -1,1 +1,2 @@
 # RISPIC
+Nanopore plasmid pipeline.
