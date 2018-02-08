@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block head %}
+<script type="text/javascript">
+function getfolder(e) {
+    var files = e.target.files;
+    var path = files[0].webkitRelativePath;
+    var Folder = path.split("/");
+    var formInfo = document.forms['run'];
+    folder = JSON.stringify(Folder);
+    formInfo.outfolder.value = e.target.value
+}
+</script>
+
+<script>
+    function openResult(evt, rname) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(rname).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="{% url 'index' %}">HOME</a></li>
+                {% if user %}
+                    <li><a href="{% url 'pipeline' %}">PIPELINES</a></li>
+                {% else %}
+                    <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
+                {% endif %}
+                <li><a href="{% url 'readme' %}">README</a></li>
+                <div id="smenubar">
+                    {% if user %}
+                        <li>
+                            <b><small style="color:rgb(136,162,175); font-size:9pt;">Logged in as: <span style="color:rgb(255,100,0);">{{ user }}</span></small></b>
+                        </li>
+                        <li><a href="{% url 'logout' %}">LOGOUT</a></li>
+                        {% if super %}
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    {% endif %}
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px">
+    <div class="tab">
+        <button class="tablinks" onclick="openResult(event, 'plasmids')">Plasmids</button>
+        <button class="tablinks" onclick="openResult(event, 'strains')">Strains</button>
+        <button class="tablinks" onclick="openResult(event, 'microbiome')">Microbiome</button>
+    </div>
+    <br>
+    <div id="inputs">
+        <form action="{% url 'results' %}" method="post" name="run" enctype="multipart/form-data">
+            <span style="color:red">*</span> = required fields <br><br>
+            <table class="table">
+                <tr><td><h3>Input</h3></td></tr>
+                <tr>
+                    <td>
+                        Select input type.
+                    </td>
+                    <td>
+                        <select id="inputtype" name="inputtype" class="ddmenu">
+                            <optgroup label="input type">
+                                <option value="none">Select an input filetype</option>
+                                <option value="fast5">FAST5</option>
+                                <option value="fastq">FASTQ</option>
+                            </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr><td><h3>Output</h3></td></tr>
+                <tr>
+                    <td>
+                        Output folder <span style="color:red">*</span>
+                    </td>
+                    <td>
+                        <input type="text" name="albacoreout" id="albacoreout" placeholder="Enter output folder" required>
+                    </td>
+                </tr>
+                <tr><td><h3>Albacore Settings</h3></td><td>&nbsp;</td></tr>
+                <tr>
+                    <td>
+                        Select folder with reads <span style="color:red">*</span>
+                    </td>
+                    <td>
+                        <select id="inputfolder" name="inputfolder" class="ddmenu">
+                            <optgroup label="folders">
+                            {% for folder in folders %}
+                                <option value="{{ folder }}">{{ folder }}</option>
+                            {% endfor %}
+                            </optgroup>
+                        </select>
+                         <!--<input type="text" name="inputfolder" id="inputfolder" placeholder="Select fast5 input folder" required>-->
+                    </td>
+                </tr>
+                <tr>
+                    <td>Barcoding [yes/no] (default = no)</td>
+                    <td>
+                        <input type="checkbox" name="barcoding" id="barcoding" value='1'>&nbsp;<label>yes &nbsp;&nbsp;&nbsp;</label>
+                        <input type="checkbox" name="barcoding" id="barcoding" value='0'>&nbsp;<label>no &nbsp;&nbsp;&nbsp;</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Select flowcell configuration (default = FLO-MIN106)
+                    </td>
+                    <td>
+                        <select id="aconfig" name="aconfig" class="ddmenu">
+                            <optgroup label="Albacore configurations">
+                                <option value="r94_450bps_linear.cfg">FLO-MIN106</option>
+                                <option value="r94_70bps_rna_linear.cfg">FLO-MIN106 RNA</option>
+                                <option value="r95_450bps_linear.cfg">FLO-MIN107</option>
+                                <option value="r95_70bps_rna_linear.cfg">FLO-MIN107 RNA</option>
+                            </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr><td><h3>Assembly Settings</h3></td><td>&nbsp;</td></tr>
+                <tr>
+                    <td>
+                        Enter the genome size <span style="color:red">*</span><br><br>
+                        <b>*</b> The genome size should be your best guess of the haploid genome size of what is being
+                        assembled.  It is used primarily to estimate coverage in reads, NOT as the desired
+                        assembly size.  Fractional values are allowed: '4.7m' equals '4700k' equals '4700000'
+                    </td>
+                    <td>
+                        <input type="text" name="gsize" id="gsize" placeholder="Enter genome size i.e. 4.7m or 4700k or 4700000" required>
+                    </td>
+                </tr>
+                <tr><td><h3>Analysis Tools Selection</h3></td><td>&nbsp;</td></tr>
+                <tr>
+                    <td>
+                        Select type <b>[ Plasmids -- Strains -- Microbiome ]</b> to see the available tools.<span style="color:red">*</span>
+                    </td>
+                    <td>
+                        <input type="hidden" required>
+                        <div id="plasmids" class="tabcontent" style="display:none;">
+                            <input type="checkbox" name="res" id="res" value='-r '>&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>
+                            <input type="checkbox" name="blast" id="blast" value='-b '>&nbsp;<label>BLAST &nbsp;&nbsp;&nbsp;</label>
+                        </div>
+                        <div id="strains" class="tabcontent" style="display:none;">
+                            <input type="checkbox" name="res" id="res" value='-r '>&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>
+                            <input type="checkbox" name="mlst" id="mlst" value='-m '>&nbsp;<label>MLST &nbsp;&nbsp;&nbsp;</label>
+                            <input type="checkbox" name="species" id="species" value='-s '>&nbsp;<label>Species Typing &nbsp;&nbsp;&nbsp;</label>
+                        </div>
+                        <div id="microbiome" class="tabcontent" style="display:none;">
+                            <input type="checkbox" name="taxonomy" id="taxonomy" value='-t '>&nbsp;<label>Taxonomy / WIMP (Not Available) &nbsp;&nbsp;&nbsp;</label>
+                            <input type="checkbox" name="gsa" id="gsa" value='-gsa '>&nbsp;<label>Genus and Species assignment (Not Available) &nbsp;&nbsp;&nbsp;</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr><td><h3>BLAST Settings</h3></td><td>&nbsp;</td></tr>
+                <tr>
+                    <td>
+                        Select a BLAST database:
+                    </td>
+                    <td>
+                        <select id="blastdb" name="blastdb" class="ddmenu">
+                            <optgroup label="Remote BLAST Databases">
+                                <option value="nt -remote">NT</option>
+                                <option value="nr -remote">NR</option>
+                            </optgroup>
+                            <optgroup label="Local BLAST Databases">
+                                {% for db in blastdb %}
+                                    <option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">{{ db }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Select BLAST task</td>
+                    <td>
+                        <select id="blasttask" name="blasttask" class="ddmenu">
+                            <optgroup label="Select BLAST task">
+                                <option value="megablast">megablast</option>
+                                <option value="blastn">blastn</option>
+                            </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr><td><h3>ResFinder Settings</h3></td></tr>
+                <tr>
+                    <td>Select a database to search for specific resistance genes or select all databases</td>
+                    <td>
+                        <select id="resdb" name="resdb" class="ddmenu">
+                            <optgroup label="Select ResFinder Database">
+                                <option value="all">all databases</option>
+                                {% for db in resdb %}
+                                    <option value="{{ db }}">{{ db }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>The threshold for % identity</td>
+                    <td>
+                        <select id="residentity" name="residentity" class="ddmenu">
+                            <optgroup label="Identity threshold">
+                                <option value="80.00">80%</option>
+                                <option value="85.00">85%</option>
+                                <option value="90.00">90%</option>
+                                <option value="95.00">95%</option>
+                                <option value="100.00">100%</option>
+                            </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>The minimum length of the overlap ex 0.60 for an overlap of minimum 60 %</td>
+                    <td>
+                         <select id="reslength" name="reslength" class="ddmenu">
+                             <optgroup label="Minimum length">
+                                 <option value="0.60">60%</option>
+                                 <option value="0.70">70%</option>
+                                 <option value="0.80">80%</option>
+                                 <option value="0.90">90%</option>
+                                 <option value="1.00">100%</option>
+                             </optgroup>
+                        </select>
+                    </td>
+                </tr>
+                <tr><td><h3>MinionQC Settings</h3></td><td>&nbsp;</td></tr>
+                <tr>
+                    <td>
+                        The cutoff value for the mean Q score of a read (default 7). Used to create separate plots for reads above and below this threshold.
+                    </td>
+                    <td>
+                        <input type="text" name="qscore" id="qscore" placeholder="Enter Q-score cutoff">
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <br />
+    <div class="tab">
+        <button class="runbutton" onclick="document.run.submit();">RUN</button>
+    </div>
+</div>
+{% endblock %}

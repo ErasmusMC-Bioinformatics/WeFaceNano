@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+<!--<h2>Sign up</h2>-->
+<!--<form method="post">-->
+    <!--<table class="table">-->
+        <!--<h2>Sign up</h2>-->
+        <!--<tr>-->
+            <!--<td>{{ form.as_p }}</td>-->
+        <!--</tr>-->
+    <!--</table>-->
+    <!--<div class="tab">-->
+        <!--<button class="runbutton" type="submit">Sign up</button>-->
+    <!--</div>-->
+<!--</form>-->
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="{% url 'index' %}">HOME</a></li>
+                <li><a href="{% url 'readme' %}">README</a></li>
+                <div id="smenubar">
+                    <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px">
+    <form method="post" autocomplete="off">
+        <table class="table">
+            <h2>Sign up</h2>
+            {% for field in form %}
+                <tr>
+                    <td>
+                        {{ field.label_tag }}
+                        {% if field.help_text %}
+                            <small style="color: grey">{{ field.help_text }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ field }}
+                    </td>
+                </tr>
+                {% for error in field.errors %}
+                  <p style="color: red">{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </table>
+        <div class="tab">
+            <button class="runbutton" type="submit">Sign up</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

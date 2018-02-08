@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="{% url 'index' %}">HOME</a></li>
+                {% if user %}
+                    <li><a href="{% url 'pipeline' %}">PIPELINES</a></li>
+                {% else %}
+                    <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
+                {% endif %}
+                <li><a href="{% url 'readme' %}">README</a></li>
+                <div id="smenubar">
+                    {% if user %}
+                        <li>
+                            <b>
+                                <small style="color:rgb(136,162,175); font-size:9pt;">
+                                    Logged in as:
+                                    <span style="color:rgb(255,100,0);">
+                                        {{ user }}
+                                    </span>
+                                </small>
+                            </b>
+                        </li>
+                        <li><a href="{% url 'logout' %}">LOGOUT</a></li>
+                        {% if super %}
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    {% endif %}
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px">
+    {% if user %}
+    <div id="welcome">
+        <h2>Welcome back <span style="color:rgb(255,100,0)">{{ user }}</span>,</h2>
+        <p>
+            Please select <a href="{% url 'pipeline' %}">PIPELINE</a> to start using the Nanopore analysis tools/pipeline.
+            For more information about the tools and pipeline, please select <a href="{% url 'readme' %}">README</a>.
+            <b>Your personal folder is /media/Nanopore/{{ user }}</b>. If you do not see your personal folder please make sure you have access to the
+            network drive and that your personal folder is created and your data is synchronized.
+        </p>
+        <h2>Your network folder is <span style="color:rgb(255,100,0);">/media/Nanopore/{{ user }}</span></h2>
+        <p>
+            The following data is available in your root directory: <br>
+            <ul id="menubar">
+                {% for folder in folders %}
+                    <li>{{ folder }}</li>
+                {% endfor %}
+            </ul>
+        </p>
+    </div>
+    {% else %}
+    <div id="welcome">
+        <h2>Welcome <span style="color:rgb(255,100,0);">guest</span>,</h2>
+        <p>
+            Please login to start using the Nanopore pipelines. If you do not have an account please SIGN UP to start using the Nanopore pipelines.<br>
+            For more information about the pipelines and tool used within these pipelines select <a href="{% url 'readme' %}">README</a>.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

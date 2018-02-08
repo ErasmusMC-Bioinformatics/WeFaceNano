@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="{% url 'index' %}">HOME</a></li>
+                {% if user %}
+                    <li><a href="{% url 'pipeline' %}">PIPELINES</a></li>
+                {% else %}
+                    <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
+                {% endif %}
+                <li><a href="{% url 'readme' %}">README</a></li>
+                <div id="smenubar">
+                    {% if user %}
+                        <li>
+                            <b><small style="color:rgb(136,162,175); font-size:9pt;">Logged in as: <span style="color:rgb(255,100,0);">{{ user }}</span></small></b>
+                        </li>
+                        <li><a href="{% url 'logout' %}">LOGOUT</a></li>
+                            {% if super %}
+                                <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                                <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                                <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                                <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                            {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px">
+    <p>
+        <h2>Pipeline Tools</h2>
+        <ul>
+            <li>Albacore 2.1.10</li>
+            <li>Canu 1.6</li>
+            <li>npAnalysis resFinder</li>
+            <li>BLAST+ 2.7.1</li>
+            <li>npAnalysis Species Typing</li>
+            <li>npAnalysis MLST</li>
+            <li>MinionQC</li>
+            <!--<li>Minimap & Miniasm</li>-->
+        </ul>
+    </p>
+    <h2>Flowcell Configurations</h2>
+    <table class="table">
+        <th>Flowcell</th>
+        <th>Kit(s)</th>
+        <th>Barcoding</th>
+        <th>Config file</th>
+        <tr>
+            <td>FLO-MIN106</td>
+            <td>
+                SQK-DCS108 <br>
+                SQK-LSK108 <br>
+                SQK-LWP001 <br>
+                SQK-PCS108 <br>
+                SQK-RAD002 <br>
+                SQK-RAD003 <br>
+                SQK-RAD004 <br>
+                SQK-RAS201 <br>
+                SQK-RLI001 <br>
+                VSK-VBK001 <br>
+                VSK-VSK001 <br>
+            </td>
+            <td>NO</td>
+            <td>r94_450bps_linear.cfg</td>
+        </tr>
+        <tr>
+            <td>FLO-MIN106</td>
+            <td>
+                SQK-LWB001 <br>
+                SQK-RAB201 <br>
+                SQK-RBK001 <br>
+                SQK-RBK004 <br>
+                SQK-RLB001 <br>
+            </td>
+            <td>YES</td>
+            <td>r94_450bps_linear.cfg</td>
+        </tr>
+        <tr>
+            <td>FLO-MIN106 RNA</td>
+            <td>SQK-RNA001</td>
+            <td>NO</td>
+            <td>r94_70bps_rna_linear.cfg</td>
+        </tr>
+        <tr>
+            <td>FLO-MIN107</td>
+            <td>
+                SQK-DCS108 <br>
+                SQK-LSK108 <br>
+                SQK-LWP001 <br>
+                SQK-PCS108 <br>
+                SQK-RAD002 <br>
+                SQK-RAD003 <br>
+                SQK-RAD004 <br>
+                SQK-RAS201 <br>
+                SQK-RLI001 <br>
+                VSK-VBK001 <br>
+                VSK-VSK001 <br>
+            </td>
+            <td>NO</td>
+            <td>r95_450bps_linear.cfg</td>
+        </tr>
+        <tr>
+            <td>FLO-MIN107</td>
+            <td>
+                SQK-LWB001 <br>
+                SQK-RAB201 <br>
+                SQK-RBK001 <br>
+                SQK-RBK004 <br>
+                SQK-RLB001 <br>
+            </td>
+            <td>YES</td>
+            <td>r95_450bps_linear.cfg</td>
+        </tr>
+        <tr>
+            <td>FLO-MIN107 RNA</td>
+            <td>SQK-RNA001</td>
+            <td>NO</td>
+            <td>r94_70bps_rna_linear.cfg</td>
+        </tr>
+        <tr>
+            <td>FLO-PRO001</td>
+            <td>SQK-LSK108</td>
+            <td>NO</td>
+            <td>r941_450bps_linear_prom.cfg</td>
+        </tr>
+    </table>
+    <div id="read_analysis">
+        <h2>Nanopore Analysis Pipeline</h2>
+        <h3>Basecalling, de-barcoding and FASTQ conversion</h3>
+        <p>
+            Albacore is used to read the raw FAST5 files from the Metrichor basecalling and will do another run of basecalling with de-barcoding <br>
+            and will convert the reads to FASTQ.
+        </p>
+        <h3>Assembly</h3>
+        <p>
+            Canu is used for assembly.<br>
+            The file created by Canu containing the contifgs will be used for further analysis.
+        </p>
+        <h3>Plasmid Detection</h3>
+        <p>
+            BLAST 2.7.1 is used for plasmid detection.<br>
+            BLAST can be used with a remote database (NT or NR) or with a local toxoplasma database.
+        </p>
+        <h3>Antibiotic Resistance</h3>
+        <p>
+            Resfinder is used to find antimicrobial resistance genes based on the contig file created by Canu.<br>
+        </p>
+        <h3>Species Detection</h3>
+        <ul>
+            <li>Select an input folder or type in the path to the fast5 reads</li>
+            <li>Barcoding Yes or No</li>
+            <li>Select the flowcell configuraion file (see list of flowcell configurations)</li>
+            <li>Select the output format (FASTQ or FAST5)</li>
+            <li>Enter the output path</li>
+            <li>Select the Species Typing tool by selecting the checkbox</li>
+            <li>Run the analysis by clicking on the 'RUN' button</li>
+        </ul>
+    </div>
+    <div id="read_results">
+        <h2>View Results</h2>
+        <h3>Antibiotic Resistance and BLAST</h3>
+        <p>
+            The results will be presented in a table with three columns. <br>
+            The first column consists of the plasmid name (if available) or the accession number from NCBI. <br>
+            Contig names can be found in the second column. <br>
+            In the last column the antibiotic resistance genes for that contig can be found. <br>
+        </p>
+    </div>
+    <div style="clear:both;"></div>
+</div>
+{% endblock %}

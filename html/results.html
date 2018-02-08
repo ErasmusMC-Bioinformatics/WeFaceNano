@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block head %}
+
+<script>
+    function openResult(evt, rname) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(rname).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="{% url 'index' %}">HOME</a></li>
+                {% if user %}
+                    <li><a href="{% url 'pipeline' %}">PIPELINES</a></li>
+                {% else %}
+                    <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
+                {% endif %}
+                <li><a href="{% url 'readme' %}">README</a></li>
+                <div id="smenubar">
+                    {% if user %}
+                        <li>
+                            <b><small style="color:rgb(136,162,175); font-size:9pt;">Logged in as: <span style="color:rgb(255,100,0);">{{ user }}</span></small></b>
+                        </li>
+                        <li><a href="{% url 'logout' %}">LOGOUT</a></li>
+                        {% if super %}
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    {% endif %}
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px">
+    <h1>Results</h1>
+    <div class="tab">
+    {% for b in barcodes %}
+        <button class="tablinks" onclick="openResult(event, '{{ b }}')">{{ b }}</button>
+    {% endfor %}
+    </div>
+    {% for b in barcodes %}
+        <div id="{{ b }}" class="tabcontent" style="display:none;">
+            <br>
+            <table class="table">
+                <th>Plasmid or Accession Number</th>
+                <th>Contig</th>
+                <th>Resfinder</th>
+                {% for bc, bp in blast.items %}
+                    {% if bc %}
+                        {% if b in bc %}
+                        <tr>
+                            <td>
+                                {% for bpn in bp %}
+                                    {{ bpn }} &nbsp; - &nbsp;
+                                {% endfor %}
+                            </td>
+                            <td>{{ bc }}</td>
+                            <td>
+                                {% for rb, rg in res.items %}
+                                    {% if rb == bc %}
+                                        {% for r in rg %}
+                                            {{ r }} <br>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr></tr>
+                        {% endif %}
+                    {% else %}
+                        <tr>
+                            <td>No Plasmids or Accession Numbers Found</td>
+                            <td>No Contigs Found</td>
+                            <td>No Genes Found</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
