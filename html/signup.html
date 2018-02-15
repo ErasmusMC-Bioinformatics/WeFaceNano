@@ -5,23 +5,16 @@
 {% endblock %}
 
 {% block content %}
-<!--<h2>Sign up</h2>-->
-<!--<form method="post">-->
-    <!--<table class="table">-->
-        <!--<h2>Sign up</h2>-->
-        <!--<tr>-->
-            <!--<td>{{ form.as_p }}</td>-->
-        <!--</tr>-->
-    <!--</table>-->
-    <!--<div class="tab">-->
-        <!--<button class="runbutton" type="submit">Sign up</button>-->
-    <!--</div>-->
-<!--</form>-->
 <div class="header">
     <div class="container">
         <div id="menu">
             <ul id="menubar">
                 <li><a href="{% url 'index' %}">HOME</a></li>
+                {% if user %}
+                    <li><a href="{% url 'pipeline' %}">PIPELINES</a></li>
+                {% else %}
+                    <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
+                {% endif %}
                 <li><a href="{% url 'readme' %}">README</a></li>
                 <div id="smenubar">
                     <li><a href="{% url 'login' %}">LOGIN</a></li>

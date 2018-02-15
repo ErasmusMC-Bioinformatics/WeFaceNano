@@ -6,19 +6,16 @@
     function openResult(evt, rname) {
     // Declare all variables
     var i, tabcontent, tablinks;
-
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
-
     // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
-
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(rname).style.display = "block";
     evt.currentTarget.className += " active";
@@ -69,41 +66,93 @@
     {% for b in barcodes %}
         <div id="{{ b }}" class="tabcontent" style="display:none;">
             <br>
-            <table class="table">
-                <th>Plasmid or Accession Number</th>
+            <table class="restable">
+                <th>Accession Number - Name - Length</th>
                 <th>Contig</th>
-                <th>Resfinder</th>
-                {% for bc, bp in blast.items %}
-                    {% if bc %}
-                        {% if b in bc %}
-                        <tr>
-                            <td>
-                                {% for bpn in bp %}
-                                    {{ bpn }} &nbsp; - &nbsp;
-                                {% endfor %}
-                            </td>
-                            <td>{{ bc }}</td>
-                            <td>
-                                {% for rb, rg in res.items %}
-                                    {% if rb == bc %}
-                                        {% for r in rg %}
-                                            {{ r }} <br>
+                <th>Antimicrobial Resistance Genes</th>
+                <th>Circle Diagram</th>
+                {% if blastrun == "-b " %}
+                    {% for bc, bp in blast.items %}
+                        {% if bc %}
+                            {% if b in bc %}
+                            <tr>
+                                <td>
+                                    {{ bp.0 }} <br>
+                                    {{ bp.1 }} <br>
+                                    {{ bp.2 }} bp <br>
+                                </td>
+                                <td>
+                                    {{ bc }} <br>
+                                    {{ bp.3 }} bp
+                                </td>
+                                <td>
+                                    {% if resrun == "-r " %}
+                                        {% for rb, rg in res.items %}
+                                            {% if rb == bc %}
+                                                {% for r in rg %}
+                                                    {{ r }} <br>
+                                                {% endfor %}
+                                            {% endif %}
                                         {% endfor %}
+                                    {% else %}
+                                        No resfinder results
                                     {% endif %}
-                                {% endfor %}
-                            </td>
-                        </tr>
+                                </td>
+                                <td>
+                                    {% for fn, code in html.items %}
+                                        {% if bc in fn %}
+                                            <iframe srcdoc="{{ code }}" frameborder="0" scrolling="no" width="600" height="600"></iframe>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                            </tr>
+                            {% else %}
+                            <tr></tr>
+                            {% endif %}
                         {% else %}
-                        <tr></tr>
+                            <tr>
+                                <td>No Plasmids or Accession Numbers Found</td>
+                                <td>No Contigs Found</td>
+                                <td>No Genes Found</td>
+                                <td>No Results</td>
+                            </tr>
                         {% endif %}
-                    {% else %}
-                        <tr>
-                            <td>No Plasmids or Accession Numbers Found</td>
-                            <td>No Contigs Found</td>
-                            <td>No Genes Found</td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    {% for rb, rg in res.items %}
+                        {% if b in rb %}
+                            <tr>
+                                <td>
+                                    No BLAST results
+                                </td>
+                                <td>
+                                    {{ rb }}
+                                </td>
+                                <td>
+                                {% for r in rg %}
+                                    {{ r }} <br>
+                                {% endfor %}
+                                </td>
+                        {% else %}
+                                <tr>
+                                    <td>
+                                        No results
+                                    </td>
+                                    <td>
+                                        No results
+                                    </td>
+                                    <td>
+                                        No results
+                                    </td>
+                                    <td>
+                                        No results
+                                    </td>
+                                </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </table>
         </div>
     {% endfor %}
