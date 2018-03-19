@@ -10,7 +10,7 @@ Nanopore plasmid pipeline.
 [Results](#results)
 
 # <a name="dependencies"></a>Dependencies
-* Python 2.7.12
+* Python 3.5 or higher
 * perl5
 * libgd 2.2.5
 * cpan packages: Getopt::Long, Bio::SeqIO, Bio::SearchIO, Try::Tiny::Retry and GD
@@ -18,6 +18,8 @@ Nanopore plasmid pipeline.
 * Django 1.11.3
 * Albacore 2.1.10
 * Canu 1.6
+* Minimap 
+* Miniasm
 * Resfinder 2.1 (edited version of resfinder.pl is available in the static folder)
 * BLAST+ 2.7.1
 * blastall and formatdb (both are available in blast2)
