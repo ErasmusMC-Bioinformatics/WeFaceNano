@@ -82,7 +82,7 @@
     border: 1px solid #ccc;
 }
 .table td {
-    word-wrap: word-all;
+    /*word-wrap: word-all;*/
     overflow: hidden;
     padding: 5px;
     width: 50%;
@@ -96,7 +96,7 @@
     border: 1px solid #ccc;
 }
 .restable td {
-    word-wrap: word-all;
+    /*word-wrap: word-all;*/
     overflow: hidden;
     padding: 5px;
     width: 50%;
@@ -110,7 +110,7 @@
     overflow: hidden;
     border: 1px solid #ccc;
     /*background-color: #f1f1f1;*/
-    background-color: #ffffff;
+    background-color: #fff;
 }
 #run {
     width: 100%;

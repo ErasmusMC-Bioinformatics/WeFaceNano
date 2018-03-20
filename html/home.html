@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block head %}
-
+<script type="text/javascript">
+function showLoading() {
+    document.getElementById('loading').style.display = "block";
+    document.results.submit();
+    return true
+}
+</script>
 {% endblock %}
 
 {% block content %}
@@ -54,14 +60,28 @@
             network drive and that your personal folder is created and your data is synchronized.
         </p>
         <h2>Your network folder is <span style="color:rgb(255,100,0);">/media/Nanopore/{{ user }}</span></h2>
-        <p>
-            The following data is available in your root directory: <br>
-            <ul id="menubar">
-                {% for folder in folders %}
-                    <li>{{ folder }}</li>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    Select the results to view:<br>
+    <form action="{% url 'results' %}" method="post" name="results" enctype="multipart/form-data">
+        <input type="hidden" id="username" name="username" value="{{ user }}">
+        <select id="resultname" name="resultname" class="ddmenu">
+            <optgroup label="Select results to view">
+                {% for r in results %}
+                    <option value="{{r}}">{{r}}</option>
                 {% endfor %}
-            </ul>
-        </p>
+            </optgroup>
+        </select>
+    </form>
+    <div class="tab" style="width:10%;">
+        <button class="runbutton" onclick="return showLoading()">VIEW</button>
+    </div>
+    <br>
+    <div id="loading" style="display:none;">
+        <img id="loadingImage" src="{% static 'img/loading.gif' %}" width="25%" height="25%">
     </div>
     {% else %}
     <div id="welcome">

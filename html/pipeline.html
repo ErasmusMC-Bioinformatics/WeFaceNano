@@ -76,7 +76,7 @@ function openResult(evt, rname) {
         </div>
         <br>
         <div id="inputs">
-            <form action="{% url 'results' %}" method="post" name="run" enctype="multipart/form-data">
+            <form action="{% url 'createresults' %}" method="post" name="run" enctype="multipart/form-data">
                 <span style="color:red">*</span> = required fields <br><br>
                 <table class="table">
                     <tr>
@@ -161,6 +161,17 @@ function openResult(evt, rname) {
                             <h3>Assembly Settings</h3>
                         </td>
                         <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Select assembler:</td>
+                        <td>
+                            <select id="assembler" name="assembler" class="ddmenu">
+                                <optgroup label="Select assembler">
+                                    <option value="canu">canu</option>
+                                    <option value="miniasm">miniasm</option>
+                                </optgroup>
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <td>

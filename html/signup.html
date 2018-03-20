@@ -17,14 +17,34 @@
                 {% endif %}
                 <li><a href="{% url 'readme' %}">README</a></li>
                 <div id="smenubar">
-                    <li><a href="{% url 'login' %}">LOGIN</a></li>
-                    <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                    {% if user %}
+                        <li>
+                            <b>
+                                <small style="color:rgb(136,162,175); font-size:9pt;">
+                                    Logged in as:
+                                    <span style="color:rgb(255,100,0);">
+                                        {{ user }}
+                                    </span>
+                                </small>
+                            </b>
+                        </li>
+                        <li><a href="{% url 'logout' %}">LOGOUT</a></li>
+                        {% if super %}
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    {% endif %}
                 </div>
             </ul>
         </div>
     </div>
 </div>
 <div class="container" style="margin-top:100px">
+    {% if super %}
     <form method="post" autocomplete="off">
         <table class="table">
             <h2>Sign up</h2>
@@ -49,5 +69,8 @@
             <button class="runbutton" type="submit">Sign up</button>
         </div>
     </form>
+    {% else %}
+        {{message}}
+    {% endif %}
 </div>
 {% endblock %}

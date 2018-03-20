@@ -99,6 +99,7 @@ esac
 done
 
 # Albacore
+echo "$BARCODING"
 if [ "${BARCODING}" = 1 ]; then
       gnome-terminal -e 'bash -c "read_fast5_basecaller.py --barcoding -r -i '"${FAST5Files}"' -c '"${CONFIG}"' -t $(nproc) -o '"${FORMAT}"' -s '"${FILEOUT}"' 2> /dev/null"' &
       sleep 5
@@ -107,8 +108,9 @@ if [ "${BARCODING}" = 1 ]; then
       done
       FINISHED=${FILEOUT}/finished.dat
       touch ${FINISHED}
-else
-      gnome-terminal -e 'bash -c "read_fast5_basecaller.py -r -i '"${FAST5Files}"' -c '"${CONFIG}"' -t $(nproc) -o '"${FORMAT}"' -s '"${FILEOUT}"'"' &
+fi
+if [ "${BARCODING}" = 0 ]; then
+      gnome-terminal -e 'bash -c "read_fast5_basecaller.py -r -i '"${FAST5Files}"' -c '"${CONFIG}"' -t $(nproc) -o '"${FORMAT}"' -s '"${FILEOUT}"' 2> /dev/null"' &
       sleep 5
       while (ps -a | grep -c read_fast5); do
         echo "Albacore is running..."

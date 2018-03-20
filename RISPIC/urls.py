@@ -22,6 +22,8 @@ urlpatterns = [
     url(r'^login', views.login, name='login'),
     url(r'^logout', views.logout, name='logout'),
     url(r'^pipeline', views.pipeline_start, name="pipeline"),
-    url(r'^results', views.show_results, name="results"),
+    url(r'^createresults', views.create_results, name="createresults"),
+    url(r'^results', views.get_stored_results, name="results"),
     url(r'^readme', views.readme, name="readme"),
+
 ]

@@ -179,7 +179,7 @@ class Ring:
 
         n = len(self._positions)
 
-        print 'Generating Ring:', self.name
+        print('Generating Ring:', self.name)
 
         for i in range(n):
             data_dict = {}
@@ -499,9 +499,13 @@ class Blaster:
             genname = genome.split('.')[0]
             print('Blasting', genome, 'against Reference DB ...')
             filename = genname + 'vs' + referencename
-            call([self.mode, '-query', os.path.join(self.path, genome), '-db', os.path.join(self.path, self.name_db), '-outfmt', '6', '-out',
-                  os.path.join(filename)])
-            self.results.append(os.path.join(filename))
+            # call([self.mode, '-query', os.path.join(self.path, genome), '-db', os.path.join(self.path, self.name_db), '-outfmt', '6', '-out',
+            #       os.path.join(filename)])
+            # self.results.append(os.path.join(filename))
+            # call(["rm", os.path.join(filename)])
+            call([self.mode, '-query', os.path.join(self.path, genome), '-db', os.path.join(self.path, self.name_db), '-outfmt', '6', '-out', filename])
+            self.results.append(filename)
+            # call(["rm", filename])
         print('\n')
 
 
