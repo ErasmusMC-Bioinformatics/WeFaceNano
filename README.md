@@ -25,7 +25,7 @@ Nanopore plasmid pipeline.
 * blastall and formatdb (both are available in blast2)
 * MinionQC
 
-# <a name="usage"></a>How to install
+# <a name="installation"></a>How to install
 Get the newest version of RISPIC by cloning of downloading the code from [github](https://github.com/ErasmusMC-Bioinformatics/RISPIC) and
 install all dependencies as seen in the [dependencies list](#dependencies).
 
@@ -44,7 +44,13 @@ To start using the Nanopore pipeline a user account has to be created by a super
 
 If you are logged in as a superuser, a new user can be created by clicking the sign up button and entering a username and password. When the new user is created a new folder will appear on the network drive with the username. This drive can be mounted on the users local machine and new data can be added using that mounted drive.
 
-When using FASTQ data all FASTQ files must be added to a folder called fastq, this folder should be added whitin the project folder. If FAST5 files are being used they have to be added to a folder called fast5 within the project folder.
+When using FASTQ data all FASTQ files must be added to a folder called fastq, this folder should be added within the project folder. If FAST5 files are being used they have to be added to a folder called fast5 within the project folder.
+The FASTQ structure should look like this: <br>
+<b>Run01 ---> fastq ---> filename.fastq</b>
+
+The FAST5 structure should look like this: <br>
+<b>Run01 ---> fast5 ---> list of FAST5 files or</b><br>
+<b>Run01 ---> fast5 ---> subfolder ---> list of FAST5 files</b> 
 
 Click on the pipelines button to start selecting a pipeline to run. For now the only available pipeline is the plasmid pipeline.
 
