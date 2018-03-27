@@ -37,7 +37,9 @@
         <h2>Pipeline Tools</h2>
         <ul>
             <li>Albacore 2.1.10</li>
+            <li>Miniamp 2.2-r168-dirty</li>
             <li>Canu 1.6</li>
+            <li>Miniasm 0.2-r168-dirty</li>
             <li>resFinder 2.1</li>
             <li>BLAST+ 2.7.1</li>
             <li>MinionQC</li>
@@ -132,42 +134,43 @@
         <h2>Nanopore Analysis Pipeline</h2>
         <h3>Basecalling, de-barcoding and FASTQ conversion</h3>
         <p>
-            Albacore is used to read the raw FAST5 files from the Metrichor basecalling and will do another run of basecalling with de-barcoding <br>
-            and will convert the reads to FASTQ.
+            Albacore is used to read the raw FAST5 files and will do another run of basecalling with de-barcoding <br>
+            and will convert the reads to FASTQ.<br>
+            When FASTQ files are being used Albacore will not be used.
         </p>
         <h3>Assembly</h3>
         <p>
-            Canu is used for assembly.<br>
-            The file created by Canu containing the contifgs will be used for further analysis.
+            Canu or Miniasm are used for assembly.<br>
+            The file created by Canu or Miniasm containing the contigs will be used for further analysis.
         </p>
         <h3>Plasmid Detection</h3>
         <p>
             BLAST 2.7.1 is used for plasmid detection.<br>
-            BLAST can be used with a remote database (NT or NR) or with a local toxoplasma database.
+            BLAST can be used with a remote database (NT or NR) or with a local NT or toxoplasma database.
         </p>
         <h3>Antibiotic Resistance</h3>
         <p>
-            Resfinder is used to find antimicrobial resistance genes based on the contig file created by Canu.<br>
+            Resfinder is used to find antimicrobial resistance genes based on the contig file created by Canu or Miniasm.<br>
         </p>
-        <h3>Species Detection</h3>
-        <ul>
-            <li>Select an input folder or type in the path to the fast5 reads</li>
-            <li>Barcoding Yes or No</li>
-            <li>Select the flowcell configuraion file (see list of flowcell configurations)</li>
-            <li>Select the output format (FASTQ or FAST5)</li>
-            <li>Enter the output path</li>
-            <li>Select the Species Typing tool by selecting the checkbox</li>
-            <li>Run the analysis by clicking on the 'RUN' button</li>
-        </ul>
+        <!--<h3>Species Detection</h3>-->
+        <!--<ul>-->
+            <!--<li>Select an input folder or type in the path to the fast5 reads</li>-->
+            <!--<li>Barcoding Yes or No</li>-->
+            <!--<li>Select the flowcell configuraion file (see list of flowcell configurations)</li>-->
+            <!--<li>Select the output format (FASTQ or FAST5)</li>-->
+            <!--<li>Enter the output path</li>-->
+            <!--<li>Select the Species Typing tool by selecting the checkbox</li>-->
+            <!--<li>Run the analysis by clicking on the 'RUN' button</li>-->
+        <!--</ul>-->
     </div>
     <div id="read_results">
         <h2>View Results</h2>
         <h3>Antibiotic Resistance and BLAST</h3>
         <p>
-            The results will be presented in a table with three columns. <br>
-            The first column consists of the plasmid name (if available) or the accession number from NCBI. <br>
-            Contig names can be found in the second column. <br>
-            In the last column the antibiotic resistance genes for that contig can be found. <br>
+            The results will be presented in different headers (Assembly, Resfinder, BLAST and Plasmids). <br>
+            The Assembly header will show the contigs created by Canu or Miniasm and the length of these contigs. <br>
+            The Resfinder header will show the antibiotic resistance genese found per contig. It will also show the percentage identity of the found gene. <br>
+
         </p>
     </div>
     <div style="clear:both;"></div>

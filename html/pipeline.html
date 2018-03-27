@@ -224,12 +224,14 @@ function openResult(evt, rname) {
                         <td>
                             <select id="blastdb" name="blastdb" class="ddmenu">
                                 <optgroup label="Remote BLAST Databases">
-                                    <option value="nt -remote">NT</option>
-                                    <option value="nr -remote">NR</option>
+                                    <option value="nt -remote">Remote NT database</option>
+                                    <option value="nr -remote">Remote NR database</option>
                                 </optgroup>
                                 <optgroup label="Local BLAST Databases">
+                                    <option value="nt">Local NT database</option>
+                                    <option value="nr">Local NR database</option>
                                     {% for db in blastdb %}
-                                        <option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">{{ db }}</option>
+                                        <option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">Local {{ db }} database</option>
                                     {% endfor %}
                                 </optgroup>
                             </select>

@@ -8,7 +8,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.http import HttpRequest
 from Bio import Entrez, SeqIO
 from brigD3 import *
 from subprocess import call
@@ -125,13 +124,12 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq, name, length, path):
 
         # Initialize ring generator and set options, write as JSON and HTML
         generator = RingGenerator(rings, path, contigname)
-        generator.setOptions(circle=length, project=contigname, title=name, title_size='100%', radius=0)
+        generator.setOptions(circle=length, project=contigname, title=name, title_size='100%', radius=200)
         generator.brigD3()
 
 
 def assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assembler):
     """
-    todo: Fix Miniasm barcode and multiple fastq file options.
     Read barcode list and try to assemble all barcodes.
     Return a list of fasta locations and filenames.
     :param inputtype: To see if the input type is FAST5 or FASTQ
@@ -164,19 +162,12 @@ def assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assemble
             for barcode in barcode_list:
                 call(["mkdir", resultfolder + "/assembly/" + barcode])
                 if barcode != "unclassified":
-                    if inputtype == "fast5" and ".fastq" not in barcode:
+                    if inputtype == "fast5":
                         call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
-                              " -g " + gsize + " -i " + resultfolder + "/workspace/pass/" + barcode + "/"], shell=True)
-                    elif inputtype == "fast5" and ".fastq" in barcode:
-                        call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
-                              " -g " + gsize + " -i " + resultfolder + "/workspace/pass/"], shell=True)
+                              " -g " + gsize + " -i " + resultfolder + "/workspace/pass/" + barcode], shell=True)
                     else:
-                        # if ".fastq" not in barcode or "fastq" not in barcode:
-                        #     call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
-                        #           " -g " + gsize + " -i " + inputfolder + "/fastq/" + barcode + "/"], shell=True)
-                        # else:
-                            call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
-                                  " -g " + gsize + " -i " + inputfolder + "/fastq"], shell=True)
+                        call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
+                              " -g " + gsize + " -i " + inputfolder + "/fastq"], shell=True)
                     files = os.listdir(resultfolder + "/assembly/" + barcode)
                     for file in files:
                         if "contigs.fasta" in file:
@@ -192,10 +183,27 @@ def assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assemble
             for barcode in barcode_list:
                 if barcode != "unclassified":
                     call(["mkdir", resultfolder + "/assembly/" + barcode])
-                    call(["cat " + inputfolder + "/" + barcode + "/* > " + inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq"], shell=True)
-                    call(["bash ~/RISPIC/static/miniasm.bash -v1 -i " + inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq -o " + resultfolder +
-                          "/assembly/" + barcode + "/" + barcode + "_cat.contigs.fasta"], shell=True)
-                    call(["rm", "-r", inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq"])
+                    if inputtype == "fast5":
+                        barcode_content = os.listdir(resultfolder + "/workspace/pass/" + barcode)
+                        if len(barcode_content) > 1:
+                            call(["cat " + resultfolder + "/workspace/pass/" + barcode + "/* > " +
+                                  resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq"],
+                                 shell=True)
+                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq -o " +
+                                  resultfolder + "/assembly/" + barcode + "/" + "_cat.contigs"], shell=True)
+                        else:
+                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0] +
+                                  " -o " + resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"], shell=True)
+                    else:
+                        barcode_content = os.listdir(inputfolder + "/" + barcode)
+                        if len(barcode_content) > 1:
+                            call(["cat " + inputfolder + "/" + barcode + "/* > " + inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq"], shell=True)
+                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq -o " + resultfolder +
+                                  "/assembly/" + barcode + "/" + barcode + "_cat.contigs"], shell=True)
+                            call(["rm", "-r", inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq"])
+                        else:
+                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + inputfolder + "/" + barcode + "/" + barcode_content[0] + " -o " +
+                                  resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"], shell=True)
                     files = os.listdir(resultfolder + "/assembly/" + barcode)
                     for file in files:
                         if "contigs.fasta" in file:
@@ -276,6 +284,9 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
     call(["mkdir", resultfolder + "/BLAST"])
     blastfolder = resultfolder + "/BLAST"
     count = 0
+    contigfasta = []
+    dict_contigfasta = {}
+    dict_draw = {}
     Entrez.email = "some_email@somedomain.com"
     for fasta in file_list:
         call(["mkdir", resultfolder + "/BLAST/" + barcodes[count]])
@@ -308,7 +319,11 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                         handle = Entrez.efetch(db="nucleotide", id=line[1], rettype="gb", retmode="gb")
                         handle_txt = Entrez.efetch(db="nucleotide", id=line[1], rettype="gb", retmode="text")
                         record = SeqIO.read(handle, "genbank")
-                        bplength = len(record.seq)
+                        gblength = len(record.seq)
+                        if gblength > bclength:
+                            bplength = gblength
+                        else:
+                            bplength = bclength
                         with open(blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".refseq.fasta", "w") as ref:
                             ref.write(record.format("fasta"))
                         with open(blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".genbank.gb", "w") as gb:
@@ -316,27 +331,39 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                         handle.close()
                         handle_txt.close()
                         new_path = blastfolder + "/" + barcodes[count] + "/"
-                        contigfasta = blastfolder + "/" + barcodes[count] + "/" + utig
+                        # contigfasta = blastfolder + "/" + barcodes[count] + "/" + utig
                         genbank = blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".genbank.gb"
                         refseq = blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".refseq.fasta"
                         try:
+                            for annotation in record.annotations:
+                                print(annotation['topology'])
                             for feature in record.features:
                                 if feature.qualifiers.get('plasmid', []):
                                     plasmids = feature.qualifiers.get('plasmid')
                             for plasmid in plasmids:
                                 p = plasmid
-                                print(p)
-                            draw_plasmid(contigfasta=contigfasta, contigname=contigname, genbank=genbank, refseq=refseq, name=p, length=bplength, path=new_path)
+                                dict_contigfasta[p] = utig
+                                dict_draw[p] = [contigname, genbank, refseq, bplength, new_path]
+                            # draw_plasmid(contigfasta=contigfasta, contigname=contigname, genbank=genbank, refseq=refseq, name=p, length=bplength, path=new_path)
                             blast[barcodes[count] + "_" + line[0]] = [p, record.description, bplength, bclength]
                         except:
-                            draw_plasmid(contigfasta=contigfasta, contigname=contigname, genbank=genbank, refseq=refseq, name=line[1], length=bplength,
-                                         path=new_path)
+                            dict_contigfasta[line[1]] = utig
+                            dict_draw[line[1]] = [contigname, genbank, refseq, bplength, new_path]
+                            # draw_plasmid(contigfasta=contigfasta, contigname=contigname, genbank=genbank, refseq=refseq, name=line[1], length=bplength,
+                            #              path=new_path)
                             try:
                                 blast[barcodes[count] + "_" + line[0]] = [line[1], record.description, bplength, bclength]
                             except:
                                 pass
                     else:
                         blast[contigname] = ["No Accession Number", "No Name", "0", bclength]
+            for dplasmid, dutigs in dict_contigfasta.items():
+                print(dict_draw[dplasmid])
+                try:
+                    draw_plasmid(contigfasta=dutigs, contigname=dict_draw[dplasmid][0], genbank=dict_draw[dplasmid][1], refseq=dict_draw[dplasmid][2],
+                                 name=dplasmid, length=dict_draw[dplasmid][3], path=dict_draw[dplasmid][4])
+                except IndexError:
+                    pass
         count += 1
     return blast
 
@@ -344,7 +371,6 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
 @csrf_exempt
 def create_results(request):
     """
-    todo: Fix the barcode list so it works with Canu and Miniasm
     Run the pipeline with entered data and show the results in an html page.
     :param request: User inputs given in the pipeline.html page.
     :return: Results page in html.
@@ -412,17 +438,6 @@ def create_results(request):
     else:
         res_genes = []
     return HttpResponseRedirect(reverse("index"))
-    #     for b in barcodes:
-    #         bfilelist = os.listdir(resultfolder + "/BLAST/" + b)
-    #         for bfile in bfilelist:
-    #             if ".html" in bfile:
-    #                 with open(resultfolder + "/BLAST/" + b + "/" + bfile) as htmlfile:
-    #                     html_code = htmlfile.read()
-    #                 html_dict[htmlfile.name] = html_code
-    # else:
-    #     blast_dict = []
-    # return render(request, "viewresults.html", context={"fasta": fasta_list, "barcodes": barcodes, "blast": blast_dict, 'blastrun': blast, 'resrun': res,
-    #                                                 "user": request.session.get("username"), "res": res_genes, 'html': html_dict})
 
 
 def readme(request):
@@ -468,7 +483,11 @@ def pipeline_start(request):
         network_drive = "/media/Nanopore/" + request.session.get("username") + "/"
         folders = []
         try:
-            blastdb = os.listdir("/media/Nanopore/blastdb/")
+            blastdb = []
+            blastdbfolder = os.listdir("/media/Nanopore/blastdb/")
+            for db in blastdbfolder:
+                if os.path.isdir("/media/Nanopore/blastdb/" + db):
+                    blastdb.append(db)
             walk = os.walk(network_drive).next()[1]
             for folder in walk:
                 folders.append(network_drive + folder)
@@ -625,10 +644,6 @@ def get_stored_assembly(username, r):
                         contigcount += 1
                         contiglength = len(record.seq)
                         assembly_report[assemblyfolder + "_" + record.id] = contiglength
-                # with open("/media/Nanopore/" + username + "/results/" + r + "/assembly/" + assemblyfolder + "/" + assembly) as assembly_report_file:
-                    # for line in assembly_report_file:
-                    #     if ">" in line:
-                    #         contigs += 1
     return assembly_report, assembly_results, sorted(assembly_bc)
 
 
