@@ -1,5 +1,6 @@
 import time
 import os
+import random
 
 from django.shortcuts import render_to_response, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
@@ -9,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
 from Bio import Entrez, SeqIO
-from brigD3 import *
+from . import brigD3
 from subprocess import call
 
 
@@ -69,10 +70,10 @@ def index(request):
         superuser = False
     if request.session.get("username"):
         network_drive = "/media/Nanopore/" + request.session.get("username")
-        folders = os.walk(network_drive).next()[1]
-        files = os.walk(network_drive).next()[2]
+        folders = os.walk(network_drive).__next__()[1]
+        files = os.walk(network_drive).__next__()[2]
         results_folder = "/media/Nanopore/" + request.session.get("username") + "/results"
-        results = os.walk(results_folder).next()[1]
+        results = os.walk(results_folder).__next__()[1]
     else:
         folders = []
         files = []
@@ -95,35 +96,24 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq, name, length, path):
     :return:
     """
     if path != '':
-        # CDS ring DAR4145, default setting CDS
-        ring_gen = AnnotationRing()
-        ring_gen.setOptions(color='#2a3e47', name=name, height=20)
+        ring_gen = brigD3.AnnotationRing()
+        ring_gen.setOptions(color='#000000', name=name, height=20)
         ring_gen.readGenbank(genbank)
-
-        # Misc Feature ring DAR4145
-        ring_misc = AnnotationRing()
-        ring_misc.setOptions(color='#34596f', name=name, height=20, path=path)
-        ring_misc.feature = 'misc_feature'
-        ring_misc.extract = {'note': 'Note: '}
-        ring_misc.readGenbank(genbank)
-
         genomes = [contigfasta]
         names = [contigname]
-        blaster = Blaster(refseq, genomes=genomes, path=path)  # Blast the contigs against the sequence fasta
+        blaster = brigD3.Blaster(refseq, genomes=genomes, path=path)
         blaster.runBLAST()
-
         blast_rings = []
         for i in range(len(blaster.results)):
-            ring_blast = BlastRing()
-            ring_blast.setOptions(color='#88a2af', name=names[i])
+            r = lambda: random.randint(0, 255)
+            color = ('#%02X%02X%02X' % (r(), r(), r()))
+            ring_blast = brigD3.BlastRing()
+            ring_blast.setOptions(color=color, name=names[i])
             ring_blast.min_length = 100
             ring_blast.readComparison(blaster.results[i])
             blast_rings.append(ring_blast)
-        # Combine rings in preferred order
-        rings = [ring_gen] + blast_rings + [ring_misc]
-
-        # Initialize ring generator and set options, write as JSON and HTML
-        generator = RingGenerator(rings, path, contigname)
+        rings = [ring_gen] + blast_rings
+        generator = brigD3.RingGenerator(rings, path, contigname)
         generator.setOptions(circle=length, project=contigname, title=name, title_size='100%', radius=200)
         generator.brigD3()
 
@@ -271,6 +261,8 @@ def resfinder(barcodes, file_list, resultfolder, resdb, reslength, residentity):
 
 def run_blast(barcodes, file_list, resultfolder, blastdb, task):
     """
+    todo: Check if DNA is circular or linear
+    todo: Fix plasmid names when using Miniasm
     Runs BLAST on assembled FASTA files.
     :param barcodes: List of barcodes that contain unitigs.
     :param file_list: List of assembled FASTA files.
@@ -308,19 +300,16 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                         cheader = contigfile.readline()
                         cheader = cheader.split(" ")
                         contigname = barcodes[count] + "_" + cheader[0][1:]
-                        try:
-                            bclength = cheader[1][4:]
-                        except IndexError:
-                            for record in SeqIO.parse(contigfile, "fasta"):
-                                bclength = len(record)
-                    line = blastfile.readline()
+                        for record in SeqIO.parse(contigfile.name, "fasta"):
+                            bclength = len(record.seq)
+                        line = blastfile.readline()
                     if line != "":
                         line = line.split("\t")
                         handle = Entrez.efetch(db="nucleotide", id=line[1], rettype="gb", retmode="gb")
                         handle_txt = Entrez.efetch(db="nucleotide", id=line[1], rettype="gb", retmode="text")
                         record = SeqIO.read(handle, "genbank")
                         gblength = len(record.seq)
-                        if gblength > bclength:
+                        if int(gblength) < int(bclength):
                             bplength = gblength
                         else:
                             bplength = bclength
@@ -328,15 +317,10 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                             ref.write(record.format("fasta"))
                         with open(blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".genbank.gb", "w") as gb:
                             gb.write(handle_txt.read())
-                        handle.close()
-                        handle_txt.close()
                         new_path = blastfolder + "/" + barcodes[count] + "/"
-                        # contigfasta = blastfolder + "/" + barcodes[count] + "/" + utig
                         genbank = blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".genbank.gb"
                         refseq = blastfolder + "/" + barcodes[count] + "/" + utig[:-6] + ".refseq.fasta"
                         try:
-                            for annotation in record.annotations:
-                                print(annotation['topology'])
                             for feature in record.features:
                                 if feature.qualifiers.get('plasmid', []):
                                     plasmids = feature.qualifiers.get('plasmid')
@@ -344,21 +328,18 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                                 p = plasmid
                                 dict_contigfasta[p] = utig
                                 dict_draw[p] = [contigname, genbank, refseq, bplength, new_path]
-                            # draw_plasmid(contigfasta=contigfasta, contigname=contigname, genbank=genbank, refseq=refseq, name=p, length=bplength, path=new_path)
                             blast[barcodes[count] + "_" + line[0]] = [p, record.description, bplength, bclength]
                         except:
                             dict_contigfasta[line[1]] = utig
                             dict_draw[line[1]] = [contigname, genbank, refseq, bplength, new_path]
-                            # draw_plasmid(contigfasta=contigfasta, contigname=contigname, genbank=genbank, refseq=refseq, name=line[1], length=bplength,
-                            #              path=new_path)
                             try:
                                 blast[barcodes[count] + "_" + line[0]] = [line[1], record.description, bplength, bclength]
                             except:
                                 pass
                     else:
                         blast[contigname] = ["No Accession Number", "No Name", "0", bclength]
+            print(dict_contigfasta)
             for dplasmid, dutigs in dict_contigfasta.items():
-                print(dict_draw[dplasmid])
                 try:
                     draw_plasmid(contigfasta=dutigs, contigname=dict_draw[dplasmid][0], genbank=dict_draw[dplasmid][1], refseq=dict_draw[dplasmid][2],
                                  name=dplasmid, length=dict_draw[dplasmid][3], path=dict_draw[dplasmid][4])
@@ -392,7 +373,6 @@ def create_results(request):
     residentity = request.POST.get("residentity")
     resultfolder = "/media/Nanopore/" + request.session.get("username") + "/results/" + outfolder
     qscore = "7"
-    # html_dict = {}
     if res is None:
         res = ''
     if mlst is None:
@@ -432,11 +412,9 @@ def create_results(request):
             barcode_list = os.listdir(inputfolder)
     fasta_list, file_list, barcodes = assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assembler)
     if blast == "-b ":
-        blast_dict = run_blast(barcodes, file_list, resultfolder, blastdb, blasttask)
+        run_blast(barcodes, file_list, resultfolder, blastdb, blasttask)
     if res == '-r ':
-        res_genes = resfinder(barcodes, file_list, resultfolder, resdb, reslength, residentity)
-    else:
-        res_genes = []
+        resfinder(barcodes, file_list, resultfolder, resdb, reslength, residentity)
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -488,7 +466,7 @@ def pipeline_start(request):
             for db in blastdbfolder:
                 if os.path.isdir("/media/Nanopore/blastdb/" + db):
                     blastdb.append(db)
-            walk = os.walk(network_drive).next()[1]
+            walk = os.walk(network_drive).__next__()[1]
             for folder in walk:
                 folders.append(network_drive + folder)
         except StopIteration:
@@ -538,6 +516,7 @@ def get_stored_results(request):
                     blast_dict = get_stored_blast(username, r)[0]
                     blast_res_dict = get_stored_blast(username, r)[1]
                     html_plasmid = get_stored_blast(username, r)[2]
+                    topology = get_stored_blast(username, r)[3]
                 if t == "resfinder":
                     resfinder_dict = get_stored_resfinder(username, r)
                 if t == "assembly":
@@ -545,7 +524,8 @@ def get_stored_results(request):
                     barcodes = get_stored_assembly(username, r)[2]
     return render_to_response("results.html", context={"super": superuser, "user": username, "results": results, "tools": tools, "dict": res_dict,
                                                        "blast": blast_dict, "plasmid": html_plasmid, "resfinder": resfinder_dict,
-                                                       "blastresults": blast_res_dict, "assemblyreport": assembly_report, "barcodes": barcodes})
+                                                       "blastresults": blast_res_dict, "assemblyreport": assembly_report, "barcodes": barcodes,
+                                                       "topology": topology})
 
 
 def get_stored_blast(username, r):
@@ -559,6 +539,7 @@ def get_stored_blast(username, r):
     html_list = []
     html_plasmid = {}
     blast_res_dict = {}
+    topology = {}
     blast_results = os.listdir("/media/Nanopore/" + username + "/results/" + r + "/BLAST/")
     for br in blast_results:
         bc_blast = os.listdir("/media/Nanopore/" + username + "/results/" + r + "/BLAST/" + br)
@@ -579,6 +560,7 @@ def get_stored_blast(username, r):
                         alignment_length = first_result[3]
                         handle = Entrez.efetch(db="nucleotide", id=first_result[1], rettype="gb", retmode="gb")
                         record = SeqIO.read(handle, "genbank")
+                        topology[first_result[1]] = record.annotations["topology"]
                         blast_name = record.description
                     except IndexError:
                         blast_name = ""
@@ -587,7 +569,7 @@ def get_stored_blast(username, r):
                         alignment_length = ""
                 blast_res_dict[br + "_" + contig] = [blast_name, pident, alignment_length]
     blast_dict[r] = blast_results
-    return blast_dict, blast_res_dict, html_plasmid
+    return blast_dict, blast_res_dict, html_plasmid, topology
 
 
 def get_stored_resfinder(username, r):

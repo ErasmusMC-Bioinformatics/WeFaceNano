@@ -138,7 +138,28 @@
                                     {% if h|length > 0 %}
                                     <td>
                                         <h2>{{r}}</h2>
-                                        <iframe srcdoc="{{ h }}" frameborder="0" scrolling="no" width="600" height="600""></iframe>
+                                        {% for acc, topo in topology.items %}
+                                        {% if acc in h %}
+                                            <!--<td>-->
+                                                {% if topo == "circular" %}
+                                                <figure>
+                                                <img id="circular" src="{% static 'img/circular.png' %}" width="8%" height="8%">
+                                                    <figcaption>
+                                                        {{ topo }}
+                                                    </figcaption>
+                                                </figure>
+                                                {% elif topo == "linear" %}
+                                                <figure>
+                                                    <img id="linear" src="{% static 'img/linear.jpg' %}" width="8%" height="8%">
+                                                    <figcaption>
+                                                        {{ topo }}
+                                                    </figcaption>
+                                                </figure>
+                                                {% endif %}
+                                            <!--</td>-->
+                                        {% endif %}
+                                    {% endfor %}
+                                        <iframe srcdoc="{{ h }}" frameborder="0" scrolling="no" width="800" height="800"></iframe>
                                     {% else %}
                                         NO PLASMIDS
                                     {% endif %}
