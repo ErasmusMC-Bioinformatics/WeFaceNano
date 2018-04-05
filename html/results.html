@@ -1,27 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block head %}
-
-<script>
-    function openResult(evt, rname) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(rname).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-</script>
-
 {% endblock %}
 
 {% block content %}
@@ -107,14 +86,15 @@
             {% if blastresults %}
                 <h3>BLAST</h3>
                 <table class="table">
-                    <th><a>Contig</a></th>
+                    <th>Contig</th>
                     <th><a>Name or Accession number</a></th>
                     <th><a>Percentage identity</a></th>
-                    <th><a>alignment length</a></th>
+                    <th><a>Alignment length</a></th>
+                    <th><a>Topology (linear or circular)</a></th>
                     {% for contig, results in blastresults.items %}
                         {% if b in contig %}
                         <tr>
-                            <td>
+                            <td class="contig">
                                 {{contig}}
                             </td>
                         {% for r in results %}
@@ -122,6 +102,27 @@
                                 {{r}}
                             </td>
                         {% endfor %}
+                            <td style="text-align:center;">
+                                {% for acc, topo in topology.items %}
+                                    {% if results.0 in acc %}
+                                        {% if topo == "circular" %}
+                                        <figure>
+                                        <img id="circular" src="{% static 'img/circular.png' %}" width="30px" height="30px">
+                                            <figcaption>
+                                                {{ topo }}
+                                            </figcaption>
+                                        </figure>
+                                        {% elif topo == "linear" %}
+                                        <figure>
+                                            <img id="linear" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
+                                            <figcaption>
+                                                {{ topo }}
+                                            </figcaption>
+                                        </figure>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
                         </tr>
                         {%  endif %}
                     {% endfor %}
@@ -130,43 +131,18 @@
             {% if plasmid %}
                 <h3>Plasmids</h3>
                 <table style="width:50%; text-align:center;">
-                    {% for r, html in plasmid.items %}
+                    {% for p, html in plasmid.items %}
                         {% if html %}
-                            {% if b in r %}
                             <tr>
-                                {% for h in html %}
-                                    {% if h|length > 0 %}
-                                    <td>
-                                        <h2>{{r}}</h2>
-                                        {% for acc, topo in topology.items %}
-                                        {% if acc in h %}
-                                            <!--<td>-->
-                                                {% if topo == "circular" %}
-                                                <figure>
-                                                <img id="circular" src="{% static 'img/circular.png' %}" width="8%" height="8%">
-                                                    <figcaption>
-                                                        {{ topo }}
-                                                    </figcaption>
-                                                </figure>
-                                                {% elif topo == "linear" %}
-                                                <figure>
-                                                    <img id="linear" src="{% static 'img/linear.jpg' %}" width="8%" height="8%">
-                                                    <figcaption>
-                                                        {{ topo }}
-                                                    </figcaption>
-                                                </figure>
-                                                {% endif %}
-                                            <!--</td>-->
-                                        {% endif %}
-                                    {% endfor %}
-                                        <iframe srcdoc="{{ h }}" frameborder="0" scrolling="no" width="800" height="800"></iframe>
-                                    {% else %}
-                                        NO PLASMIDS
-                                    {% endif %}
-                                    </td>
-                                {% endfor %}
+                                {% if html|length > 0 %}
+                                <td>
+                                    <h2>{{p}}</h2>
+                                    <iframe srcdoc="{{ html }}" frameborder="0" scrolling="no" width="800" height="800"></iframe>
+                                {% else %}
+                                    NO PLASMIDS
+                                {% endif %}
+                                </td>
                             </tr>
-                            {% endif %}
                         {% else %}
                             NO PLASMIDS
                         {% endif %}

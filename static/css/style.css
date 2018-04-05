@@ -75,6 +75,13 @@
     float: left;
     color: grey;
 }
+.table-view {
+    width: 100%;
+    border: 0px;
+}
+.table-view select {
+    width: 100%;
+}
 .table {
     width: 100%;
 }
@@ -82,7 +89,6 @@
     border: 1px solid #ccc;
 }
 .table td {
-    /*word-wrap: word-all;*/
     overflow: hidden;
     padding: 5px;
     width: 50%;
@@ -96,7 +102,6 @@
     border: 1px solid #ccc;
 }
 .restable td {
-    /*word-wrap: word-all;*/
     overflow: hidden;
     padding: 5px;
     width: 50%;
@@ -109,7 +114,6 @@
 .tab {
     overflow: hidden;
     border: 1px solid #ccc;
-    /*background-color: #f1f1f1;*/
     background-color: #fff;
 }
 #run {

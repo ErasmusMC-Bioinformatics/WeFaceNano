@@ -84,7 +84,6 @@ def index(request):
 
 def draw_plasmid(contigfasta, contigname, genbank, refseq, name, length, path):
     """
-    todo: Add multiple rings to the same plasmid if contig aligns.
     Draw a plasmid and aligned contig based on BLAST results.
     :param contigfasta: FASTA file containing the contig
     :param contigname: The name of the contig
@@ -99,13 +98,13 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq, name, length, path):
         ring_gen = brigD3.AnnotationRing()
         ring_gen.setOptions(color='#000000', name=name, height=20)
         ring_gen.readGenbank(genbank)
-        genomes = [contigfasta]
-        names = [contigname]
+        genomes = contigfasta
+        names = contigname
         blaster = brigD3.Blaster(refseq, genomes=genomes, path=path)
         blaster.runBLAST()
         blast_rings = []
         for i in range(len(blaster.results)):
-            r = lambda: random.randint(0, 255)
+            r = lambda: random.randint(80, 200)
             color = ('#%02X%02X%02X' % (r(), r(), r()))
             ring_blast = brigD3.BlastRing()
             ring_blast.setOptions(color=color, name=names[i])
@@ -114,8 +113,76 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq, name, length, path):
             blast_rings.append(ring_blast)
         rings = [ring_gen] + blast_rings
         generator = brigD3.RingGenerator(rings, path, contigname)
-        generator.setOptions(circle=length, project=contigname, title=name, title_size='100%', radius=200)
+        generator.setOptions(circle=length, project=name, title=name, title_size='100%', radius=200)
         generator.brigD3()
+
+
+def filter_reads(ref, fastq):
+    """
+    todo: Remove this function if useless.
+    Filters reads using Bowtie2.
+    :param ref: Reference to filter reads.
+    :param fastq: Reads to be filtered.
+    :return: FASTQ with unaligned reads.
+    """
+    # Takes a long time and gives a strange result with Miniasm assembly.
+    unaligned = "filtered_" + fastq
+    call(["bowtie2", "-x", ref, "-U", fastq, "-un", unaligned])
+    return unaligned
+
+
+def circularize(assembly, inputfolder, resultfolder):
+    """
+    todo: Add the option to change the number of threads and kmer size.
+    todo:
+    Use circulator to check if a contig is circular or linear.
+    :param assembly: Previously build assembly
+    :param inputfolder: Folder with the used reads in FASTQ format.
+    :param resultfolder: The output folder to store the circulator results.
+    :return: Lists with circular and linear contigs.
+    """
+    reads = os.listdir(inputfolder)
+    out = resultfolder + "/circlator"
+    circular_contigs = []
+    linear_contigs = []
+    # Add the number of threads and kmer size in the pipeline settings page.
+    # kmer sizes 127 and 117 are to high and will not give any good results,
+    # A kmer size of 77 was ok but still gave very short contigs. A lower kmer size might be a better option.
+    threads = 8
+    kmer = 77
+    # Concatenate FASTQ files if there are more than 1 FASTQ file
+    if len(reads) > 1:
+        call(["cat " + inputfolder + "/fastq/*.fastq >> " + inputfolder + "/cat_reads.fastq"], shell=True)
+        # Run SPAdes with standard Nanopore settings on the concatenated FASTQ files
+        call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", assembly,
+              inputfolder + "/cat_reads.fastq", out])
+        # Remove concatenate FASTQ file after running circlator.
+        call(["rm", inputfolder + "/cat_reads.fastq"])
+    else:
+        # Run SPAdes with standard Nanopore settings on a single FASTQ file
+        call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", assembly,
+              inputfolder + "/" + reads[0], out])
+    circlatorfiles = os.listdir(out)
+    for file in circlatorfiles:
+        if "04.merge.circularise_details.log" in file:
+            with open(resultfolder + "/circlator/" + file) as circfile:
+                for line in circfile:
+                    line = line.split("\t")
+                    # Check if contig is circularized
+                    # If so add contig to the circular list
+                    if "Circularized: yes" in line[2]:
+                        circular_contigs.append(line[1])
+                    # If not add contig to the linear list
+                    elif "Circularized: no" in line[2]:
+                        linear_contigs.append(line[1])
+                    else:
+                        print("Error")
+                circfile.close()
+        else:
+            circular_contigs.append("")
+        print("Circular contigs (circularized)", circular_contigs)
+        print("Linear contigs (not circularized)", linear_contigs)
+    return circular_contigs, linear_contigs
 
 
 def assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assembler):
@@ -127,6 +194,7 @@ def assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assemble
     :param barcode_list: A list of barcodes created by albacore.
     :param resultfolder: Folder where the reads are stored.
     :param gsize: The genome size for canu assembly.
+    :param assembler: The selected assembler (Canu or Miniasm).
     :return: A list of fasta paths and filenames.
     """
     fasta_list = []
@@ -261,8 +329,7 @@ def resfinder(barcodes, file_list, resultfolder, resdb, reslength, residentity):
 
 def run_blast(barcodes, file_list, resultfolder, blastdb, task):
     """
-    todo: Check if DNA is circular or linear
-    todo: Fix plasmid names when using Miniasm
+    todo: Fix error handling.
     Runs BLAST on assembled FASTA files.
     :param barcodes: List of barcodes that contain unitigs.
     :param file_list: List of assembled FASTA files.
@@ -271,14 +338,14 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
     :param task: Task for megablast or blastn selection.
     :return: A list of BLAST output files.
     """
-    blast = {} # BLAST dict
-    bfiles = [] # BLAST files
+    blast = {}
+    bfiles = []
     call(["mkdir", resultfolder + "/BLAST"])
     blastfolder = resultfolder + "/BLAST"
     count = 0
-    contigfasta = []
     dict_contigfasta = {}
     dict_draw = {}
+    plasmidcount = 0
     Entrez.email = "some_email@somedomain.com"
     for fasta in file_list:
         call(["mkdir", resultfolder + "/BLAST/" + barcodes[count]])
@@ -305,8 +372,8 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                         line = blastfile.readline()
                     if line != "":
                         line = line.split("\t")
-                        handle = Entrez.efetch(db="nucleotide", id=line[1], rettype="gb", retmode="gb")
-                        handle_txt = Entrez.efetch(db="nucleotide", id=line[1], rettype="gb", retmode="text")
+                        handle = Entrez.efetch(db="nucleotide", id=line[1].split("_")[-1], rettype="gb", retmode="gb")
+                        handle_txt = Entrez.efetch(db="nucleotide", id=line[1].split("_")[-1], rettype="gb", retmode="text")
                         record = SeqIO.read(handle, "genbank")
                         gblength = len(record.seq)
                         if int(gblength) < int(bclength):
@@ -326,25 +393,47 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task):
                                     plasmids = feature.qualifiers.get('plasmid')
                             for plasmid in plasmids:
                                 p = plasmid
-                                dict_contigfasta[p] = utig
-                                dict_draw[p] = [contigname, genbank, refseq, bplength, new_path]
+                                dict_contigfasta[p + "_" + str(plasmidcount)] = utig
+                                dict_draw[p + "_" + str(plasmidcount)] = [contigname, genbank, refseq, bplength, new_path]
+                                plasmidcount += 1
                             blast[barcodes[count] + "_" + line[0]] = [p, record.description, bplength, bclength]
                         except:
-                            dict_contigfasta[line[1]] = utig
-                            dict_draw[line[1]] = [contigname, genbank, refseq, bplength, new_path]
+                            dict_contigfasta[line[1].split("_")[-1]] = utig
+                            dict_draw[line[1].split("_")[-1]] = [contigname, genbank, refseq, bplength, new_path]
                             try:
                                 blast[barcodes[count] + "_" + line[0]] = [line[1], record.description, bplength, bclength]
                             except:
                                 pass
                     else:
                         blast[contigname] = ["No Accession Number", "No Name", "0", bclength]
-            print(dict_contigfasta)
-            for dplasmid, dutigs in dict_contigfasta.items():
-                try:
-                    draw_plasmid(contigfasta=dutigs, contigname=dict_draw[dplasmid][0], genbank=dict_draw[dplasmid][1], refseq=dict_draw[dplasmid][2],
-                                 name=dplasmid, length=dict_draw[dplasmid][3], path=dict_draw[dplasmid][4])
-                except IndexError:
+            contigkeys = dict_contigfasta.keys()
+            usedkeys = []
+            for key in contigkeys:
+                utgkeys = []
+                for dplasmid, dutigs in dict_contigfasta.items():
+                    if key[:-2] in dplasmid:
+                        utgkeys.append(dutigs)
+                    else:
+                        pass
+                if key[:-2] not in usedkeys:
+                    try:
+                        contigs = []
+                        for utgfasta in utgkeys:
+                            with open(blastfolder + "/" + barcodes[count] + "/" + utgfasta) as unitig_fasta:
+                                for line in unitig_fasta:
+                                    if ">" in line:
+                                        contigs.append(line)
+                        if "_" in key:
+                            name = key.split("_")[0]
+                        else:
+                            name = key
+                        draw_plasmid(contigfasta=utgkeys, contigname=contigs, genbank=dict_draw[key][1],
+                                     refseq=dict_draw[key][2], name=name, length=dict_draw[key][3], path=dict_draw[key][4])
+                    except IndexError:
+                        pass
+                else:
                     pass
+                usedkeys.append(key[:-2])
         count += 1
     return blast
 
@@ -478,6 +567,7 @@ def pipeline_start(request):
 @csrf_exempt
 def get_stored_results(request):
     """
+    todo: Add circularize results.
     Gets stored results from the network drive after the user selects a previously run analysis from the homepage.
     Shows the resfinder results and the plasmid contig alignment HTML pages.
     :param request:
@@ -505,23 +595,24 @@ def get_stored_results(request):
     res_dict = {}
     selected_result = request.POST.get("resultname")
     for r in results:
-        if r == selected_result:
-            tool_list = []
-            tools = os.listdir("/media/Nanopore/" + username + "/results/" + r)
-            for t in tools:
-                if "." not in t:
-                    tool_list.append(t)
-                    res_dict[r] = tool_list
-                if t == "BLAST":
-                    blast_dict = get_stored_blast(username, r)[0]
-                    blast_res_dict = get_stored_blast(username, r)[1]
-                    html_plasmid = get_stored_blast(username, r)[2]
-                    topology = get_stored_blast(username, r)[3]
-                if t == "resfinder":
-                    resfinder_dict = get_stored_resfinder(username, r)
-                if t == "assembly":
-                    assembly_report = get_stored_assembly(username, r)[0]
-                    barcodes = get_stored_assembly(username, r)[2]
+        if selected_result != "none":
+            if r == selected_result:
+                tool_list = []
+                tools = os.listdir("/media/Nanopore/" + username + "/results/" + r)
+                for t in tools:
+                    if "." not in t:
+                        tool_list.append(t)
+                        res_dict[r] = tool_list
+                    if t == "BLAST":
+                        blast_dict = get_stored_blast(username, r)[0]
+                        blast_res_dict = get_stored_blast(username, r)[1]
+                        html_plasmid = get_stored_blast(username, r)[2]
+                        topology = get_stored_blast(username, r)[3]
+                    if t == "resfinder":
+                        resfinder_dict = get_stored_resfinder(username, r)
+                    if t == "assembly":
+                        assembly_report = get_stored_assembly(username, r)[0]
+                        barcodes = get_stored_assembly(username, r)[2]
     return render_to_response("results.html", context={"super": superuser, "user": username, "results": results, "tools": tools, "dict": res_dict,
                                                        "blast": blast_dict, "plasmid": html_plasmid, "resfinder": resfinder_dict,
                                                        "blastresults": blast_res_dict, "assemblyreport": assembly_report, "barcodes": barcodes,
@@ -530,13 +621,14 @@ def get_stored_results(request):
 
 def get_stored_blast(username, r):
     """
+    todo: Fix alignment length information from BLAST output.
+    todo: Change output headers in local BLAST output file.
     Get the stored BLAST result based on the selected run.
     :param username: The user that is logged in
     :param r: Name of the selected run
     :return: blast_dict, blast_res_dict, html_plasmid
     """
     blast_dict = {}
-    html_list = []
     html_plasmid = {}
     blast_res_dict = {}
     topology = {}
@@ -547,9 +639,7 @@ def get_stored_blast(username, r):
             if ".html" in bc:
                 with open("/media/Nanopore/" + username + "/results/" + r + "/BLAST/" + br + "/" + bc) as htmlfile:
                     code = htmlfile.read()
-                html_list.append(code)
-                html_plasmid[bc] = html_list
-            html_list = []
+                html_plasmid[bc.split(".")[0]] = code
             if ".out" in bc:
                 with open("/media/Nanopore/" + username + "/results/" + r + "/BLAST/" + br + "/" + bc) as blastfile:
                     first_result = blastfile.readline()
@@ -558,16 +648,19 @@ def get_stored_blast(username, r):
                         contig = first_result[0]
                         pident = first_result[2]
                         alignment_length = first_result[3]
-                        handle = Entrez.efetch(db="nucleotide", id=first_result[1], rettype="gb", retmode="gb")
+                        handle = Entrez.efetch(db="nucleotide", id=first_result[1].split("_")[-1], rettype="gb", retmode="gb")
                         record = SeqIO.read(handle, "genbank")
-                        topology[first_result[1]] = record.annotations["topology"]
+                        topology[record.description] = record.annotations["topology"]
                         blast_name = record.description
                     except IndexError:
                         blast_name = ""
                         contig = ""
                         pident = ""
                         alignment_length = ""
-                blast_res_dict[br + "_" + contig] = [blast_name, pident, alignment_length]
+                if contig:
+                    blast_res_dict[br + "_" + contig] = [blast_name, pident, alignment_length]
+                else:
+                    pass
     blast_dict[r] = blast_results
     return blast_dict, blast_res_dict, html_plasmid, topology
 
@@ -607,6 +700,7 @@ def get_stored_resfinder(username, r):
 
 def get_stored_assembly(username, r):
     """
+    todo: Add circularize information (circular or linear contigs).
     Get stored assembly results based on the selected run
     :param username: The user that is logged in
     :param r: Name of the selected run

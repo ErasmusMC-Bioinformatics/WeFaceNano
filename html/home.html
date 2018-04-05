@@ -66,19 +66,34 @@ function showLoading() {
     <br>
     <br>
     Select the results to view:<br>
-    <form action="{% url 'results' %}" method="post" name="results" enctype="multipart/form-data">
-        <input type="hidden" id="username" name="username" value="{{ user }}">
-        <select id="resultname" name="resultname" class="ddmenu">
-            <optgroup label="Select results to view">
-                {% for r in results %}
-                    <option value="{{r}}">{{r}}</option>
-                {% endfor %}
-            </optgroup>
-        </select>
-    </form>
-    <div class="tab" style="width:10%;">
-        <button class="runbutton" onclick="return showLoading()">VIEW</button>
-    </div>
+    <table class="table-view" style="border:0px;">
+        <tr>
+            <td>
+                <form action="{% url 'results' %}" method="post" name="results" enctype="multipart/form-data">
+                    <input type="hidden" id="username" name="username" value="{{ user }}">
+                    <select id="resultname" name="resultname" class="ddmenu">
+                        <optgroup label="Select results to view">
+                            <option value="none" selected >Select result</option>
+                        {% for r in results %}
+                            <option value="{{r}}">{{r}}</option>
+                        {% endfor %}
+                        </optgroup>
+                    </select>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>
+                <div class="tab">
+                    <button class="runbutton" onclick="return showLoading()">VIEW RESULTS</button>
+                </div>
+            </td>
+        </tr>
+    </table>
+
     <br>
     <div id="loading" style="display:none;">
         <img id="loadingImage" src="{% static 'img/loading.gif' %}" width="25%" height="25%">

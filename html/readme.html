@@ -42,7 +42,8 @@
             <li>Miniasm 0.2-r168-dirty</li>
             <li>resFinder 2.1</li>
             <li>BLAST+ 2.7.1</li>
-            <li>MinionQC</li>
+            <li>Circlator 1.5.5</li>
+            <li>SPAdes 3.7.1</li>
         </ul>
     </p>
     <h2>Flowcell Configurations</h2>
@@ -142,6 +143,14 @@
         <p>
             Canu or Miniasm are used for assembly.<br>
             The file created by Canu or Miniasm containing the contigs will be used for further analysis.
+        </p>
+        <h3>Circularize contigs</h3>
+        <p>
+            Circlator 1.5.5 can be used to try and circularize the contigs. <br>
+            This option can be selected in the pipeline settings menu and is set to OFF by default. <br>
+            Running the circularize option can take a long time.
+            <br>
+            SPAdes 3.7.1 will be used for reassembling by Circlator.
         </p>
         <h3>Plasmid Detection</h3>
         <p>

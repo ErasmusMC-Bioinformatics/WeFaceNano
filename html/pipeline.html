@@ -230,9 +230,10 @@ function openResult(evt, rname) {
                                 <optgroup label="Local BLAST Databases">
                                     <option value="nt">Local NT database</option>
                                     <option value="nr">Local NR database</option>
-                                    {% for db in blastdb %}
-                                        <option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">Local {{ db }} database</option>
-                                    {% endfor %}
+                                    <option value="/media/Nanopore/blastdb/plasmid">Local Plasmid database</option>
+                                    <!--{% for db in blastdb %}-->
+                                        <!--<option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">Local {{ db }} database</option>-->
+                                    <!--{% endfor %}-->
                                 </optgroup>
                             </select>
                         </td>
