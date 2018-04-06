@@ -131,10 +131,9 @@ def filter_reads(ref, fastq):
     return unaligned
 
 
-def circularize(assembly, inputfolder, resultfolder):
+def circularize(assembly, inputfolder, resultfolder, kmer):
     """
-    todo: Add the option to change the number of threads and kmer size.
-    todo:
+    todo: Test circularize function
     Use circulator to check if a contig is circular or linear.
     :param assembly: Previously build assembly
     :param inputfolder: Folder with the used reads in FASTQ format.
@@ -145,43 +144,38 @@ def circularize(assembly, inputfolder, resultfolder):
     out = resultfolder + "/circlator"
     circular_contigs = []
     linear_contigs = []
-    # Add the number of threads and kmer size in the pipeline settings page.
-    # kmer sizes 127 and 117 are to high and will not give any good results,
-    # A kmer size of 77 was ok but still gave very short contigs. A lower kmer size might be a better option.
     threads = 8
-    kmer = 77
-    # Concatenate FASTQ files if there are more than 1 FASTQ file
-    if len(reads) > 1:
-        call(["cat " + inputfolder + "/fastq/*.fastq >> " + inputfolder + "/cat_reads.fastq"], shell=True)
-        # Run SPAdes with standard Nanopore settings on the concatenated FASTQ files
-        call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", assembly,
-              inputfolder + "/cat_reads.fastq", out])
-        # Remove concatenate FASTQ file after running circlator.
-        call(["rm", inputfolder + "/cat_reads.fastq"])
-    else:
-        # Run SPAdes with standard Nanopore settings on a single FASTQ file
-        call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", assembly,
-              inputfolder + "/" + reads[0], out])
-    circlatorfiles = os.listdir(out)
-    for file in circlatorfiles:
-        if "04.merge.circularise_details.log" in file:
-            with open(resultfolder + "/circlator/" + file) as circfile:
-                for line in circfile:
-                    line = line.split("\t")
-                    # Check if contig is circularized
-                    # If so add contig to the circular list
-                    if "Circularized: yes" in line[2]:
-                        circular_contigs.append(line[1])
-                    # If not add contig to the linear list
-                    elif "Circularized: no" in line[2]:
-                        linear_contigs.append(line[1])
-                    else:
-                        print("Error")
-                circfile.close()
+    for fasta in assembly:
+        if len(reads) > 1:
+            call(["cat " + inputfolder + "/fastq/*.fastq >> " + inputfolder + "/cat_reads.fastq"], shell=True)
+            # Run SPAdes with standard Nanopore settings on the concatenated FASTQ files
+            call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", fasta,
+                  inputfolder + "/cat_reads.fastq", out])
+            # Remove concatenate FASTQ file after running circlator.
+            call(["rm", inputfolder + "/cat_reads.fastq"])
         else:
-            circular_contigs.append("")
-        print("Circular contigs (circularized)", circular_contigs)
-        print("Linear contigs (not circularized)", linear_contigs)
+            call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", fasta,
+                  inputfolder + "/" + reads[0], out])
+        circlatorfiles = os.listdir(out)
+        for file in circlatorfiles:
+            if "04.merge.circularise_details.log" in file:
+                with open(resultfolder + "/circlator/" + file) as circfile:
+                    for line in circfile:
+                        line = line.split("\t")
+                        # Check if contig is circularized
+                        # If so add contig to the circular list
+                        if "Circularized: yes" in line[2]:
+                            circular_contigs.append(line[1])
+                        # If not add contig to the linear list
+                        elif "Circularized: no" in line[2]:
+                            linear_contigs.append(line[1])
+                        else:
+                            print("Error")
+                    circfile.close()
+            else:
+                circular_contigs.append("")
+            print("Circular contigs (circularized)", circular_contigs)
+            print("Linear contigs (not circularized)", linear_contigs)
     return circular_contigs, linear_contigs
 
 
@@ -460,6 +454,8 @@ def create_results(request):
     resdb = request.POST.get("resdb")
     reslength = request.POST.get("reslength")
     residentity = request.POST.get("residentity")
+    kmer = request.POST.get("kmer")
+    circulator = request.POST.get("circularize")
     resultfolder = "/media/Nanopore/" + request.session.get("username") + "/results/" + outfolder
     qscore = "7"
     if res is None:
@@ -500,6 +496,8 @@ def create_results(request):
         else:
             barcode_list = os.listdir(inputfolder)
     fasta_list, file_list, barcodes = assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assembler)
+    if circulator == "yes":
+        circularize(fasta_list, inputfolder, resultfolder, kmer)
     if blast == "-b ":
         run_blast(barcodes, file_list, resultfolder, blastdb, blasttask)
     if res == '-r ':
