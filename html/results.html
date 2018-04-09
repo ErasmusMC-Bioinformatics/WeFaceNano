@@ -51,11 +51,37 @@
                 <table class="table">
                     <th><a>Contig</a></th>
                     <th><a>Length</a></th>
+                    <th><a>Contig Topology</a></th>
                 {% for barcode, contiglength in assemblyreport.items %}
                     <tr>
                     {% if b in barcode %}
                         <td>{{barcode}}</td>
                         <td>{{contiglength}} bp</td>
+                        <td style="text-align: center;">
+                        {% if contigtopology %}
+                            {% for ct, ctv in contigtopology.items %}
+                                {% if ct in barcode %}
+                                    {% if ctv == 'linear' %}
+                                        <figure>
+                                        <img id="{{ ctv }}" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
+                                            <figcaption>
+                                                {{ ctv }}
+                                            </figcaption>
+                                        </figure>
+                                    {% elif ctv == 'circular' %}
+                                        <figure>
+                                        <img id="{{ ctv }}" src="{% static 'img/circular.png' %}" width="30px" height="30px">
+                                            <figcaption>
+                                                {{ ctv }}
+                                            </figcaption>
+                                        </figure>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Unknown
+                        </td>
+                        {% endif %}
                     {% endif %}
                     </tr>
                 {% endfor %}
@@ -90,7 +116,7 @@
                     <th><a>Name or Accession number</a></th>
                     <th><a>Percentage identity</a></th>
                     <th><a>Alignment length</a></th>
-                    <th><a>Topology (linear or circular)</a></th>
+                    <th><a>Reference Topology</a></th>
                     {% for contig, results in blastresults.items %}
                         {% if b in contig %}
                         <tr>
@@ -106,19 +132,21 @@
                                 {% for acc, topo in topology.items %}
                                     {% if results.0 in acc %}
                                         {% if topo == "circular" %}
-                                        <figure>
-                                        <img id="circular" src="{% static 'img/circular.png' %}" width="30px" height="30px">
-                                            <figcaption>
-                                                {{ topo }}
-                                            </figcaption>
-                                        </figure>
+                                            <figure>
+                                            <img id="circular" src="{% static 'img/circular.png' %}" width="30px" height="30px">
+                                                <figcaption>
+                                                    {{ topo }}
+                                                </figcaption>
+                                            </figure>
                                         {% elif topo == "linear" %}
-                                        <figure>
-                                            <img id="linear" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
-                                            <figcaption>
-                                                {{ topo }}
-                                            </figcaption>
-                                        </figure>
+                                            <figure>
+                                                <img id="linear" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
+                                                <figcaption>
+                                                    {{ topo }}
+                                                </figcaption>
+                                            </figure>
+                                        {% else %}
+                                            Unknown
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}

@@ -87,15 +87,17 @@ function openResult(evt, rname) {
                     </tr>
                     <tr>
                         <td>
-                            Select input type. (default = FAST5)
+                            Select input type. (default = FASTQ)
                         </td>
                         <td>
-                            <select id="inputtype" name="inputtype" class="ddmenu">
-                                <optgroup label="input type">
-                                    <option value="fast5">FAST5</option>
-                                    <option value="fastq">FASTQ</option>
-                                </optgroup>
-                            </select>
+                            <input type="radio" name="inputtype" value='fastq' checked="checked">&nbsp;<label>FASTQ &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="inputtype" value='fast5'>&nbsp;<label>FAST5 &nbsp;&nbsp;&nbsp;</label>
+                            <!--<select id="inputtype" name="inputtype" class="ddmenu">-->
+                                <!--<optgroup label="input type">-->
+                                    <!--<option value="fast5">FAST5</option>-->
+                                    <!--<option value="fastq">FASTQ</option>-->
+                                <!--</optgroup>-->
+                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>
@@ -136,8 +138,8 @@ function openResult(evt, rname) {
                     <tr>
                         <td>Barcoding [yes/no] (default = no)</td>
                         <td>
-                            <input type="checkbox" name="barcoding" id="barcoding" value='1'>&nbsp;<label>yes &nbsp;&nbsp;&nbsp;</label>
-                            <input type="checkbox" name="barcoding" id="barcoding" value='0'>&nbsp;<label>no &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="barcoding" id="barcoding" value='1'>&nbsp;<label>yes &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="barcoding" id="barcoding" value='0' checked="checked">&nbsp;<label>no &nbsp;&nbsp;&nbsp;</label>
                         </td>
                     </tr>
                     <tr>
@@ -165,12 +167,14 @@ function openResult(evt, rname) {
                     <tr>
                         <td>Select assembler:</td>
                         <td>
-                            <select id="assembler" name="assembler" class="ddmenu">
-                                <optgroup label="Select assembler">
-                                    <option value="canu">canu</option>
-                                    <option value="miniasm">miniasm</option>
-                                </optgroup>
-                            </select>
+                            <input type="radio" name="assembler" id="assembler" value='canu' checked="checked">&nbsp;<label>Canu &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="assembler" id="assembler" value='miniasm'>&nbsp;<label>Miniasm &nbsp;&nbsp;&nbsp;</label>
+                            <!--<select id="assembler" name="assembler" class="ddmenu">-->
+                                <!--<optgroup label="Select assembler">-->
+                                    <!--<option value="canu">canu</option>-->
+                                    <!--<option value="miniasm">miniasm</option>-->
+                                <!--</optgroup>-->
+                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>
@@ -193,23 +197,33 @@ function openResult(evt, rname) {
                         </td>
                     </tr>
                     <tr>
-                        <td>Circularize?</td>
-                        <td><input type="checkbox" name="circularize" id="circularize" value='yes'>&nbsp;<label>yes</label></td>
+                        <td>
+                            Check the checkbox to circularize contigs
+                        </td>
+                        <td><input type="checkbox" name="circularize" id="circularize" value='yes'></td>
                     </tr>
                     <tr>
-                        <td>Kmer size</td>
+                        <td>Assembler</td>
                         <td>
-                            <select id="kmer" name="kmer" class="ddmenu">
-                                <optgroup label="Select kmer size">
-                                    <option value="37">37</option>
-                                    <option value="47">47</option>
-                                    <option value="57">57</option>
-                                    <option value="67">67</option>
-                                    <option value="77">77</option>
-                                    <option value="87">87</option>
-                                    <option value="97">97</option>
-                                </optgroup>
-                            </select>
+                            <input type="radio" name="c_assembler" id="c_assembler" value='spades' checked="checked">&nbsp;<label>SPAdes &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="c_assembler" id="c_assembler" value='canu'>&nbsp;<label>Canu &nbsp;&nbsp;&nbsp;</label>
+                            <!--<select id="c_assembler" name="c_assembler" class="ddmenu">-->
+                                <!--<optgroup label="Select circulator assembler">-->
+                                    <!--<option value="spades">SPAdes</option>-->
+                                    <!--<option value="canu">Canu</option>-->
+                                <!--</optgroup>-->
+                            <!--</select>-->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Kmer size<br>
+                            <b><i>Enter odd numbers i.e. 33</i></b><br>
+                            <b><i>To use multiple kmer sizes and automatically select the best assembly,
+                                enter the sizes seperated by a comma i.e. 33,55,77,99</i></b>
+                        </td>
+                        <td>
+                            <input type="text" id="kmer" name="kmer" placeholder="33,55,77,99">
                         </td>
                     </tr>
                     <tr>
@@ -269,12 +283,14 @@ function openResult(evt, rname) {
                     <tr>
                         <td>Select BLAST task</td>
                         <td>
-                            <select id="blasttask" name="blasttask" class="ddmenu">
-                                <optgroup label="Select BLAST task">
-                                    <option value="megablast">megablast</option>
-                                    <option value="blastn">blastn</option>
-                                </optgroup>
-                            </select>
+                            <input type="radio" name="blasttask" id="blasttask" value='megablast' checked="checked">&nbsp;<label>megablast &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="blasttask" id="blasttask" value='blastn'>&nbsp;<label>blastn &nbsp;&nbsp;&nbsp;</label>
+                            <!--<select id="blasttask" name="blasttask" class="ddmenu">-->
+                                <!--<optgroup label="Select BLAST task">-->
+                                    <!--<option value="megablast">megablast</option>-->
+                                    <!--<option value="blastn">blastn</option>-->
+                                <!--</optgroup>-->
+                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>

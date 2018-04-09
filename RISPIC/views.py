@@ -131,142 +131,143 @@ def filter_reads(ref, fastq):
     return unaligned
 
 
-def circularize(assembly, inputfolder, resultfolder, kmer):
+def circularize(assembly, inputfolder, resultfolder, kmer, assembler):
     """
     todo: Test circularize function
     Use circulator to check if a contig is circular or linear.
     :param assembly: Previously build assembly
     :param inputfolder: Folder with the used reads in FASTQ format.
     :param resultfolder: The output folder to store the circulator results.
+    :param kmer: Selected kmer size for SPAdes assembly
+    :param assembler: Selected assembler for circlator
     :return: Lists with circular and linear contigs.
     """
-    reads = os.listdir(inputfolder)
-    out = resultfolder + "/circlator"
-    circular_contigs = []
-    linear_contigs = []
+    barcodes = os.listdir(inputfolder)
+    out = resultfolder + "/circularize"
     threads = 8
     for fasta in assembly:
-        if len(reads) > 1:
-            call(["cat " + inputfolder + "/fastq/*.fastq >> " + inputfolder + "/cat_reads.fastq"], shell=True)
-            # Run SPAdes with standard Nanopore settings on the concatenated FASTQ files
-            call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", fasta,
-                  inputfolder + "/cat_reads.fastq", out])
-            # Remove concatenate FASTQ file after running circlator.
-            call(["rm", inputfolder + "/cat_reads.fastq"])
-        else:
-            call(["circlator", "all", "--threads", threads, "--assemble_spades_k", kmer, "--merge_min_id", "85", "--merge_breaklen", "1000", fasta,
-                  inputfolder + "/" + reads[0], out])
-        circlatorfiles = os.listdir(out)
-        for file in circlatorfiles:
-            if "04.merge.circularise_details.log" in file:
-                with open(resultfolder + "/circlator/" + file) as circfile:
-                    for line in circfile:
-                        line = line.split("\t")
-                        # Check if contig is circularized
-                        # If so add contig to the circular list
-                        if "Circularized: yes" in line[2]:
-                            circular_contigs.append(line[1])
-                        # If not add contig to the linear list
-                        elif "Circularized: no" in line[2]:
-                            linear_contigs.append(line[1])
-                        else:
-                            print("Error")
-                    circfile.close()
-            else:
-                circular_contigs.append("")
-            print("Circular contigs (circularized)", circular_contigs)
-            print("Linear contigs (not circularized)", linear_contigs)
-    return circular_contigs, linear_contigs
+        for bc in barcodes:
+            cmd = ("circlator all --assembler " + assembler + " --threads " + str(threads) + " --assemble_spades_k " + kmer +
+                   " --merge_min_id 85 --merge_breaklen 1000 " + fasta + " " + inputfolder + "/" + bc + "/trimmed/cat_reads.fastq " + out)
+            call(["cat " + inputfolder + "/" + bc + "/trimmed/*.fastq >> " + inputfolder + "/" + bc + "/trimmed/cat_reads.fastq"], shell=True)
+            call([cmd], shell=True)
+            # call(["circlator", "all", "--assemble_spades_k", kmer, "--threads", str(4), "--merge_min_id", str(85), "--merge_breaklen", str(1000),
+            #       fasta, inputfolder + "/" + bc + "/trimmed/cat_reads.fastq", out])
+            # call(["rm", inputfolder + "/trimmed/cat_reads.fastq"])
 
 
-def assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assembler):
+def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
     """
-    Read barcode list and try to assemble all barcodes.
-    Return a list of fasta locations and filenames.
+
     :param inputtype: To see if the input type is FAST5 or FASTQ
     :param inputfolder: To search for the FASTQ files in the input folder.
-    :param barcode_list: A list of barcodes created by albacore.
+    :param barcode_list: A list of barcodes.
     :param resultfolder: Folder where the reads are stored.
-    :param gsize: The genome size for canu assembly.
-    :param assembler: The selected assembler (Canu or Miniasm).
+    :param gsize: The genome size for assembly.
     :return: A list of fasta paths and filenames.
     """
     fasta_list = []
     file_list = []
     unitigs_barcode = []
-    if os.path.exists(resultfolder + "/assembly/"):
-        for barcode in barcode_list:
-            if barcode != "unclassified":
-                files = os.listdir(resultfolder + "/assembly/" + barcode)
-                for file in files:
-                    if "contigs.fasta" in file:
-                        with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
-                            head = contigfile.readline()
-                        if head == '' or head is None:
-                            pass
-                        else:
-                            fasta_list.append(resultfolder + "/assembly/" + barcode + "/" + file)
-                            file_list.append(file)
-                            unitigs_barcode.append(barcode)
-    else:
-        call(["mkdir", resultfolder + "/assembly/"])
-        if assembler == "canu":
-            for barcode in barcode_list:
-                call(["mkdir", resultfolder + "/assembly/" + barcode])
-                if barcode != "unclassified":
-                    if inputtype == "fast5":
-                        call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
-                              " -g " + gsize + " -i " + resultfolder + "/workspace/pass/" + barcode], shell=True)
+    call(["mkdir", resultfolder + "/assembly/"])
+    for barcode in barcode_list:
+        call(["mkdir", resultfolder + "/assembly/" + barcode])
+        if barcode != "unclassified":
+            if inputtype == "fast5":
+                call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
+                      " -g " + gsize + " -i " + resultfolder + "/workspace/pass/" + barcode], shell=True)
+            else:
+                call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
+                      " -g " + gsize + " -i " + inputfolder + "/fastq/" + barcode + "/trimmed"], shell=True)
+            files = os.listdir(resultfolder + "/assembly/" + barcode)
+            for file in files:
+                if "contigs.fasta" in file:
+                    with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
+                        head = contigfile.readline()
+                    if head == '' or head is None:
+                        pass
                     else:
-                        call(["bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " + resultfolder + "/assembly/" + barcode +
-                              " -g " + gsize + " -i " + inputfolder + "/fastq"], shell=True)
-                    files = os.listdir(resultfolder + "/assembly/" + barcode)
-                    for file in files:
-                        if "contigs.fasta" in file:
-                            with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
-                                head = contigfile.readline()
-                            if head == '' or head is None:
-                                pass
-                            else:
-                                fasta_list.append(resultfolder + "/assembly/" + barcode + "/" + file)
-                                file_list.append(file)
-                                unitigs_barcode.append(barcode)
-        elif assembler == "miniasm":
-            for barcode in barcode_list:
-                if barcode != "unclassified":
-                    call(["mkdir", resultfolder + "/assembly/" + barcode])
-                    if inputtype == "fast5":
-                        barcode_content = os.listdir(resultfolder + "/workspace/pass/" + barcode)
-                        if len(barcode_content) > 1:
-                            call(["cat " + resultfolder + "/workspace/pass/" + barcode + "/* > " +
-                                  resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq"],
-                                 shell=True)
-                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq -o " +
-                                  resultfolder + "/assembly/" + barcode + "/" + "_cat.contigs"], shell=True)
-                        else:
-                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0] +
-                                  " -o " + resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"], shell=True)
+                        fasta_list.append(resultfolder + "/assembly/" + barcode + "/" + file)
+                        file_list.append(file)
+                        unitigs_barcode.append(barcode)
+        return fasta_list, file_list, unitigs_barcode
+
+
+def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
+    """
+
+    :param inputtype: To see if the input type is FAST5 or FASTQ
+    :param inputfolder: To search for the FASTQ files in the input folder.
+    :param barcode_list: A list of barcodes.
+    :param resultfolder: Folder where the reads are stored.
+    :return: A list of fasta paths and filenames.
+    """
+    fasta_list = []
+    file_list = []
+    unitigs_barcode = []
+    call(["mkdir", resultfolder + "/assembly/"])
+    for barcode in barcode_list:
+        if barcode != "unclassified":
+            call(["mkdir", resultfolder + "/assembly/" + barcode])
+            if inputtype == "fast5":
+                barcode_content = os.listdir(resultfolder + "/workspace/pass/" + barcode)
+                if len(barcode_content) > 1:
+                    call(["cat " + resultfolder + "/workspace/pass/" + barcode + "/* > " +
+                          resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq"],
+                         shell=True)
+                    call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq -o " +
+                          resultfolder + "/assembly/" + barcode + "/" + "_cat.contigs"], shell=True)
+                else:
+                    call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0] +
+                          " -o " + resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"], shell=True)
+            else:
+                barcode_content = os.listdir(inputfolder + "/" + barcode)
+                if len(barcode_content) > 1:
+                    call(["cat " + inputfolder + "/" + barcode + "/trimmed/* > " + inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fastq"],
+                         shell=True)
+                    call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fastq -o " +
+                          resultfolder + "/assembly/" + barcode + "/" + barcode + "_cat.contigs"], shell=True)
+                    call(["rm", "-r", inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fastq"])
+                else:
+                    call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode_content[0] + " -o " +
+                          resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"], shell=True)
+            files = os.listdir(resultfolder + "/assembly/" + barcode)
+            for file in files:
+                if "contigs.fasta" in file:
+                    with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
+                        head = contigfile.readline()
+                    if head == '' or head is None:
+                        pass
                     else:
-                        barcode_content = os.listdir(inputfolder + "/" + barcode)
-                        if len(barcode_content) > 1:
-                            call(["cat " + inputfolder + "/" + barcode + "/* > " + inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq"], shell=True)
-                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq -o " + resultfolder +
-                                  "/assembly/" + barcode + "/" + barcode + "_cat.contigs"], shell=True)
-                            call(["rm", "-r", inputfolder + "/" + barcode + "/" + barcode + "_cat.fastq"])
-                        else:
-                            call(["bash ~/RISPIC/static/miniasm.bash -v2 -i " + inputfolder + "/" + barcode + "/" + barcode_content[0] + " -o " +
-                                  resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"], shell=True)
-                    files = os.listdir(resultfolder + "/assembly/" + barcode)
-                    for file in files:
-                        if "contigs.fasta" in file:
-                            with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
-                                head = contigfile.readline()
-                            if head == '' or head is None:
-                                pass
-                            else:
-                                fasta_list.append(resultfolder + "/assembly/" + barcode + "/" + file)
-                                file_list.append(file)
-                                unitigs_barcode.append(barcode)
+                        fasta_list.append(resultfolder + "/assembly/" + barcode + "/" + file)
+                        file_list.append(file)
+                        unitigs_barcode.append(barcode)
+    return fasta_list, file_list, unitigs_barcode
+
+
+def skip_assembly(resultfolder, barcode_list):
+    """
+    Skip the assembly if the assembly folder is already available.
+    :param resultfolder: Folder to store the results.
+    :param barcode_list: List of barcodes.
+    :return: A list of fasta paths and filenames.
+    """
+    fasta_list = []
+    file_list = []
+    unitigs_barcode = []
+    for barcode in barcode_list:
+        if barcode != "unclassified":
+            files = os.listdir(resultfolder + "/assembly/" + barcode)
+            for file in files:
+                if "contigs.fasta" in file:
+                    with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
+                        head = contigfile.readline()
+                    if head == '' or head is None:
+                        pass
+                    else:
+                        fasta_list.append(resultfolder + "/assembly/" + barcode + "/" + file)
+                        file_list.append(file)
+                        unitigs_barcode.append(barcode)
     return fasta_list, file_list, unitigs_barcode
 
 
@@ -448,6 +449,7 @@ def create_results(request):
     species = request.POST.get("species")
     gsize = request.POST.get("gsize")
     assembler = request.POST.get("assembler")
+    c_assembler = request.POST.get("c_assembler")
     blast = request.POST.get("blast")
     blastdb = request.POST.get("blastdb")
     blasttask = request.POST.get("blasttask")
@@ -495,14 +497,44 @@ def create_results(request):
             barcode_list = os.listdir(resultfolder + "/assembly")
         else:
             barcode_list = os.listdir(inputfolder)
-    fasta_list, file_list, barcodes = assembly(inputtype, inputfolder, barcode_list, resultfolder, gsize, assembler)
+            trim_reads(inputfolder, barcode_list)
+    if os.path.exists(resultfolder + "/assembly/"):
+        skip_assembly(barcode_list)
+    else:
+        if assembler == "canu":
+            fasta_list, file_list, barcodes = canu(inputtype, inputfolder, barcode_list, resultfolder, gsize)
+        elif assembler == "miniasm":
+            fasta_list, file_list, barcodes = miniasm(inputtype, inputfolder, barcode_list, resultfolder)
+        else:
+            return HttpResponseRedirect(reverse("index"))
     if circulator == "yes":
-        circularize(fasta_list, inputfolder, resultfolder, kmer)
+        circularize(fasta_list, inputfolder, resultfolder, kmer, c_assembler)
     if blast == "-b ":
         run_blast(barcodes, file_list, resultfolder, blastdb, blasttask)
     if res == '-r ':
         resfinder(barcodes, file_list, resultfolder, resdb, reslength, residentity)
+    for bc in barcode_list:
+        call(["rm", "-rf", inputfolder + "/" + bc + "/trimmed"])
     return HttpResponseRedirect(reverse("index"))
+
+
+def trim_reads(inputfolder, barcode_list):
+    """
+    Trim the adapters from the reads using Porechop.
+    :param inputfolder: The reads inputfolder.
+    :param barcode_list: The list of barcodes to find the FASTQ files.
+    :return:
+    """
+    for barcodes in barcode_list:
+        barcode_folder = os.listdir(inputfolder + "/" + barcodes)
+        if "trimmed" not in barcode_folder:
+            for file in barcode_folder:
+                file_path = inputfolder + "/" + barcodes + "/" + file
+                call(["mkdir", inputfolder + "/" + barcodes + "/trimmed/"])
+                trim_path = inputfolder + "/" + barcodes + "/trimmed/" + file
+                call(["porechop", "-i", file_path, "-o", trim_path])
+        else:
+            pass
 
 
 def readme(request):
@@ -578,6 +610,7 @@ def get_stored_results(request):
     blast_res_dict = {}
     resfinder_dict = {}
     assembly_report = []
+    contig_topology = {}
     tools = []
     barcodes = []
     Entrez.email = "some_email@somedomain.com"
@@ -602,22 +635,49 @@ def get_stored_results(request):
                         tool_list.append(t)
                         res_dict[r] = tool_list
                     if t == "BLAST":
-                        blast_dict = get_stored_blast(username, r)[0]
-                        blast_res_dict = get_stored_blast(username, r)[1]
-                        html_plasmid = get_stored_blast(username, r)[2]
-                        topology = get_stored_blast(username, r)[3]
+                        blast_dict = get_stored_blast_results(username, r)[0]
+                        blast_res_dict = get_stored_blast_results(username, r)[1]
+                        html_plasmid = get_stored_blast_results(username, r)[2]
+                        topology = get_stored_blast_results(username, r)[3]
                     if t == "resfinder":
-                        resfinder_dict = get_stored_resfinder(username, r)
+                        resfinder_dict = get_stored_resfinder_results(username, r)
                     if t == "assembly":
-                        assembly_report = get_stored_assembly(username, r)[0]
-                        barcodes = get_stored_assembly(username, r)[2]
+                        assembly_report = get_stored_assembly_results(username, r)[0]
+                        barcodes = get_stored_assembly_results(username, r)[2]
+                    if t == "circularize":
+                        contig_topology = get_stored_circularize_results(username, r)
     return render_to_response("results.html", context={"super": superuser, "user": username, "results": results, "tools": tools, "dict": res_dict,
                                                        "blast": blast_dict, "plasmid": html_plasmid, "resfinder": resfinder_dict,
                                                        "blastresults": blast_res_dict, "assemblyreport": assembly_report, "barcodes": barcodes,
-                                                       "topology": topology})
+                                                       "topology": topology, "contigtopology": contig_topology})
 
 
-def get_stored_blast(username, r):
+def get_stored_circularize_results(username, r):
+    """
+    Get the stored circularization results created by circulator.
+    :param username: The user that is logged in
+    :param r: Name of the selected run
+    :return: Dictionary of the contig topology showing if a contig is circular or linear
+    """
+    circ_folder = "/media/Nanopore/" + username + "/results/" + r + "/circularize/"
+    circularize_data = os.listdir(circ_folder)
+    contig_topology = {}
+    for cd in circularize_data:
+        if "04.merge.circularise_details.log" in cd:
+            with open(circ_folder + cd) as circ_log:
+                for line in circ_log:
+                    line = line.split("\t")
+                    try:
+                        if "Circularized: no" in line[2]:
+                            contig_topology[line[1]] = "linear"
+                        elif "Circularized: yes" in line[2]:
+                            contig_topology[line[1]] = "circular"
+                    except IndexError:
+                        pass
+    return contig_topology
+
+
+def get_stored_blast_results(username, r):
     """
     todo: Fix alignment length information from BLAST output.
     todo: Change output headers in local BLAST output file.
@@ -663,7 +723,7 @@ def get_stored_blast(username, r):
     return blast_dict, blast_res_dict, html_plasmid, topology
 
 
-def get_stored_resfinder(username, r):
+def get_stored_resfinder_results(username, r):
     """
     Get stored resfinder results based on the selected run
     :param username: The user that is logged in
@@ -696,9 +756,8 @@ def get_stored_resfinder(username, r):
     return resfinder_dict
 
 
-def get_stored_assembly(username, r):
+def get_stored_assembly_results(username, r):
     """
-    todo: Add circularize information (circular or linear contigs).
     Get stored assembly results based on the selected run
     :param username: The user that is logged in
     :param r: Name of the selected run
