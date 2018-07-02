@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block head %}
+<script type="text/javascript">
+    function deleteResult() {
+        document.getElementById('loading').style.display = "block";
+        document.remove.submit();
+        return true
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="{% url 'index' %}">HOME</a></li>
+                {% if user %}
+                    <li><a href="{% url 'pipeline' %}">PIPELINES</a></li>
+                {% else %}
+                    <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
+                {% endif %}
+                <li><a href="{% url 'delete' %}">DELETE</a></li>
+                <li><a href="{% url 'readme' %}">README</a></li>
+                <div id="smenubar">
+                    {% if user %}
+                        <li>
+                            <b>
+                                <small style="color:rgb(136,162,175); font-size:9pt;">
+                                    Logged in as:
+                                    <span style="color:rgb(255,100,0);">
+                                        {{ user }}
+                                    </span>
+                                </small>
+                            </b>
+                        </li>
+                        <li><a href="{% url 'logout' %}">LOGOUT</a></li>
+                        {% if super %}
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li><a href="{% url 'signup' %}">SIGN UP</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">LOGIN</a></li>
+                    {% endif %}
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px;"></div>
+    <div id="del" style="width: 50%; margin: 0 auto;">
+        <table class="table-view" style="border:0px;">
+            <tr>
+                <td>
+                    <form action="{% url 'remove' %}" method="post" name="remove" enctype="multipart/form-data">
+                        <input type="hidden" id="username" name="username" value="{{ user }}">
+                        <select id="resultname" name="resultname" class="ddmenu">
+                            <optgroup label="Select results to view">
+                                <option value="none" selected >Select result</option>
+                            {% for r in results %}
+                                <option value="{{r}}">{{r}}</option>
+                            {% endfor %}
+                            </optgroup>
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="tab">
+                        <button class="runbutton" onclick="return deleteResult()">DELETE RESULT</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div id="loading" style="display:none;">
+            <img id="loadingImage" src="{% static 'img/loading.gif' %}" width="25%" height="25%">
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -20,22 +20,16 @@ do
        ;;
  esac
 done
-
-GAFOUTPUT="$FASTQFile.gfa"
+GFAOUTPUT="$FASTQFile.gfa"
 TEMPPAF="$FASTQFile.paf.gz"
-#FASTAOUT="$FASTQFile.out.fasta"
-#MAPLOG="$FASTQFile.minimap.log"
-#ASMLOG="$FASTQFile.miniasm.log"
 echo -n "-Starting MiniMap / Miniasm pipeline at: "
 date
 # Cleanup from previous runs:
 if [ -f "$TEMPPAF" ]; then
 	echo "Trying to removing any existing files - if they don't exist expect an 'rm' error"
 	rm $TEMPPAF
-	rm $GAFOUTPUT
-	rm $FASTAOUT
-	#rm $MAPLOG
-	#rm $ASMLOG
+	rm $GFAOUTPUT
+	rm "$FASTQFile.racon.fasta"
 fi
 echo
 ### 1) MiniMap
@@ -52,41 +46,61 @@ case "$VERSION"
 in
 0) echo "Select a MiniMap version (-v1 or -v2)"
 	exit 1;;
-1) time ~/minimap/minimap -x ava10k "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
+1) time ~/minimap/minimap -Sw5 -L100 -m0 "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
 2) time ~/minimap2/minimap2 -x ava-ont "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
 esac
 echo
-echo -n "MiniMap2 End: "
+echo -n "MiniMap End: "
 date
 echo
 ### 2) Miniasm
 echo -n "Miniasm Start: "
 date
-time ~/miniasm/miniasm -f "$FASTQFile" "$TEMPPAF" > "$GAFOUTPUT" #>(tee $ASMLOG >&2) 
+time ~/miniasm/miniasm -f "$FASTQFile" "$TEMPPAF" > "$GFAOUTPUT"
 echo -n "Miniasm End: "
 date
 echo
-### 3) Convert to FASTA
-awk '/^S/{print ">"$2"\n"$3}' "$GAFOUTPUT" | fold > "$FASTAOUT"
+echo -n "Create concensus"
+awk '$1 == "S" {print ">"$2;print $3}' $GFAOUTPUT > "$FASTQFile.raw.fasta"
 echo
-### 4) Summary:
+echo "Concensus build"
+echo
+echo "Run Minimap against the concensus"
+echo
+time ~/minimap2/minimap2 "$FASTQFile.raw.fasta" "$FASTQFile" > "$FASTQFile.mapped.paf"
+echo
+echo "Run racon"
+echo
+time racon -t8 "$FASTQFile" "$FASTQFile.mapped.paf" "$FASTQFile.raw.fasta" > "$FASTQFile.racon.fasta"
+echo
 echo "---------------Summary---------------"
 echo " "
 echo " MINIMAP Version	: $VERSION"
 echo " FASTQ Input   		: $FASTQFile"
-echo " FASTA Output  		: $FASTAOUT"
+echo " FASTA Output  		: $FASTQFile.racon.fasta"
 echo -n " No. of utigs		: "
-grep ">" "$FASTAOUT" | wc -l  | cut -f1
+grep ">" "$FASTQFile.racon.fasta" | wc -l  | cut -f1
 echo " "
 echo "---------------Summary---------------"
-echo 
+echo
+echo -n "Filter FASTA sequences by length"
+echo
+awk '!/^>/ { next } { getline seq } length(seq) >= 15000 { print $0 "\n" seq }' "$FASTQFile.racon.fasta" > "$FASTAOUT"
+echo
+echo "No. of utigs after filtering:"
+grep ">" "$FASTAOUT" | wc -l  | cut -f1
+echo
 echo -n "Removing $GAFOUTPUT ..... "
-rm $GAFOUTPUT
-echo "$GAFOUTPUT removed"
+rm "$GFAOUTPUT"
+echo "$GFAOUTPUT removed"
 echo -n "Removing $TEMPPAF ..... "
-rm $TEMPPAF
+rm "$TEMPPAF"
 echo "$TEMPPAF removed"
-echo
+echo -n "Removing $FASTQFile.raw.fasta ..... "
+rm "$FASTQFile.raw.fasta"
+echo -n "Removing $FASTQFile.mapped.paf ..... "
+rm "$FASTQFile.mapped.paf"
+echo -n "Removing temp racon file ..... "
+rm "$FASTQFile.racon.fasta"
 echo -n "-Finishing MiniMap / Miniasm pipeline at: "
-date 
-echo
+date

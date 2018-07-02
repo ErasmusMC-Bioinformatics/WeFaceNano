@@ -130,6 +130,7 @@ class Ring:
         self.height = 20
         self.path = ''
         self.tooltip = Tooltip()
+        self.res_loc = {}
         self._positions = []
         self._popups = []
         self._colors = []
@@ -143,7 +144,7 @@ class Ring:
         for ring in rings:
             self.data += ring.data
 
-    def setOptions(self, name='Ring', color='black', height=20, tooltip=None, path=''):
+    def setOptions(self, name='Ring', color='black', height=20, tooltip=None, path='', res_loc={}):
         """
         Set basic attributes for ring object
         """
@@ -151,6 +152,7 @@ class Ring:
         self.color = color
         self.height = height
         self.path = path
+        self.res_loc = res_loc
         if tooltip is None:
             self.tooltip = Tooltip()
         else:
@@ -160,8 +162,21 @@ class Ring:
         """
         Get ring data in dictionary format for Ring Generator and D3.
         """
-        n = len(self._positions)
+        # n = len(self._positions)
         print('Generating Ring:', self.name)
+        for res, loc in self.res_loc.items():
+            contig_name = ">" + res.split("_")[0]
+            res_name = res.split("_")[1]
+            if str(contig_name) == str(self.name.strip("\n")):
+                pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
+                       '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                       '</span><br>')
+                self._positions.append(loc)
+                # self._colors.append('#ff6400')
+                self._colors.append('#ff5000')
+                self._popups.append(pop)
+                self._heights.append(20)
+        n = len(self._positions)
         for i in range(n):
             data_dict = {}
             data_dict['start'] = self._positions[i][0]
@@ -314,41 +329,52 @@ class AnnotationRing(Ring):
                                                               ('Type:', row[2]), ('Note:', row[3])]))
         self._getRing()
 
-    def readGenbank(self, file):
+    def readGenbank(self, file, length):
         """
         Read genbank annotation file and extract relevant features and qualifiers.
         """
         self._clear()
-        genome = SeqIO.read(open(file, "r"), "genbank")
-        features = [feature for feature in genome.features if feature.type in self.feature]
-        # Only include feature with all qualifiers present.
-        clean = []
-        for feature in features:
-            check = True
-            for q in self.extract.keys():
-                if q == 'plasmid':
-                    if q in feature.qualifiers:
-                        check = True
-                    elif q not in feature.qualifiers:
-                        check = False
+        if file != "":
+            genome = SeqIO.read(open(file, "r"), "genbank")
+            features = [feature for feature in genome.features if feature.type in self.feature]
+            # Only include feature with all qualifiers present.
+            clean = []
+            for feature in features:
+                check = True
+                for q in self.extract.keys():
+                    if q == 'plasmid':
+                        if q in feature.qualifiers:
+                            check = True
+                        elif q not in feature.qualifiers:
+                            check = False
+                        else:
+                            check = False
                     else:
-                        check = False
-                else:
-                    if q not in feature.qualifiers and q != 'organism':
-                        check = False
-            if check:
-                clean.append(feature)
-        # Get tooltips for each extracted feature.
-        for feature in features:
-            self._positions.append([int(feature.location.start), int(feature.location.end)])
+                        if q not in feature.qualifiers and q != 'organism':
+                            check = False
+                if check:
+                    clean.append(feature)
+            # Get tooltips for each extracted feature.
+            for feature in features:
+                self._positions.append([int(feature.location.start), int(feature.location.end)])
+                self._colors.append(self.color)
+                self._heights.append(self.height)
+                qualifier_texts = []
+                for qualifier in self.extract.keys():
+                    if qualifier in feature.qualifiers:
+                        text_tuple = (self.extract[qualifier], ''.join(feature.qualifiers[qualifier]))
+                        qualifier_texts.append(text_tuple)
+                qualifier_texts.insert(0, ('Location: ', str(feature.location.start) + '-' + str(feature.location.end)))
+                qualifier_texts.insert(0, ('Genome: ', self.name))
+                popup = self.tooltip.getPopup(qualifier_texts)
+                self._popups.append(popup)
+        else:
+            self._positions.append([1, int(length)])
             self._colors.append(self.color)
             self._heights.append(self.height)
             qualifier_texts = []
-            for qualifier in self.extract.keys():
-                if qualifier in feature.qualifiers:
-                    text_tuple = (self.extract[qualifier], ''.join(feature.qualifiers[qualifier]))
-                    qualifier_texts.append(text_tuple)
-            qualifier_texts.insert(0, ('Location: ', str(feature.location.start) + '-' + str(feature.location.end)))
+            qualifier_texts.append("plasmid")
+            qualifier_texts.insert(0, ('Location: ', str(1) + '-' + str(length)))
             qualifier_texts.insert(0, ('Genome: ', self.name))
             popup = self.tooltip.getPopup(qualifier_texts)
             self._popups.append(popup)
@@ -588,8 +614,7 @@ class Visualization:
 
     def _writeHTML(self):
         """
-        Write script to HTML.
-        """
+        Write script to HTML."""
         with open(os.path.join(self.path, self.project + '.html'), 'w') as outfile:
             outfile.write(self.head)
         with open(os.path.join(self.path, self.project + '.html'), 'a') as outfile:

@@ -15,6 +15,8 @@ Including another URLconf
 """
 from . import views
 from django.conf.urls import url
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^$', views.index, name="index"),
@@ -25,5 +27,7 @@ urlpatterns = [
     url(r'^createresults', views.create_results, name="createresults"),
     url(r'^results', views.get_stored_results, name="results"),
     url(r'^readme', views.readme, name="readme"),
-
+    url(r'^delete', views.delete, name="delete"),
+    url(r'^remove', views.remove_result, name="remove"),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

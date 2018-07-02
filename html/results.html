@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block head %}
+
 {% endblock %}
 
 {% block content %}
@@ -14,6 +15,7 @@
                 {% else %}
                     <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
                 {% endif %}
+                <li><a href="{% url 'delete' %}">DELETE</a></li>
                 <li><a href="{% url 'readme' %}">README</a></li>
                 <div id="smenubar">
                     {% if user %}
@@ -46,6 +48,12 @@
     </div>
     {% for b in barcodes %}
         <div id="{{ b }}" class="tabcontent" style="display:none;">
+            {% for r, q in qc.items %}
+                {% if r in b %}
+                    <h3>QC report</h3>
+                    <iframe srcdoc="{{ q }}" frameborder="1" scrolling="yes" height="800" width="1200"></iframe>
+                {% endif %}
+            {% endfor %}
             {% for res, tools in dict.items %}
                 <h3>Assembly</h3>
                 <table class="table">
@@ -63,16 +71,16 @@
                                 {% if ct in barcode %}
                                     {% if ctv == 'linear' %}
                                         <figure>
-                                        <img id="{{ ctv }}" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
+                                        <img id="{{ctv}}" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
                                             <figcaption>
-                                                {{ ctv }}
+                                                {{ctv}}
                                             </figcaption>
                                         </figure>
                                     {% elif ctv == 'circular' %}
                                         <figure>
-                                        <img id="{{ ctv }}" src="{% static 'img/circular.png' %}" width="30px" height="30px">
+                                        <img id="{{ctv}}" src="{% static 'img/circular.png' %}" width="30px" height="30px">
                                             <figcaption>
-                                                {{ ctv }}
+                                                {{ctv}}
                                             </figcaption>
                                         </figure>
                                     {% endif %}
@@ -111,50 +119,55 @@
             {% endfor %}
             {% if blastresults %}
                 <h3>BLAST</h3>
-                <table class="table">
-                    <th>Contig</th>
-                    <th><a>Name or Accession number</a></th>
-                    <th><a>Percentage identity</a></th>
-                    <th><a>Alignment length</a></th>
-                    <th><a>Reference Topology</a></th>
-                    {% for contig, results in blastresults.items %}
-                        {% if b in contig %}
-                        <tr>
-                            <td class="contig">
-                                {{contig}}
-                            </td>
-                        {% for r in results %}
-                            <td>
-                                {{r}}
-                            </td>
-                        {% endfor %}
-                            <td style="text-align:center;">
-                                {% for acc, topo in topology.items %}
-                                    {% if results.0 in acc %}
-                                        {% if topo == "circular" %}
-                                            <figure>
-                                            <img id="circular" src="{% static 'img/circular.png' %}" width="30px" height="30px">
-                                                <figcaption>
-                                                    {{ topo }}
-                                                </figcaption>
-                                            </figure>
-                                        {% elif topo == "linear" %}
-                                            <figure>
-                                                <img id="linear" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
-                                                <figcaption>
-                                                    {{ topo }}
-                                                </figcaption>
-                                            </figure>
-                                        {% else %}
-                                            Unknown
+                <!-- <div class="tab">
+                    <button class="tabbutton" onclick="openTab(event, 'plasmid')">Plasmid database</button>
+                </div> -->
+                <div id="plasmid" class="tabdiv" style="display:block;">
+                    <table class="table">
+                        <th>Contig</th>
+                        <th><a>Name or Accession number</a></th>
+                        <th><a>Percentage identity</a></th>
+                        <th><a>Alignment length</a></th>
+                        <th><a>Reference Topology</a></th>
+                        {% for contig, results in blastresults.items %}
+                            {% if b in contig %}
+                            <tr>
+                                <td class="contig">
+                                    {{contig}}
+                                </td>
+                            {% for r in results %}
+                                <td>
+                                    {{r}}
+                                </td>
+                            {% endfor %}
+                                <td style="text-align:center;">
+                                    {% for acc, topo in topology.items %}
+                                        {% if results.0 in acc %}
+                                            {% if topo == "circular" %}
+                                                <figure>
+                                                <img id="circular" src="{% static 'img/circular.png' %}" width="30px" height="30px">
+                                                    <figcaption>
+                                                        {{ topo }}
+                                                    </figcaption>
+                                                </figure>
+                                            {% elif topo == "linear" %}
+                                                <figure>
+                                                    <img id="linear" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
+                                                    <figcaption>
+                                                        {{ topo }}
+                                                    </figcaption>
+                                                </figure>
+                                            {% else %}
+                                                Unknown
+                                            {% endif %}
                                         {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
-                        </tr>
-                        {%  endif %}
-                    {% endfor %}
-                </table>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {%  endif %}
+                        {% endfor %}
+                    </table>
+                </div>
             {% endif %}
             {% if plasmid %}
                 <h3>Plasmids</h3>
@@ -164,8 +177,10 @@
                             <tr>
                                 {% if html|length > 0 %}
                                 <td>
+                                {% if b|add:"_" in p %}
                                     <h2>{{p}}</h2>
                                     <iframe srcdoc="{{ html }}" frameborder="0" scrolling="no" width="800" height="800"></iframe>
+                                {% endif %}
                                 {% else %}
                                     NO PLASMIDS
                                 {% endif %}

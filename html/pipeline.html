@@ -46,6 +46,7 @@ function openResult(evt, rname) {
                 {% else %}
                     <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
                 {% endif %}
+                <li><a href="{% url 'delete' %}">DELETE</a></li>
                 <li><a href="{% url 'readme' %}">README</a></li>
                 <div id="smenubar">
                     {% if user %}
@@ -266,13 +267,15 @@ function openResult(evt, rname) {
                         <td>
                             <select id="blastdb" name="blastdb" class="ddmenu">
                                 <optgroup label="Remote BLAST Databases">
-                                    <option value="nt -remote">Remote NT database</option>
-                                    <option value="nr -remote">Remote NR database</option>
+                                    <option value="nt -remote">Remote NT Database</option>
+                                    <option value="nr -remote">Remote NR Database</option>
                                 </optgroup>
                                 <optgroup label="Local BLAST Databases">
-                                    <option value="nt">Local NT database</option>
-                                    <option value="nr">Local NR database</option>
-                                    <option value="/media/Nanopore/blastdb/plasmid">Local Plasmid database</option>
+                                    <option value="nt">Local NT Database</option>
+                                    <option value="nr">Local NR Database</option>
+                                    <!-- <option value="/media/Nanopore/blastdb/plasmid">Local Plasmid database</option> -->
+                                    <option value="/media/Nanopore/plasmidb/plasmidb">Local Plasmid Database</option>
+                                    <option value="/media/Nanopore/blastdb/toxoplasma">Local Toxoplasma Database</option>
                                     <!--{% for db in blastdb %}-->
                                         <!--<option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">Local {{ db }} database</option>-->
                                     <!--{% endfor %}-->

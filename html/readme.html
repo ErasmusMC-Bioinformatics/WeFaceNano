@@ -12,6 +12,7 @@
                 {% else %}
                     <li><a href="{% url 'pipeline' %}" class="disabled"><span style="text-decoration: line-through;">PIPELINES</span></a></li>
                 {% endif %}
+                <li><a href="{% url 'delete' %}">DELETE</a></li>
                 <li><a href="{% url 'readme' %}">README</a></li>
                 <div id="smenubar">
                     {% if user %}
