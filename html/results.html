@@ -51,7 +51,7 @@
             {% for r, q in qc.items %}
                 {% if r in b %}
                     <h3>QC report</h3>
-                    <iframe srcdoc="{{ q }}" frameborder="1" scrolling="yes" height="800" width="1200"></iframe>
+                    <iframe srcdoc="{{ q }}" frameborder="1" scrolling="yes" height="800" width="100%"></iframe>
                 {% endif %}
             {% endfor %}
             {% for res, tools in dict.items %}
@@ -170,8 +170,10 @@
                 </div>
             {% endif %}
             {% if plasmid %}
+                <div id="d3plasmid" style="text-align:center; width:100%">
                 <h3>Plasmids</h3>
-                <table style="width:50%; text-align:center;">
+                {{ html }}
+                <table style="width:100%; text-align:center;">
                     {% for p, html in plasmid.items %}
                         {% if html %}
                             <tr>
@@ -179,7 +181,7 @@
                                 <td>
                                 {% if b|add:"_" in p %}
                                     <h2>{{p}}</h2>
-                                    <iframe srcdoc="{{ html }}" frameborder="0" scrolling="no" width="800" height="800"></iframe>
+                                    <iframe srcdoc="{{ html }}" frameborder="0" scrolling="no" width="100%" height="800"></iframe>
                                 {% endif %}
                                 {% else %}
                                     NO PLASMIDS
@@ -191,6 +193,7 @@
                         {% endif %}
                     {% endfor %}
                 </table>
+                </div>
             {% endif %}
         </div>
     {% endfor %}

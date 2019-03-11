@@ -75,7 +75,7 @@ class RingGenerator:
         return self.data
 
     def setOptions(self, circle, radius=300, gap=5, project='data', title='brigD3', title_size='300%', title_font='times',
-                   ring_opacity=0.8, width=800, height=800):
+                   ring_opacity=0.8, width=1600, height=800):
         """
         Set options for circle generator and visualization with D3.
         """
