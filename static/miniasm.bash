@@ -103,4 +103,5 @@ rm "$FASTQFile.mapped.paf"
 echo -n "Removing temp racon file ..... "
 rm "$FASTQFile.racon.fasta"
 echo -n "-Finishing MiniMap / Miniasm pipeline at: "
+time python3 ~/Simple-Circularise/simple_circularise.py "$FASTAOUT" "$FASTAOUT"
 date
