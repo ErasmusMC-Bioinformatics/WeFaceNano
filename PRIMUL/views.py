@@ -242,13 +242,13 @@ def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
         if barcode != "unclassified":
             if inputtype == "fast5":
                 call([
-                    "bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " +
+                    "bash ~/PRIMUL/static/canu.sh -p " + barcode + " -d " +
                     resultfolder + "/assembly/" + barcode + " -g " + gsize +
                     " -i " + resultfolder + "/workspace/pass/" + barcode
                 ], shell=True)
             else:
                 call([
-                    "bash ~/RISPIC/static/canu.sh -p " + barcode + " -d " +
+                    "bash ~/PRIMUL/static/canu.sh -p " + barcode + " -d " +
                     resultfolder + "/assembly/" + barcode + " -g " + gsize +
                     " -i " + inputfolder + "/" + barcode + "/trimmed/*.fasta"
                 ], shell=True)
@@ -299,14 +299,14 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
                         "/" + barcode + "_cat.fastq"
                     ], shell=True)
                     call([
-                        "bash ~/RISPIC/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
                         barcode + "_cat.fastq -o " + resultfolder +
                         "/assembly/" + barcode + "/" + "_cat.contigs"
                     ], shell=True)
                 else:
                     call([
-                        "bash ~/RISPIC/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
                         barcode_content[0] + " -o " + resultfolder +
                         "/assembly/" + barcode + "/" + barcode_content[0] +
@@ -321,7 +321,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
                         "/trimmed/" + barcode + "_cat.fasta"
                     ], shell=True)
                     call([
-                        "bash ~/RISPIC/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
                         inputfolder + "/" + barcode + "/trimmed/" + barcode +
                         "_cat.fasta -o " + resultfolder + "/assembly/" +
                         barcode + "/" + barcode + "_cat.contigs"
@@ -332,7 +332,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
                     ])
                 else:
                     call([
-                        "bash ~/RISPIC/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
                         inputfolder + "/" + barcode + "/trimmed/" +
                         barcode_content[0] + " -o " + resultfolder +
                         "/assembly/" + barcode + "/" + barcode_content[0] +
@@ -415,7 +415,7 @@ def resfinder(barcodes, file_list, resultfolder,
     for file in file_list:
         call(["mkdir", resultfolder + "/resfinder/" + barcodes[count]])
         call([
-            "bash ~/RISPIC/static/splitfasta.sh " + resultfolder +
+            "bash ~/PRIMUL/static/splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[count] + "/" + file + " " + resultfolder +
             "/resfinder/" + barcodes[count]
         ], shell=True)
@@ -425,7 +425,7 @@ def resfinder(barcodes, file_list, resultfolder,
                             barcodes[count] + "/" + unitig)
             if resdb != "all":
                 call([
-                    "perl ~/RISPIC/static/resfinder.pl "
+                    "perl ~/PRIMUL/static/resfinder.pl "
                     "-d ~/resfinder -i " + fasta_unitig +
                     " -a " + resdb + " -o " + resultfolder + "/resfinder/" +
                     barcodes[count] + " -k " + residentity + " -l " + reslength
@@ -433,7 +433,7 @@ def resfinder(barcodes, file_list, resultfolder,
             else:
                 for db in db_all:
                     call([
-                        "perl ~/RISPIC/static/resfinder.pl -d "
+                        "perl ~/PRIMUL/static/resfinder.pl -d "
                         "~/resfinder -i " + fasta_unitig +
                         " -a " + db + " -o " + resultfolder + "/resfinder/" +
                         barcodes[count] + " -k " + residentity +
@@ -497,7 +497,7 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
         unitig_bc = []
         call(["mkdir", resultfolder + "/BLAST/" + barcodes[bcount]])
         call([
-            "bash ~/RISPIC/static/splitfasta.sh " + resultfolder +
+            "bash ~/PRIMUL/static/splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[bcount] + "/" + fasta + " " +
             blastfolder + "/" + barcodes[bcount]
         ], shell=True)
@@ -715,7 +715,7 @@ def create_results(request):
         call(["mkdir", resultfolder + "/workspace/pass"])
         call(["mkdir", resultfolder + "/qc"])
         call([
-            "bash ~/RISPIC/static/albacore.sh " + res + mlst + species +
+            "bash ~/PRIMUL/static/albacore.sh " + res + mlst + species +
             "-b -c " + configuration + " -i" + inputfolder + "/fast5 -o " +
             resultfolder + " -f fastq"
         ], shell=True)
@@ -727,7 +727,7 @@ def create_results(request):
         call(["mkdir", resultfolder + "/workspace/pass"])
         call(["mkdir", resultfolder + "/qc"])
         call([
-            "bash ~/RISPIC/static/albacore.sh " + res + mlst + species +
+            "bash ~/PRIMUL/static/albacore.sh " + res + mlst + species +
             "-c " + configuration + " -i" + inputfolder + "/fast5 -o " +
             resultfolder + " -f fastq"
         ], shell=True)
