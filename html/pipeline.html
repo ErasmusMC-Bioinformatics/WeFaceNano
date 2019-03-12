@@ -72,8 +72,6 @@ function openResult(evt, rname) {
     <div id="pipeline-form" style="display:block;">
         <div class="tab">
             <button class="tablinks" onclick="openResult(event, 'plasmids')">Plasmids</button>
-            <!--<button class="tablinks" onclick="openResult(event, 'strains')">Strains</button>-->
-            <!--<button class="tablinks" onclick="openResult(event, 'microbiome')">Microbiome</button>-->
         </div>
         <br>
         <div id="inputs">
@@ -93,12 +91,6 @@ function openResult(evt, rname) {
                         <td>
                             <input type="radio" name="inputtype" value='fastq' checked="checked">&nbsp;<label>FASTQ &nbsp;&nbsp;&nbsp;</label>
                             <input type="radio" name="inputtype" value='fast5'>&nbsp;<label>FAST5 &nbsp;&nbsp;&nbsp;</label>
-                            <!--<select id="inputtype" name="inputtype" class="ddmenu">-->
-                                <!--<optgroup label="input type">-->
-                                    <!--<option value="fast5">FAST5</option>-->
-                                    <!--<option value="fastq">FASTQ</option>-->
-                                <!--</optgroup>-->
-                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>
@@ -170,12 +162,6 @@ function openResult(evt, rname) {
                         <td>
                             <input type="radio" name="assembler" id="assembler" value='canu' checked="checked">&nbsp;<label>Canu &nbsp;&nbsp;&nbsp;</label>
                             <input type="radio" name="assembler" id="assembler" value='miniasm'>&nbsp;<label>Miniasm &nbsp;&nbsp;&nbsp;</label>
-                            <!--<select id="assembler" name="assembler" class="ddmenu">-->
-                                <!--<optgroup label="Select assembler">-->
-                                    <!--<option value="canu">canu</option>-->
-                                    <!--<option value="miniasm">miniasm</option>-->
-                                <!--</optgroup>-->
-                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>
@@ -208,12 +194,6 @@ function openResult(evt, rname) {
                         <td>
                             <input type="radio" name="c_assembler" id="c_assembler" value='spades' checked="checked">&nbsp;<label>SPAdes &nbsp;&nbsp;&nbsp;</label>
                             <input type="radio" name="c_assembler" id="c_assembler" value='canu'>&nbsp;<label>Canu &nbsp;&nbsp;&nbsp;</label>
-                            <!--<select id="c_assembler" name="c_assembler" class="ddmenu">-->
-                                <!--<optgroup label="Select circulator assembler">-->
-                                    <!--<option value="spades">SPAdes</option>-->
-                                    <!--<option value="canu">Canu</option>-->
-                                <!--</optgroup>-->
-                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>
@@ -243,15 +223,6 @@ function openResult(evt, rname) {
                                 <input type="checkbox" name="blast" id="blast" value='-b '>&nbsp;<label>BLAST &nbsp;&nbsp;&nbsp;</label>
                                 <input type="checkbox" name="res" id="res" value='-r '>&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>
                             </div>
-                            <!--<div id="strains" class="tabcontent" style="display:none;">-->
-                                <!--<input type="checkbox" name="res" id="res" value='-r '>&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>-->
-                                <!--<input type="checkbox" name="mlst" id="mlst" value='-m '>&nbsp;<label>MLST &nbsp;&nbsp;&nbsp;</label>-->
-                                <!--<input type="checkbox" name="species" id="species" value='-s '>&nbsp;<label>Species Typing &nbsp;&nbsp;&nbsp;</label>-->
-                            <!--</div>-->
-                            <!--<div id="microbiome" class="tabcontent" style="display:none;">-->
-                                <!--<input type="checkbox" name="taxonomy" id="taxonomy" value='-t '>&nbsp;<label>Taxonomy / WIMP (Not Available) &nbsp;&nbsp;&nbsp;</label>-->
-                                <!--<input type="checkbox" name="gsa" id="gsa" value='-gsa '>&nbsp;<label>Genus and Species assignment (Not Available) &nbsp;&nbsp;&nbsp;</label>-->
-                            <!--</div>-->
                         </td>
                     </tr>
                     <tr>
@@ -271,14 +242,10 @@ function openResult(evt, rname) {
                                     <option value="nr -remote">Remote NR Database</option>
                                 </optgroup>
                                 <optgroup label="Local BLAST Databases">
-                                    <option value="nt">Local NT Database</option>
-                                    <option value="nr">Local NR Database</option>
-                                    <!-- <option value="/media/Nanopore/blastdb/plasmid">Local Plasmid database</option> -->
-                                    <option value="/media/Nanopore/plasmidb/plasmidb">Local Plasmid Database</option>
-                                    <option value="/media/Nanopore/blastdb/toxoplasma">Local Toxoplasma Database</option>
-                                    <!--{% for db in blastdb %}-->
-                                        <!--<option value="/media/Nanopore/blastdb/{{ db }}/{{ db }}.fsa">Local {{ db }} database</option>-->
-                                    <!--{% endfor %}-->
+                                    <option value="{drive}blastdb/nt">Local NT Database</option>
+                                    <option value="{drive}blastdb/nr">Local NR Database</option>
+                                    <option value="{drive}plasmidb/plasmidb">Local Plasmid Database</option>
+                                    <option value="{drive}blastdb/toxoplasma">Local Toxoplasma Database</option>
                                 </optgroup>
                             </select>
                         </td>
@@ -288,12 +255,6 @@ function openResult(evt, rname) {
                         <td>
                             <input type="radio" name="blasttask" id="blasttask" value='megablast' checked="checked">&nbsp;<label>megablast &nbsp;&nbsp;&nbsp;</label>
                             <input type="radio" name="blasttask" id="blasttask" value='blastn'>&nbsp;<label>blastn &nbsp;&nbsp;&nbsp;</label>
-                            <!--<select id="blasttask" name="blasttask" class="ddmenu">-->
-                                <!--<optgroup label="Select BLAST task">-->
-                                    <!--<option value="megablast">megablast</option>-->
-                                    <!--<option value="blastn">blastn</option>-->
-                                <!--</optgroup>-->
-                            <!--</select>-->
                         </td>
                     </tr>
                     <tr>

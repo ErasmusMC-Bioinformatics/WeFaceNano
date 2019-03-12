@@ -899,6 +899,7 @@ def pipeline_start(request):
             "user": request.session.get('username'),
             "super": superuser,
             "blastdb": blastdb,
+            "drive": NANOPORE_DRIVE,
             "resdb": resdb})
 
 
