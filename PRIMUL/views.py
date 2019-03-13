@@ -426,7 +426,7 @@ def resfinder(barcodes, file_list, resultfolder,
             if resdb != "all":
                 call([
                     "perl ~/PRIMUL/static/resfinder.pl "
-                    "-d ~/resfinder -i " + fasta_unitig +
+                    "-d ~/resfinder_db -i " + fasta_unitig +
                     " -a " + resdb + " -o " + resultfolder + "/resfinder/" +
                     barcodes[count] + " -k " + residentity + " -l " + reslength
                 ], shell=True)
@@ -434,7 +434,7 @@ def resfinder(barcodes, file_list, resultfolder,
                 for db in db_all:
                     call([
                         "perl ~/PRIMUL/static/resfinder.pl -d "
-                        "~/resfinder -i " + fasta_unitig +
+                        "~/resfinder_db -i " + fasta_unitig +
                         " -a " + db + " -o " + resultfolder + "/resfinder/" +
                         barcodes[count] + " -k " + residentity +
                         " -l " + reslength
