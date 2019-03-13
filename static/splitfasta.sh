@@ -4,7 +4,7 @@ i=0;
 FOLDER=$2;
 
 while read line ; do
-  if [ ${line:0:1} == ">" ] ; then
+  if [ "${line:0:1}" == ">" ] ; then
     ((i++))
     echo "$line" >> ${FOLDER}/unitig"${i}".fasta
   else
