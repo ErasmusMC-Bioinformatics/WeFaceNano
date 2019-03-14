@@ -4,6 +4,7 @@ import random
 import re
 
 from urllib.error import HTTPError
+from django.conf import settings
 from django.shortcuts import render_to_response, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
@@ -15,7 +16,7 @@ from Bio import Entrez, SeqIO
 from . import brigD3
 from subprocess import call
 
-NANOPORE_DRIVE = "/mnt/d/Nanopore/"
+
 @csrf_exempt
 def signup(request):
     """Let's superusers create a new user to use the pipeline.
@@ -28,14 +29,14 @@ def signup(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            if os.path.exists(NANOPORE_DRIVE + username):
+            if os.path.exists(settings.NANOPORE_DRIVE + username):
                 pass
             else:
-                call(["mkdir", NANOPORE_DRIVE + username])
-            if os.path.exists(NANOPORE_DRIVE + username + "/results"):
+                call(["mkdir", settings.NANOPORE_DRIVE + username])
+            if os.path.exists(settings.NANOPORE_DRIVE + username + "/results"):
                 pass
             else:
-                call(["mkdir", NANOPORE_DRIVE + username + "/results"])
+                call(["mkdir", settings.NANOPORE_DRIVE + username + "/results"])
             return redirect('index')
     else:
         superusers = User.objects.filter(
@@ -79,10 +80,10 @@ def index(request):
     else:
         superuser = False
     if request.session.get("username"):
-        network_drive = NANOPORE_DRIVE + request.session.get("username")
+        network_drive = settings.NANOPORE_DRIVE + request.session.get("username")
         folders = os.walk(network_drive).__next__()[1]
         files = os.walk(network_drive).__next__()[2]
-        results_folder = (NANOPORE_DRIVE +
+        results_folder = (settings.NANOPORE_DRIVE +
                           request.session.get("username") + "/results")
         results = os.walk(results_folder).__next__()[1]
     else:
@@ -94,7 +95,7 @@ def index(request):
         "user": request.session.get("username"),
         "folders": folders,
         "files": files,
-        "drive": NANOPORE_DRIVE,
+        "drive": settings.NANOPORE_DRIVE,
         "results": results})
 
 
@@ -119,7 +120,6 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
                             name=name,
                             height=20,
                             res_loc=res_loc)
-        # if genbank != "":
         ring_gen.readGenbank(genbank, length)
         genomes = contigfasta
         names = contigname
@@ -268,7 +268,7 @@ def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
         return fasta_list, file_list, unitigs_barcode
 
 
-def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
+def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
     """Use Miniasm for assembly and return the assembly as a FASTA file.
 
     Arguments:
@@ -299,14 +299,14 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
                         "/" + barcode + "_cat.fastq"
                     ], shell=True)
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
                         barcode + "_cat.fastq -o " + resultfolder +
                         "/assembly/" + barcode + "/" + "_cat.contigs"
                     ], shell=True)
                 else:
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
                         barcode_content[0] + " -o " + resultfolder +
                         "/assembly/" + barcode + "/" + barcode_content[0] +
@@ -321,7 +321,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
                         "/trimmed/" + barcode + "_cat.fasta"
                     ], shell=True)
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
                         inputfolder + "/" + barcode + "/trimmed/" + barcode +
                         "_cat.fasta -o " + resultfolder + "/assembly/" +
                         barcode + "/" + barcode + "_cat.contigs"
@@ -332,7 +332,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder):
                     ])
                 else:
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
                         inputfolder + "/" + barcode + "/trimmed/" +
                         barcode_content[0] + " -o " + resultfolder +
                         "/assembly/" + barcode + "/" + barcode_content[0] +
@@ -570,15 +570,15 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                             bplength = bclength
                             genbank = ""
                         new_path = blastfolder + "/" + barcodes[bcount] + "/"
-                        if blastdb == NANOPORE_DRIVE + "plasmidb/plasmidb":
+                        if blastdb == settings.NANOPORE_DRIVE + "plasmidb/plasmidb":
                             for ref_folder in os.listdir(
-                                    NANOPORE_DRIVE):
+                                    settings.NANOPORE_DRIVE):
                                 if "RB_REF" in ref_folder:
                                    for ref_file in os.listdir(
-                                           NANOPORE_DRIVE +
+                                           settings.NANOPORE_DRIVE +
                                            ref_folder):
                                        if line[1].strip("/") in ref_file:
-                                           with open(NANOPORE_DRIVE +
+                                           with open(settings.NANOPORE_DRIVE +
                                                      ref_folder + "/" +
                                                      ref_file) as ref_rb_file:
                                                with open(blastfolder + "/" +
@@ -700,7 +700,7 @@ def create_results(request):
     residentity = request.POST.get("residentity")
     kmer = request.POST.get("kmer")
     circulator = request.POST.get("circularize")
-    resultfolder = (NANOPORE_DRIVE + request.session.get("username") +
+    resultfolder = (settings.NANOPORE_DRIVE + request.session.get("username") +
                     "/results/" + outfolder)
     # qscore = "7"
     if res is None:
@@ -719,10 +719,6 @@ def create_results(request):
             "-b -c " + configuration + " -i" + inputfolder + "/fast5 -o " +
             resultfolder + " -f fastq"
         ], shell=True)
-        # call([
-        #     "Rscript minion_qc/MinionQC.R -i " + resultfolder +
-        #     "/sequencing_summary.txt -o " + resultfolder + "/qc -q " + qscore
-        # ], shell=True)
     elif request.POST.get("barcoding") == '0' and inputtype == "fast5":
         call(["mkdir", resultfolder + "/workspace/pass"])
         call(["mkdir", resultfolder + "/qc"])
@@ -731,10 +727,6 @@ def create_results(request):
             "-c " + configuration + " -i" + inputfolder + "/fast5 -o " +
             resultfolder + " -f fastq"
         ], shell=True)
-        # call([
-        #     "Rscript minion_qc/MinionQC.R -i " + resultfolder +
-        #     "/sequencing_summary.txt -o " + resultfolder + "/qc -q " + qscore
-        # ], shell=True)
     if inputtype == "fast5":
         barcode_list = []
         time.sleep(15)
@@ -767,7 +759,7 @@ def create_results(request):
                 inputtype, inputfolder, barcode_list, resultfolder, gsize)
         elif assembler == "miniasm":
             fasta_list, file_list, barcodes = miniasm(
-                inputtype, inputfolder, barcode_list, resultfolder)
+                inputtype, inputfolder, barcode_list, resultfolder, kmer)
         else:
             return HttpResponseRedirect(reverse("index"))
     
@@ -879,14 +871,14 @@ def pipeline_start(request):
             superuser = True
         else:
             superuser = False
-        network_drive = (NANOPORE_DRIVE +
+        network_drive = (settings.NANOPORE_DRIVE +
                          request.session.get("username") + "/")
         folders = []
         try:
             blastdb = []
-            blastdbfolder = os.listdir(NANOPORE_DRIVE + "blastdb/")
+            blastdbfolder = os.listdir(settings.NANOPORE_DRIVE + "blastdb/")
             for db in blastdbfolder:
-                if os.path.isdir(NANOPORE_DRIVE + "blastdb/" + db):
+                if os.path.isdir(settings.NANOPORE_DRIVE + "blastdb/" + db):
                     blastdb.append(db)
             walk = os.walk(network_drive).__next__()[1]
             for folder in walk:
@@ -899,7 +891,7 @@ def pipeline_start(request):
             "user": request.session.get('username'),
             "super": superuser,
             "blastdb": blastdb,
-            "drive": NANOPORE_DRIVE,
+            "drive": settings.NANOPORE_DRIVE,
             "resdb": resdb})
 
 
@@ -931,14 +923,14 @@ def get_stored_results(request):
     else:
         superuser = False
     username = request.POST.get("username")
-    results = os.listdir(NANOPORE_DRIVE + username + "/results/")
+    results = os.listdir(settings.NANOPORE_DRIVE + username + "/results/")
     res_dict = {}
     selected_result = request.POST.get("resultname")
     for r in results:
         if selected_result != "none":
             if r == selected_result:
                 tool_list = []
-                tools = os.listdir(NANOPORE_DRIVE +
+                tools = os.listdir(settings.NANOPORE_DRIVE +
                                    username + "/results/" + r)
                 if tools:
                     for t in tools:
@@ -990,11 +982,20 @@ def get_stored_results(request):
 
 
 def get_stored_qc(username, r):
+    """Get the QC pages stored on the drive.
+    
+    Arguments:
+        username {str} -- The user that is logged in.
+        r {str} -- Name of the selected run.
+    
+    Returns:
+        dict -- Dictionary with qc html page.
+    """
     qc_dict = {}
-    qc_bc = (NANOPORE_DRIVE + username +
+    qc_bc = (settings.NANOPORE_DRIVE + username +
              "/results/" + r + "/qc/")
     for bc in os.listdir(qc_bc):
-        folder = (NANOPORE_DRIVE + username +
+        folder = (settings.NANOPORE_DRIVE + username +
                   "/results/" + r + "/qc/" + bc)
         for qc in os.listdir(folder):
             if ".html" in qc:
@@ -1009,13 +1010,13 @@ def get_stored_circularize_results(username, r):
 
     Arguments:
         username {str} -- The user that is logged in.
-        r {str} -- Name of the selected run
+        r {str} -- Name of the selected run.
 
     Returns:
         dict -- Dictionary of the contig topology showing 
-        if a contig is circular or linear
+        if a contig is circular or linear.
     """
-    circ_folder = (NANOPORE_DRIVE + username +
+    circ_folder = (settings.NANOPORE_DRIVE + username +
                    "/results/" + r + "/circularize/")
     circularize_data = os.listdir(circ_folder)
     contig_topology = {}
@@ -1054,19 +1055,19 @@ def get_stored_blast_results(username, r):
     coveragelist = []
     total_length = []
     blast_results = os.listdir(
-        NANOPORE_DRIVE + username + "/results/" + r + "/BLAST/")
+        settings.NANOPORE_DRIVE + username + "/results/" + r + "/BLAST/")
     for br in blast_results:
-        bc_blast = os.listdir(NANOPORE_DRIVE +
+        bc_blast = os.listdir(settings.NANOPORE_DRIVE +
                               username + "/results/" + r + "/BLAST/" + br)
         for bc in bc_blast:
             if ".html" in bc:
-                with open(NANOPORE_DRIVE + username + "/results/" + r +
+                with open(settings.NANOPORE_DRIVE + username + "/results/" + r +
                           "/BLAST/" + br + "/" + bc) as htmlfile:
                     code = htmlfile.read()
                 html_plasmid[br + "_" + bc.split(".")[0]] = code
             if ".out" in bc:
                 count = 0
-                with open(NANOPORE_DRIVE + username + "/results/" + r +
+                with open(settings.NANOPORE_DRIVE + username + "/results/" + r +
                           "/BLAST/" + br + "/" + bc) as blastfile:
                     for line in blastfile:
                         line = line.split("\t")
@@ -1081,9 +1082,7 @@ def get_stored_blast_results(username, r):
                     first_result = first_result.split('\t')
                     try:
                         contig = first_result[0]
-                        # pident = first_result[2]
                         pident = sum(coveragelist)/len(coveragelist)
-                        # alignment_length = first_result[3]
                         alignment_length = sum(total_length)
                         try:
                             handle = Entrez.efetch(
@@ -1098,11 +1097,6 @@ def get_stored_blast_results(username, r):
                         except HTTPError:
                             topology[first_result[1]] = "circular"
                             blast_name = first_result[1]
-                            # return HttpResponseRedirect('index')
-                        # record = SeqIO.read(handle, "genbank")
-                        # topology[record.description] = record.annotations[
-                            # "topology"]
-                        # blast_name = record.description
                     except IndexError:
                         blast_name = ""
                         contig = ""
@@ -1131,18 +1125,18 @@ def get_stored_resfinder_results(username, r):
     resfinder_dict = {}
     arglist = []
     resfinder_results = os.listdir(
-        NANOPORE_DRIVE + username + "/results/" + r + "/resfinder/")
+        settings.NANOPORE_DRIVE + username + "/results/" + r + "/resfinder/")
     for resfolder in resfinder_results:
         contiglist = []
         resbarcode = os.listdir(
-            NANOPORE_DRIVE + username + "/results/" + r +
+            settings.NANOPORE_DRIVE + username + "/results/" + r +
             "/resfinder/" + resfolder)
         if "results_tab.txt" in resbarcode:
             if os.stat(
-                NANOPORE_DRIVE + username + "/results/" + r +
+                settings.NANOPORE_DRIVE + username + "/results/" + r +
                     "/resfinder/" + resfolder + "/results_tab.txt"
             ).st_size > 0:
-                with open(NANOPORE_DRIVE + username + "/results/" + r +
+                with open(settings.NANOPORE_DRIVE + username + "/results/" + r +
                           "/resfinder/" + resfolder +
                           "/results_tab.txt") as resfinderfile:
                     for line in resfinderfile:
@@ -1181,22 +1175,22 @@ def get_stored_assembly_results(username, r):
     """
     assembly_report = {}
     assembly_results = os.listdir(
-        NANOPORE_DRIVE + username + "/results/" + r + "/assembly/")
+        settings.NANOPORE_DRIVE + username + "/results/" + r + "/assembly/")
     assembly_bc = []
     for assemblyfolder in assembly_results:
         assembly_barcode = os.listdir(
-            NANOPORE_DRIVE + username + "/results/" + r +
+            settings.NANOPORE_DRIVE + username + "/results/" + r +
             "/assembly/" + assemblyfolder)
         for assembly in assembly_barcode:
             if ".contigs.fasta" in assembly:
                 contigcount = 0
                 if os.stat(
-                    NANOPORE_DRIVE + username + "/results/" + r +
+                    settings.NANOPORE_DRIVE + username + "/results/" + r +
                     "/assembly/" + assemblyfolder + "/" + assembly
                 ).st_size > 0:
                     assembly_bc.append(assemblyfolder)
                     for record in SeqIO.parse(
-                        NANOPORE_DRIVE + username + "/results/" + r +
+                        settings.NANOPORE_DRIVE + username + "/results/" + r +
                             "/assembly/" + assemblyfolder + "/" + assembly,
                             "fasta"):
                         contigcount += 1
@@ -1224,7 +1218,7 @@ def delete(request):
     else:
         superuser = False
     username = request.session.get('username')
-    results = os.listdir(NANOPORE_DRIVE + username + "/results/")
+    results = os.listdir(settings.NANOPORE_DRIVE + username + "/results/")
     return render_to_response("delete.html", context={
         'super': superuser,
         'user': username,
@@ -1242,7 +1236,7 @@ def remove_result(request):
     """
     result = request.POST.get("resultname")
     username = request.POST.get("username")
-    cmd = NANOPORE_DRIVE + username + "/results/" + result
+    cmd = settings.NANOPORE_DRIVE + username + "/results/" + result
     call(["rm", "-rf", cmd])
     return HttpResponseRedirect(reverse("index"))
 

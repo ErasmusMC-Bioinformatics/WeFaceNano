@@ -4,11 +4,12 @@ echo
 VERSION=0
 SEED=42
 # Get options
-while getopts v:i:o:hs: option
+while getopts v:k:i:o:hs: option
 do
  case "${option}"
  in
  v) VERSION=${OPTARG};;
+ k) KMER=${OPTARG};;
  i) FASTQFile=${OPTARG};;
  o) FASTAOUT="${OPTARG}.fasta";;
  h) echo "Usage: miniasm.bash -v <MiniMap Version number> -i <FASTQ input> -o <FASTA output> --- Pipeline that runs MiniMap and Miniasm and creates a FASTA file."
@@ -46,8 +47,8 @@ case "$VERSION"
 in
 0) echo "Select a MiniMap version (-v1 or -v2)"
 	exit 1;;
-1) time ~/minimap/minimap -Sw5 -L100 -m0 "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
-2) time ~/minimap2/minimap2 -x ava-ont "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
+1) time ~/minimap/minimap -Sw5 -L100 -m0 -k "$KMER" "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
+2) time ~/minimap2/minimap2 -x ava-ont -k "$KMER" "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
 esac
 echo
 echo -n "MiniMap End: "
