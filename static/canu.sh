@@ -23,4 +23,4 @@ do
  esac
 done
 
-~/canu/Linux-amd64/bin/canu -p ${PREFIX} -d ${OUTFOLDER} genomeSize=${GENOMESIZE} -nanopore-raw ${FASTQ} stopOnReadQuality=false gnuplotTested=true
+~/canu/Linux-amd64/bin/canu -p ${PREFIX} -d ${OUTFOLDER} genomeSize=${GENOMESIZE} -nanopore-raw ${FASTQ} stopOnReadQuality=false 
