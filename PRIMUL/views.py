@@ -467,7 +467,6 @@ def resfinder(barcodes, file_list, resultfolder,
 def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
     """Runs BLAST on assembled FASTA files.
 
-    TODO: Use fixed start FASTA if contig is circularized.
     FIXME: Function is too long. Split or clean function.
 
     Arguments:
@@ -562,12 +561,13 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                                 blastfolder + "/" + barcodes[bcount] + "/" +
                                 utig[:-6] + ".genbank.gb"
                             )
-                            if int(gblength) < int(bclength):
-                                bplength = gblength
-                            else:
-                                bplength = bclength
+                            # if int(gblength) < int(bclength):
+                            #     bplength = gblength
+                            # else:
+                            #     bplength = bclength
+                            bplength = gblength
                         except HTTPError:
-                            bplength = bclength
+                            # bplength = bclength
                             genbank = ""
                         new_path = blastfolder + "/" + barcodes[bcount] + "/"
                         if blastdb == settings.NANOPORE_DRIVE + "plasmidb/plasmidb":
@@ -592,6 +592,8 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                             blastfolder + "/" + barcodes[bcount] + "/" +
                             utig[:-6] + ".refseq.fasta"
                         )
+                        for record in SeqIO.parse(refseq, "fasta"):
+                            bplength = len(record)
                         try:
                             for feature in record.features:
                                 if feature.qualifiers.get('plasmid', []):
