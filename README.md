@@ -96,7 +96,9 @@ If the FAST5 option is selected, please select the following Albacore settings:
 * Barcoding [yes or no]
 * Flowcell configuration file.
 
-When selecting the FASTQ option the Albacore basecalling step will be skipped and Canu or Miniasm will use the inputfolder to start the assembly. For the Canu assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped. After the assembly the Simple-Circularise tool will look for repeats and will circularise the contigs.
+When selecting the FASTQ option the Albacore basecalling step will be skipped and Canu or Miniasm will use the inputfolder to start the assembly. For the Canu assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped but instead you will enter the kmer-size you want Minimap to use. Select a kmer size between 13 and 28 for the best results.
+
+After the assembly the Simple-Circularise tool will look for repeats and will circularise the contigs.
 
 The plasmid pipeline can run two additional tools (BLAST and resfinder). Please check the tools you want to run during the pipeline.
 
