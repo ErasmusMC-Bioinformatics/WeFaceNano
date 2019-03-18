@@ -15,27 +15,77 @@
 * Biopython 1.70 or higher
 * Django 2.0 or higher
 * Albacore 2.3.4 or higher
+* Porechop 0.2.4 or higher
 * Canu 1.8 or higher
 * Minimap 2.15-r915 or higher
 * Miniasm 0.3-r178 or higher
+* Racon 1.3.3 or higher
 * Resfinder database
-* BLAST+ 2.6.0 or higher
-* BLAST 2 (version that includes blastall and formatdb needed to run resfinder)
+* NCBI-BLAST+ 2.6.0 or higher
+* NCBI-BLAST 2 (version that includes blastall and formatdb needed to run resfinder)
 * NanoPlot 1.20.1 or higher
 * Simple-Circularise
+* KmerGenie 1.7051
 * libgd 2.2.5
 * cpan packages: Getopt::Long, Bio::SeqIO, Bio::SearchIO, Try::Tiny::Retry and GD
 
 ## <a name="installation"></a>How to install
 
-1. Get the newest version of PRIMUL by cloning of downloading the code from [github](https://github.com/ErasmusMC-Bioinformatics/PRIMUL) and
-install all dependencies.
-
-2. Download the Resfinder database
+1. Install dependencies:
 
 ```bash
+# Python 3, Perl5, NCBI-BLAST+, NCBI-BLAST 2 libgd
+sudo apt-get update
+sudo apt-get install python3.6 perlbrew ncbi-blast+ blast2 libgd
+
+# Django, Biopython, NanoPlot
+pip install django biopython NanoPlot --user
+
+# PRIMUL
+git clone https://github.com/ErasmusMC-Bioinformatics/PRIMUL
+python PRIMUL/manage.py migrate
+
+# Albacore 2.3.4
+wget https://mirror.oxfordnanoportal.com/software/analysis/ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl
+sudo pip install ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl
+rm ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl
+
+# Porechop
+git clone https://github.com/rrwick/Porechop.git
+cd Porechop
+python3 setup.py install
+
+# Minimap
+git clone https://github.com/lh3/minimap2
+cd minimap2 && make
+
+# Miniasm
+git clone https://github.com/lh3/miniasm
+cd miniasm && make
+
+# Canu 1.8
+git clone https://github.com/marbl/canu.git
+cd canu/src
+make -j <number of threads>
+
+# Racon
+git clone --recursive https://github.com/isovic/racon.git racon
+cd racon
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+
+# KmerGenie
+wget http://kmergenie.bx.psu.edu/kmergenie-1.7051.tar.gz
+tar -xvzf kmergenie-1.7051.tar.gz
+cd kmergenie-1.7051 && make
+
+# Resfinder database
 git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db.git
-cd resfinder_db
+
+# Simple Circularise
+git clone https://github.com/Kzra/Simple-Circularise
 ```
 
 3. Mount a network drive to /mnt/d/Nanopore to start using PRIMUL with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
@@ -47,7 +97,7 @@ django-admin createsuperuser --username username --password password --database 
 python path/to/PRIMUL/manage.py runserver 0.0.0.0:8080
 ```
 
-5. Go to 127.0.0.1:8080 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
+6. Go to 127.0.0.1:8080 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
 
 ## <a name="usage"></a>Plasmid Pipeline Usage
 
@@ -96,7 +146,7 @@ If the FAST5 option is selected, please select the following Albacore settings:
 * Barcoding [yes or no]
 * Flowcell configuration file.
 
-When selecting the FASTQ option the Albacore basecalling step will be skipped and Canu or Miniasm will use the inputfolder to start the assembly. For the Canu assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped but instead you will enter the kmer-size you want Minimap to use. Select a kmer size between 13 and 28 for the best results.
+When selecting the FASTQ option the Albacore basecalling step will be skipped and Canu or Miniasm will use the inputfolder to start the assembly. For the Canu assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped but instead the KmerGenie tool will run to find the optimal kmer-size for the selected reads. If the run is barcoded the tool will run for all barcodes and will calculate the optimal kmer-size for all barcodes.
 
 After the assembly the Simple-Circularise tool will look for repeats and will circularise the contigs.
 
