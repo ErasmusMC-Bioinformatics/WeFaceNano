@@ -19,10 +19,10 @@ from subprocess import call
 
 @csrf_exempt
 def signup(request):
-    """Let's superusers create a new user to use the pipeline.
+    """Let superusers create a new users.
 
     Arguments:
-        request -- Request information used to sign up.
+        request: Request information used to sign up.
     """
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -63,10 +63,11 @@ def signup(request):
 
 @csrf_exempt
 def index(request):
-    """Information on the homepage and check if user is superuser.
+    """Check if user is superuser and retrieves the users results folder.
+    Shows the homepage where you can select a result from the users results folder.
 
     Arguments:
-        request -- Request information when user is logged in. 
+        request: Request information when user is logged in. 
         Shows information about the users network drive 
         and if user is a superuser.
     """
@@ -101,17 +102,17 @@ def index(request):
 
 def draw_plasmid(contigfasta, contigname, genbank, refseq,
                  name, length, path, res_loc):
-    """Draw a plasmid and aligned contig based on BLAST results.
+    """Draw a diagram conataining the plasmid with the aligned contigs.
 
     Arguments:
-        contigfasta {list} -- A list of contigsfiles.
-        contigname {list} -- A list of contig names based on the files.
-        genbank {list} -- A list of genbank files to retrieve gene info.
-        refseq {str} -- The reference filename to align the contigs with.
-        name {list} -- A list of plasmid names.
-        length {int} -- The length of the plasmid.
-        path {str} -- The path to store te HTML output.
-        res_loc {dict} -- The names and locations of the 
+        contigfasta: A list of contigsfiles.
+        contigname: A list of contig names based on the files.
+        genbank: A list of genbank files to retrieve gene info.
+        refseq: The reference filename to align the contigs with.
+        name: A list of plasmid names.
+        length: The length of the plasmid.
+        path: The path to store te HTML output.
+        res_loc: The names and locations of the 
         antibiotic resistance genes.
     """
     if path != '':
@@ -151,12 +152,14 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
 def circularize(assembly, inputfolder, resultfolder, kmer, assembler):
     """Use circulator to check if a contig is circular or linear.
 
+    TODO: Should we keep this tool? It is very slow.
+
     Arguments:
-        assembly {str} -- Filename of the first assembly.
-        inputfolder {str} -- The folder containing the reads.
-        resultfolder {str} -- Name of the outputfolder to store results.
-        kmer {str} -- Kmer-size when using SPAdes assembly.
-        assembler {str} -- Selected assembler for use with circlator.
+        assembly: Filename of the first assembly.
+        inputfolder: The folder containing the reads.
+        resultfolder: Name of the outputfolder to store results.
+        kmer: Kmer-size when using SPAdes assembly.
+        assembler: Selected assembler for use with circlator.
     """
     barcodes = os.listdir(inputfolder)
     out = resultfolder + "/circularize"
@@ -222,16 +225,14 @@ def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
     """Use Canu for assembly and return the assembly as a FASTA file.
 
     Arguments:
-        inputtype {str} -- To see if the inputfiles are FAST5 or FASTQ.
-        inputfolder {str} -- Name of the folder with the inputfiles.
-        barcode_list {list} -- A list of barcodes.
-        resultfolder {str} -- Folder where the results will be stored.
-        gsize {str} -- The genome size for the Canu assembler.
+        inputtype: To see if the inputfiles are FAST5 or FASTQ.
+        inputfolder: Name of the folder with the inputfiles.
+        barcode_list: A list of barcodes.
+        resultfolder: Folder where the results will be stored.
+        gsize: The genome size for the Canu assembler.
 
     Returns:
-        list -- A list of FASTA paths.
-        list -- A list of FASTA filenames
-        list -- A list of barcodes.
+        A list of FASTA paths, FASTA filenames and barcodes.
     """
     fasta_list = []
     file_list = []
@@ -272,15 +273,13 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
     """Use Miniasm for assembly and return the assembly as a FASTA file.
 
     Arguments:
-        inputtype {str} -- To see if the inputfiles are FAST5 or FASTQ.
-        inputfolder {str} -- Name of the folder with the inputfiles.
-        barcode_list {list} -- A list of barcodes.
-        resultfolder {str} -- Folder where the results will be stored.
+        inputtype: To see if the inputfiles are FAST5 or FASTQ.
+        inputfolder: Name of the folder with the inputfiles.
+        barcode_list: A list of barcodes.
+        resultfolder: Folder where the results will be stored.
 
     Returns:
-        list -- A list of FASTA paths.
-        list -- A list of FASTA filenames
-        list -- A list of barcodes.
+        A list of FASTA paths, FASTA filenames and barcodes.
     """
     fasta_list = []
     file_list = []
@@ -358,13 +357,11 @@ def skip_assembly(resultfolder, barcode_list):
     """Skip the assembly if the assembly folder is already available.
 
     Arguments:
-        resultfolder {str} -- Folder where the results will be stored.
-        barcode_list {list} -- A list of barcodes.
+        resultfolder: Folder where the results will be stored.
+        barcode_list: A list of barcodes.
 
     Returns:
-        list -- A list of FASTA paths.
-        list -- A list of FASTA filenames
-        list -- A list of barcodes.
+        A list of FASTA paths, FASTA filenames and barcodes.
     """
     fasta_list = []
     file_list = []
@@ -393,16 +390,16 @@ def resfinder(barcodes, file_list, resultfolder,
     selected database or all databases.
 
     Arguments:
-        barcodes {list} -- A list of barcodes.
-        file_list {list} -- A list of files that contains the assembly.
-        resultfolder {str} -- The ouputfolder to store the results.
-        resdb {str} -- The database to search antibiotic resistance genes.
-        reslength {str} -- The minimum length cutoff when using resfinder.
-        residentity {str} -- The % of identity cutoff when using resfinder.
+        barcodes: A list of barcodes.
+        file_list: A list of files that contains the assembly.
+        resultfolder: The ouputfolder to store the results.
+        resdb: The database to search antibiotic resistance genes.
+        reslength: The minimum length cutoff when using resfinder.
+        residentity: The % of identity cutoff when using resfinder.
 
     Returns:
-        dict -- A dictionary with the contigs and the found genes.
-        dict -- A dictionary of the gene locations within the contigs.
+        A dictionary with the contigs and the found genes and 
+        the gene locations within the contigs.
     """
     call(["mkdir", resultfolder + "/resfinder"])
     db_all = ["aminoglycoside", "beta-lactam", "colistin", "fosfomycin",
@@ -470,16 +467,20 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
     FIXME: Function is too long. Split or clean function.
 
     Arguments:
-        barcodes {list} -- A list of barcodes that contains contigs.
-        file_list {list} -- A list of filenames to use with BLAST.
-        resultfolder {str} -- The folder where the 
+        barcodes: A list of barcodes that contains contigs.
+        file_list: A list of filenames to use with BLAST.
+        resultfolder: The folder where the 
         BLAST results will be stored.
-        blastdb {str} -- The selected BLAST database.
-        task {str} -- The selected task in BLAST (blastn or megablast)
-        res_loc {dict} -- Locations of resistance genes to draw plasmid.
+        blastdb: The selected BLAST database.
+        task: The selected task in BLAST (blastn or megablast)
+        res_loc: Locations of resistance genes to draw plasmid.
 
     Returns:
-        dict -- BLAST output information (plasmid, description, length).
+        Dictionary with BLAST output information (plasmid, description, length).
+
+    Raises:
+        HTTPError: No Genbank entry found.
+        IndexError, KeyError: No BLAST result.
     """
     blast = {}
     bfiles = []
@@ -490,7 +491,6 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
     dict_draw = {}
     plasmidcount = 0
     ext_plasmidcount = 0
-    # plasmidlist = []
     Entrez.email = "some_email@somedomain.com"
     for fasta in file_list:
         unitig_bc = []
@@ -561,13 +561,8 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                                 blastfolder + "/" + barcodes[bcount] + "/" +
                                 utig[:-6] + ".genbank.gb"
                             )
-                            # if int(gblength) < int(bclength):
-                            #     bplength = gblength
-                            # else:
-                            #     bplength = bclength
                             bplength = gblength
                         except HTTPError:
-                            # bplength = bclength
                             genbank = ""
                         new_path = blastfolder + "/" + barcodes[bcount] + "/"
                         if blastdb == settings.NANOPORE_DRIVE + "plasmidb/plasmidb":
@@ -662,14 +657,12 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                         refseq=dict_draw[key + "_" + barcodes[bcount]][2],
                         name=name,
                         length=dict_draw[key + "_" + barcodes[bcount]][3],
-                        # path=dict_draw[key][4],
                         path=new_path_bc,
                         res_loc=res_loc)
                 except (IndexError, KeyError):
                     pass
             else:
                 pass
-            # usedkeys.append(key[:-2])
             usedkeys.append(key.split("_")[0])
         barcodes.pop(0)
         dict_contigfasta = {}
@@ -682,7 +675,7 @@ def create_results(request):
     """Run the pipeline with entered data and show the results in an html page.
 
     Arguments:
-        request -- Request information to get information to run the pipeline.
+        request: Request information to get information to run the pipeline.
     """
     inputfolder = request.POST.get("inputfolder")
     inputtype = request.POST.get("inputtype")
@@ -704,7 +697,6 @@ def create_results(request):
     circulator = request.POST.get("circularize")
     resultfolder = (settings.NANOPORE_DRIVE + request.session.get("username") +
                     "/results/" + outfolder)
-    # qscore = "7"
     if res is None:
         res = ''
     if mlst is None:
@@ -764,7 +756,6 @@ def create_results(request):
                 inputtype, inputfolder, barcode_list, resultfolder, kmer)
         else:
             return HttpResponseRedirect(reverse("index"))
-    
     # Create QC pages
     for barcode in barcode_list:
         files = os.listdir(inputfolder + "/" + barcode + "/trimmed")
@@ -776,7 +767,6 @@ def create_results(request):
                 extention = "fast5"
             qc_report(extention, barcode, file,
                       resultfolder + "/qc/" + barcode)
-
     if circulator == "yes":
         circularize(fasta_list, inputfolder, resultfolder, kmer, c_assembler)
     if res == '-r ':
@@ -798,10 +788,10 @@ def qc_report(extention, barcode, filename, outfolder):
     FASTQ file quality score information will be shown.
     
     Arguments:
-        extention {str} -- File extention (fasta or fastq).
-        barcode {str} -- Barcode name.
-        filename {str} -- Name of the file to run the QC.
-        outfolder {str} -- Where to store the QC data.
+        extention: File extention (fasta or fastq).
+        barcode: Barcode name.
+        filename: Name of the file to run the QC.
+        outfolder: Where to store the QC data.
     """
     cmd = ("NanoPlot --" + extention + " " + filename +
            " --N50 --plot kde hex dot -p " + barcode +
@@ -813,8 +803,8 @@ def trim_reads(inputfolder, barcode_list):
     """Trim the adapters from the reads using Porechop.
 
     Arguments:
-        inputfolder {str} -- The folder containing the reads.
-        barcode_list {list} -- A list of barcodes to find the FASTQ files.
+        inputfolder: The folder containing the reads.
+        barcode_list: A list of barcodes to find the FASTQ files.
     """
     for barcode in barcode_list:
         barcode_folder = os.listdir(inputfolder + "/" + barcode)
@@ -833,7 +823,7 @@ def readme(request):
     """Shows the readme page and checks if user is a superuser.
 
     Arguments:
-        request -- A request to check if the logged in user is a superuser.
+        request: A request to check if the logged in user is a superuser.
     """
     superusers = User.objects.filter(is_superuser=True).values_list('username')
     su_list = []
@@ -854,7 +844,10 @@ def pipeline_start(request):
     """Shows the pipeline page and all the available options.
 
     Arguments:
-        request -- Request information to start the plasmid pipeline.
+        request: Request information to start the plasmid pipeline.
+
+    Raises:
+        StopIteration: No Nanopore drive found.
     """
     resdb = ["aminoglycoside", "beta-lactam", "colistin", "fosfomycin",
              "fusidicacid", "macrolide", "nitroimidazole", "oxazolidinone",
@@ -903,7 +896,7 @@ def get_stored_results(request):
     previously run analysis from the homepage.
 
     Arguments:
-        request -- Request information to retrieve stored results.
+        request: Request information to retrieve stored results.
     """
     superusers = User.objects.filter(is_superuser=True).values_list('username')
     su_list = []
@@ -987,11 +980,11 @@ def get_stored_qc(username, r):
     """Get the QC pages stored on the drive.
     
     Arguments:
-        username {str} -- The user that is logged in.
-        r {str} -- Name of the selected run.
+        username: The user that is logged in.
+        r: Name of the selected run.
     
     Returns:
-        dict -- Dictionary with qc html page.
+        Dictionary with qc html page.
     """
     qc_dict = {}
     qc_bc = (settings.NANOPORE_DRIVE + username +
@@ -1011,12 +1004,14 @@ def get_stored_circularize_results(username, r):
     """Get the stored circularization results created by circulator.
 
     Arguments:
-        username {str} -- The user that is logged in.
-        r {str} -- Name of the selected run.
+        username: The user that is logged in.
+        r: Name of the selected run.
 
     Returns:
-        dict -- Dictionary of the contig topology showing 
-        if a contig is circular or linear.
+        Dictionary of the contig topology showing if a contig is circular or linear.
+
+    Raises:
+        IndexError: No circularized data found.
     """
     circ_folder = (settings.NANOPORE_DRIVE + username +
                    "/results/" + r + "/circularize/")
@@ -1041,14 +1036,17 @@ def get_stored_blast_results(username, r):
     """Get the stored BLAST result based on the selected run.
 
     Arguments:
-        username {str} -- The user that is logged in.
-        r {str} -- Name of the selected run
+        username: The user that is logged in.
+        r: Name of the selected run
 
     Returns:
     blast_dict, blast_res_dict, html_plasmid
-        dict -- A dictionary with BLAST files.
-        dict -- A dictionary with BLAST result information.
-        dict -- A dictionary with the HTML code to view the plasmid.
+        A dictionary with BLAST files, BLAST result information and 
+        the HTML code to view the plasmid.
+
+    Raises:
+        HTTPError: No Genbank information.
+        IndexError: No BLAST data available.
     """
     blast_dict = {}
     html_plasmid = {}
@@ -1117,12 +1115,15 @@ def get_stored_resfinder_results(username, r):
     """Get stored resfinder results based on the selected run
 
     Arguments:
-        username {str} -- The user that is logged in.
-        r {str} -- Name of the selected run.
+        username: The user that is logged in.
+        r: Name of the selected run.
 
     Returns:
-        dict -- A dictionary with resfinder results 
+        A dictionary with resfinder results 
         (Contig name, antibiotic resistance genes and percentag identity).
+    
+    Raises:
+        IndexError: No resfinder information available.
     """
     resfinder_dict = {}
     arglist = []
@@ -1167,13 +1168,12 @@ def get_stored_assembly_results(username, r):
     """Get stored assembly results based on the selected run
 
     Arguments:
-        username {str} -- The user that is logged in.
-        r {str} -- Name of the selected run.
+        username: The user that is logged in.
+        r: Name of the selected run.
 
     Returns:
-        dict -- A dictionary with the assembly and contig lengths.
-        list -- A list of files containing the assembly results.
-        list -- A list of barcodes.
+        A dictionary with the assembly and contig lengths.
+        A list of files containing the assembly results and barcodes.
     """
     assembly_report = {}
     assembly_results = os.listdir(
@@ -1208,7 +1208,7 @@ def delete(request):
     to delete.
     
     Arguments:
-        request -- Request information to visit the delete page.
+        request: Request information to visit the delete page.
     """
     superusers = User.objects.filter(is_superuser=True).values_list('username')
     su_list = []
@@ -1233,7 +1233,7 @@ def remove_result(request):
     network drive. This cannot be undone.
     
     Arguments:
-        request -- Get the username and resultname to remove the 
+        request: Get the username and resultname to remove the 
         selected result from the network drive.
     """
     result = request.POST.get("resultname")
@@ -1247,7 +1247,7 @@ def logout(request):
     """Flush the session to logout the current user.
 
     Arguments:
-        request -- Request the session of the current user to 
+        request: Request the session of the current user to 
         flush the session.
     """
     request.session.flush()
@@ -1261,7 +1261,7 @@ def login(request):
     Store username in a session.
 
     Arguments:
-        request -- Request the username and password for login 
+        request: Request the username and password for login 
         and store information in session.
     """
     if request.session.get('username') is None:
