@@ -4,11 +4,12 @@ echo
 VERSION=0
 SEED=42
 # Get options
-while getopts v:k:i:o:hs: option
+while getopts v:m:k:i:o:hs: option
 do
  case "${option}"
  in
  v) VERSION=${OPTARG};;
+ m) MINCONTIG=${OPTARG};;
  k) KMER=${OPTARG};;
  i) FASTQFile=${OPTARG};;
  o) FASTAOUT="${OPTARG}.fasta";;
@@ -86,7 +87,7 @@ echo "---------------Summary---------------"
 echo
 echo -n "Filter FASTA sequences by length"
 echo
-awk '!/^>/ { next } { getline seq } length(seq) >= 15000 { print $0 "\n" seq }' "$FASTQFile.racon.fasta" > "$FASTAOUT"
+awk '!/^>/ { next } { getline seq } length(seq) >= '"$MINCONTIG"' { print $0 "\n" seq }' "$FASTQFile.racon.fasta" > "$FASTAOUT"
 echo
 echo "No. of utigs after filtering:"
 grep ">" "$FASTAOUT" | wc -l  | cut -f1

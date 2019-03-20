@@ -290,7 +290,7 @@ def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
         return fasta_list, file_list, unitigs_barcode
 
 
-def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
+def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig):
     """Use Miniasm for assembly and return the assembly as a FASTA file.
 
     Arguments:
@@ -320,7 +320,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
                         "/" + barcode + "_cat.fastq"
                     ], shell=True)
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
                         barcode + "_cat.fastq -o " + resultfolder +
                         "/assembly/" + barcode + "/" + "_cat.contigs"
@@ -328,7 +328,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
                 else:
                     kmer = kmergenie(resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0])
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
                         barcode_content[0] + " -o " + resultfolder +
                         "/assembly/" + barcode + "/" + barcode_content[0] +
@@ -348,7 +348,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
                     ], shell=True)
                     kmer = kmergenie(str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         inputfolder + "/" + barcode + "/trimmed/" + barcode +
                         "_cat.fasta -o " + resultfolder + "/assembly/" +
                         barcode + "/" + barcode + "_cat.contigs"
@@ -360,7 +360,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer):
                 else:
                     kmer = kmergenie(inputfolder + "/" + barcode + "/" + barcode_content[0])
                     call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -k " + kmer + " -i " +
+                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         inputfolder + "/" + barcode + "/trimmed/" +
                         barcode_content[0] + " -o " + resultfolder +
                         "/assembly/" + barcode + "/" + barcode_content[0] +
@@ -723,6 +723,7 @@ def create_results(request):
     reslength = request.POST.get("reslength")
     residentity = request.POST.get("residentity")
     kmer = request.POST.get("kmer")
+    mincontig = request.POST.get("min-contig")
     circulator = request.POST.get("circularize")
     resultfolder = (settings.NANOPORE_DRIVE + request.session.get("username") +
                     "/results/" + outfolder)
@@ -782,7 +783,7 @@ def create_results(request):
                 inputtype, inputfolder, barcode_list, resultfolder, gsize)
         elif assembler == "miniasm":
             fasta_list, file_list, barcodes = miniasm(
-                inputtype, inputfolder, barcode_list, resultfolder, kmer)
+                inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig)
         else:
             return HttpResponseRedirect(reverse("index"))
     # Create QC pages
