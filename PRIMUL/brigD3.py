@@ -162,20 +162,34 @@ class Ring:
         """
         Get ring data in dictionary format for Ring Generator and D3.
         """
-        # n = len(self._positions)
+        resfinder_dictionary = {
+            "Fluoroquinolone and aminoglycoside resistance": '#fa0a96',
+            "Aminoglycoside resistance": '#6400fa',
+            "Beta-lactam resistance": '#d07fff',
+            "Phenicol resistance": '#19ff00',
+            "Sulphonamide resistance": '#ff6100',
+            "Tetracycline resistance": '#00ffe9',
+            "Trimethoprim resistance": '#ff0000',
+            "Macrolide resistance": '#faff00',
+            "Rifampicin resistance": '#007fff',
+            "": '#ff7ca8'
+        }
         print('Generating Ring:', self.name)
-        for res, loc in self.res_loc.items():
-            contig_name = ">" + res.split("_")[0]
-            res_name = res.split("_")[1]
-            if str(contig_name) == str(self.name.strip("\n")):
-                pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
-                       '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
-                       '</span><br>')
-                self._positions.append(loc)
-                # self._colors.append('#ff6400')
-                self._colors.append('#ff5000')
-                self._popups.append(pop)
-                self._heights.append(20)
+        if "_utg" in self.name:
+            for res, loc in self.res_loc.items():
+                resgroup = res.split("_")[-1]
+                residentity = res.split("_")[-2]
+                contig_name = res.split("_")[0]
+                res_name = res.split("_")[1]
+                if str(contig_name) in str(self.name.strip("\n").split("_")[1]):
+                    pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
+                        '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                        '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
+                        '\n</span><br>')
+                    self._positions.append(loc)
+                    self._colors.append(resfinder_dictionary[resgroup]) 
+                    self._popups.append(pop)
+                    self._heights.append(20)
         n = len(self._positions)
         for i in range(n):
             data_dict = {}

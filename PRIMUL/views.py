@@ -115,12 +115,16 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
         res_loc: The names and locations of the 
         antibiotic resistance genes.
     """
+    resistance_genes = {}
+    for res, loc in res_loc.items():
+        if int(loc[1]) <= int(length):
+            resistance_genes[res] = [loc[0], loc[1]]
     if path != '':
         ring_gen = brigD3.AnnotationRing()
         ring_gen.setOptions(color='#000000',
                             name=name,
                             height=20,
-                            res_loc=res_loc)
+                            res_loc=resistance_genes)
         ring_gen.readGenbank(genbank, length)
         genomes = contigfasta
         names = contigname
@@ -130,12 +134,12 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
         blaster.runBLAST()
         blast_rings = []
         for i in range(len(blaster.results)):
-            def r(): return random.randint(80, 200)
+            def r(): return random.randint(40, 120)
             color = ('#%02X%02X%02X' % (r(), r(), r()))
             ring_blast = brigD3.BlastRing()
             ring_blast.setOptions(color=color,
                                   name=names[i],
-                                  res_loc=res_loc)
+                                  res_loc=resistance_genes)
             ring_blast.min_length = 100
             ring_blast.readComparison(blaster.results[i])
             blast_rings.append(ring_blast)
@@ -238,7 +242,7 @@ def kmergenie(inputfile):
     for line in kmergenie_out.split("\n"):
         if "best k:" in line:
             kmer = line.split(" ")[-1]
-    call(["rm ~/kmersizeoutput*"])
+    call(["rm", "~/kmersizeoutput*"])
     return kmer
 
 
@@ -482,8 +486,8 @@ def resfinder(barcodes, file_list, resultfolder,
                         argene.append(line[0] + " - " + line[5])
                     res_genes[barcodes[count] + "_" + contig] = argene
                     loc = line[4].split("..")
-                    res_loc[contig + "_" + line[0] + "_" +
-                            str(rcount)] = [loc[0], loc[1]]
+                    res_loc[contig + "_" + line[0] + "_" + str(rcount) + "_" +
+                            line[1] + "_" + line[5]] = [loc[0], loc[1]]
                     stored_contig = line[3]
                     rcount += 1
         count += 1
