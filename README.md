@@ -36,7 +36,7 @@
 ```bash
 # Python 3, Perl5, NCBI-BLAST+, NCBI-BLAST 2 libgd
 sudo apt-get update
-sudo apt-get install python3.6 perlbrew ncbi-blast+ blast2 libgd
+sudo apt-get install python3.6 perlbrew cpanminus ncbi-blast+ blast2 libgd
 
 # Django, Biopython, NanoPlot
 pip install django biopython NanoPlot --user
@@ -88,16 +88,16 @@ git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db.git
 git clone https://github.com/Kzra/Simple-Circularise
 ```
 
-3. Mount a network drive to /mnt/d/Nanopore to start using PRIMUL with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
+2. Mount a network drive to /mnt/d/Nanopore to start using PRIMUL with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
 
-4. Create a django superuser and start the PRIMUL server:
+3. Create a django superuser and start the PRIMUL server:
 
 ```bash
 django-admin createsuperuser --username username --password password --database path/to/PRIMUL/db.sqlite3
 python path/to/PRIMUL/manage.py runserver 0.0.0.0:8080
 ```
 
-6. Go to 127.0.0.1:8080 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
+4. Go to 127.0.0.1:8080 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
 
 ## <a name="usage"></a>Plasmid Pipeline Usage
 
@@ -164,7 +164,7 @@ There is also an option to search for a specific gene or search for all availabl
 When the pipeline is finished running you will be send back to the homepage. On this page you will see a dropdown menu with all generated resultfolders for the user that is logged in. To see any of the generated results select the result you want to view and click the VIEW button. After a few minutes/seconds a resultpage will be shown with the following information:
 
 1. Plots created with NanoPlot (readlength and yield histogram)
-2. The assembly information containing the contigs and lengths of the contigs.
-3. Antimicrobial resistance genes found by resfinder for each of the contigs.
+2. A table with the assembly information containing the contigs and lengths of the contigs.
+3. A table with the antimicrobial resistance genes found by resfinder for each of the contigs.
 4. The BLAST results with the top hit for all contigs, percentage identity and alignment length
 5. Interactive circle diagrams based on the BLAST results.
