@@ -225,24 +225,25 @@ def circularize(assembly, inputfolder, resultfolder, kmer, assembler):
             call([cmd], shell=True)
 
 
-def kmergenie(inputfile):
+def kmergenie(resultfolder, inputfile):
     """Calculate the kmer-size that will be used when running minimap.
     
     Arguments:
         inputfile: The path to the nanopore reads to calculate the kmer-size
+        resultfolder: Path to store the kmergenie output files.
     
     Returns:
         The calculated kmer-size.
     """
     kmer = "15"
+    call(["mkdir", resultfolder + "/kmer"])
     kmergenie_out = Popen(
         ["~/kmergenie-1.7051/kmergenie " + inputfile +
-            " -l 13 -k 28 -s 1 -o kmersizeoutput"],
+            " -l 13 -k 28 -s 1 -o " + resultfolder + "/kmer/kmersizeoutput"],
         stdout=PIPE, shell=True).communicate()[0].decode()
     for line in kmergenie_out.split("\n"):
         if "best k:" in line:
             kmer = line.split(" ")[-1]
-    call(["rm", "~/kmersizeoutput*"])
     return kmer
 
 
@@ -317,7 +318,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig)
                 barcode_content = os.listdir(
                     resultfolder + "/workspace/pass/" + barcode)
                 if len(barcode_content) > 1:
-                    kmer = kmergenie(resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq")
+                    kmer = kmergenie(resultfolder, resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq")
                     call([
                         "cat " + resultfolder + "/workspace/pass/" + barcode +
                         "/* > " + resultfolder + "/workspace/pass/" + barcode +
@@ -330,7 +331,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig)
                         "/assembly/" + barcode + "/" + "_cat.contigs"
                     ], shell=True)
                 else:
-                    kmer = kmergenie(resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0])
+                    kmer = kmergenie(resultfolder, resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0])
                     call([
                         "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         resultfolder + "/workspace/pass/" + barcode + "/" +
@@ -350,7 +351,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig)
                         "/trimmed/* > " + inputfolder + "/" + barcode +
                         "/trimmed/" + barcode + "_cat.fasta"
                     ], shell=True)
-                    kmer = kmergenie(str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
+                    kmer = kmergenie(resultfolder, str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
                     call([
                         "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         inputfolder + "/" + barcode + "/trimmed/" + barcode +
@@ -362,7 +363,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig)
                         "/trimmed/" + barcode + "_cat.fasta"
                     ])
                 else:
-                    kmer = kmergenie(inputfolder + "/" + barcode + "/" + barcode_content[0])
+                    kmer = kmergenie(resultfolder, inputfolder + "/" + barcode + "/" + barcode_content[0])
                     call([
                         "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -i " +
                         inputfolder + "/" + barcode + "/trimmed/" +
