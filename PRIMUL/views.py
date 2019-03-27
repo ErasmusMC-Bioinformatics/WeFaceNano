@@ -296,13 +296,20 @@ def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
 
 
 def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig):
-    """Use Miniasm for assembly and return the assembly as a FASTA file.
+    """Use Miniasm for assembly and return the assembly as a FASTA file. 
+    The Kmer-size will be calculated with KmerGenie so the user will not have to 
+    manually enter this value. A minimum contig size can be entered to filter out
+    all contigs smaller than this value. The default value will be 15000 when 
+    no value is entered.
 
     Arguments:
         inputtype: To see if the inputfiles are FAST5 or FASTQ.
         inputfolder: Name of the folder with the inputfiles.
         barcode_list: A list of barcodes.
         resultfolder: Folder where the results will be stored.
+        kmer: Kmer-size calculated with KmerGenie.
+        mincontig: The minimum contig length. 
+        All contig smaller will be filtered out.
 
     Returns:
         A list of FASTA paths, FASTA filenames and barcodes.
@@ -310,6 +317,8 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig)
     fasta_list = []
     file_list = []
     unitigs_barcode = []
+    if mincontig == "" or mincontig is None:
+        mincontig = str(15000)
     call(["mkdir", resultfolder + "/assembly/"])
     for barcode in barcode_list:
         if barcode != "unclassified":
