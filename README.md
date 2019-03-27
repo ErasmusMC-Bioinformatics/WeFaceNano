@@ -10,7 +10,7 @@
 
 ## <a name="dependencies"></a>Dependencies
 
-* Python 3.5 or higher
+* Python 3.6 or higher
 * perl5
 * Biopython 1.70 or higher
 * Django 2.0 or higher
@@ -26,7 +26,6 @@
 * NanoPlot 1.20.1 or higher
 * Simple-Circularise
 * KmerGenie 1.7051
-* libgd 2.2.5
 * cpan packages: Getopt::Long, Bio::SeqIO, Bio::SearchIO, Try::Tiny::Retry and GD
 
 ## <a name="installation"></a>How to install
@@ -36,7 +35,7 @@
 ```bash
 # Python 3, Perl5, NCBI-BLAST+, NCBI-BLAST 2 libgd
 sudo apt-get update
-sudo apt-get install python3.6 perlbrew cpanminus ncbi-blast+ blast2 libgd
+sudo apt-get install python3.6 perlbrew cpanminus ncbi-blast+ blast2 libgd-dev cmake
 
 # Django, Biopython, NanoPlot
 pip install django biopython NanoPlot --user
@@ -86,6 +85,9 @@ git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db.git
 
 # Simple Circularise
 git clone https://github.com/Kzra/Simple-Circularise
+
+# cpan packages
+cpan install Getopt::Long, Bio::SeqIO, Bio::SearchIO, Try::Tiny::Retry and GD
 ```
 
 2. Mount a network drive to /mnt/d/Nanopore to start using PRIMUL with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
