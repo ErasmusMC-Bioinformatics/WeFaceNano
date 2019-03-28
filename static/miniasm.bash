@@ -4,13 +4,14 @@ echo
 VERSION=0
 SEED=42
 # Get options
-while getopts v:m:k:i:o:hs: option
+while getopts v:m:k:c:i:o:hs: option
 do
  case "${option}"
  in
  v) VERSION=${OPTARG};;
  m) MINCONTIG=${OPTARG};;
  k) KMER=${OPTARG};;
+ c) CIRCULARISE=${OPTARG};;
  i) FASTQFile=${OPTARG};;
  o) FASTAOUT="${OPTARG}.fasta";;
  h) echo "Usage: miniasm.bash -v <MiniMap Version number> -i <FASTQ input> -o <FASTA output> --- Pipeline that runs MiniMap and Miniasm and creates a FASTA file."
@@ -105,5 +106,7 @@ rm "$FASTQFile.mapped.paf"
 echo -n "Removing temp racon file ..... "
 rm "$FASTQFile.racon.fasta"
 echo -n "-Finishing MiniMap / Miniasm pipeline at: "
-time python3 ~/Simple-Circularise/simple_circularise.py "$FASTAOUT" "$FASTAOUT"
+if [ "${CIRCULARISE}" = "1" ]; then
+time python3 ~/Simple-Circularise/simple_circularise.py -p 0.0001 "$FASTAOUT" "$FASTAOUT"
+fi
 date
