@@ -93,6 +93,9 @@ echo
 echo "No. of utigs after filtering:"
 grep ">" "$FASTAOUT" | wc -l  | cut -f1
 echo
+echo "Create Bandage image"
+time Bandage image "$GFAOUTPUT" "$FASTAOUT.jpg" --nodewidth 2
+echo
 echo -n "Removing $GAFOUTPUT ..... "
 rm "$GFAOUTPUT"
 echo "$GFAOUTPUT removed"

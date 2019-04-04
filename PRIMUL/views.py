@@ -379,7 +379,7 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig,
                     ], shell=True)
             files = os.listdir(resultfolder + "/assembly/" + barcode)
             for file in files:
-                if "contigs.fasta" in file:
+                if "contigs.fasta" in file and ".jpg" not in file:
                     with open(resultfolder + "/assembly/" + barcode + "/" +
                               file) as contigfile:
                         head = contigfile.readline()
@@ -410,7 +410,7 @@ def skip_assembly(resultfolder, barcode_list):
         if barcode != "unclassified":
             files = os.listdir(resultfolder + "/assembly/" + barcode)
             for file in files:
-                if "contigs.fasta" in file:
+                if "contigs.fasta" in file and ".jpg" not in file:
                     with open(resultfolder + "/assembly/" + barcode + "/" +
                               file) as contigfile:
                         head = contigfile.readline()
@@ -1228,7 +1228,7 @@ def get_stored_assembly_results(username, r):
             settings.NANOPORE_DRIVE + username + "/results/" + r +
             "/assembly/" + assemblyfolder)
         for assembly in assembly_barcode:
-            if ".contigs.fasta" in assembly:
+            if ".contigs.fasta" in assembly and ".jpg" not in assembly:
                 contigcount = 0
                 if os.stat(
                     settings.NANOPORE_DRIVE + username + "/results/" + r +
