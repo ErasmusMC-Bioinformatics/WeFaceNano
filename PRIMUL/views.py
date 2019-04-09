@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
 from Bio import Entrez, SeqIO
-from . import brigD3
+from PRIMUL import brigD3
 from subprocess import call, Popen, PIPE
 
 
