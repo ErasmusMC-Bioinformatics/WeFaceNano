@@ -2,6 +2,7 @@ import time
 import os
 import random
 import re
+import json
 
 from urllib.error import HTTPError
 from django.conf import settings
@@ -424,6 +425,28 @@ def skip_assembly(resultfolder, barcode_list):
     return fasta_list, file_list, unitigs_barcode
 
 
+def plasmidfinder(barcodes, file_list, resultfolder):
+    """Run plasmidfinder on all FASTA files in the list on the 
+    plasmidfinder enterobacteriaceae database.
+    
+    Arguments:
+        barcodes: A list of barcodes
+        file_list: A list of files that contains the assembly.
+        resultfolder: The ouputfolder to store the results.
+    """
+    call(["mkdir", resultfolder + "/plasmidfinder"])
+    count = 0
+    for assemblyfile in file_list:
+        call(["mkdir", resultfolder + "/plasmidfinder/" + barcodes[count]])
+        inpath = resultfolder + "/assembly/" + \
+            barcodes[count] + "/" + assemblyfile
+        outpath = str(resultfolder + "/plasmidfinder/" + barcodes[count] + "/")
+        plasmidcmd = "python3 ~/plasmidfinder/plasmidfinder.py -i " + inpath + \
+            " -o " + outpath + " -p ~/plasmidfinder_db/ -d enterobacteriaceae"
+        call([plasmidcmd], shell=True)
+        count += 1
+
+
 def resfinder(barcodes, file_list, resultfolder,
               resdb, reslength, residentity):
     """Runs resfinder on all FASTA files in the list on the 
@@ -813,6 +836,7 @@ def create_results(request):
                       resultfolder + "/qc/" + barcode)
     if circulator == "yes":
         circularize(fasta_list, inputfolder, resultfolder, kmer, c_assembler)
+    plasmidfinder(barcodes, file_list, resultfolder)
     if res == '-r ':
         dummyres_genes, res_loc = resfinder(
             barcodes, file_list, resultfolder, resdb, reslength, residentity)
@@ -987,6 +1011,9 @@ def get_stored_results(request):
                         if t == "resfinder":
                             resfinder_dict = get_stored_resfinder_results(
                                 username, r)
+                        if t == "plasmidfinder":
+                            plasmidfinder_dict = get_stored_plasmidfinder_results(
+                                username, r)
                         if t == "assembly":
                             assembly_report = get_stored_assembly_results(
                                 username, r)[0]
@@ -1012,6 +1039,7 @@ def get_stored_results(request):
         "blast": blast_dict,
         "plasmid": html_plasmid,
         "resfinder": resfinder_dict,
+        "plasmidfinder": plasmidfinder_dict,
         "blastresults": blast_res_dict,
         "assemblyreport": assembly_report,
         "barcodes": barcodes,
@@ -1156,7 +1184,7 @@ def get_stored_blast_results(username, r):
 
 
 def get_stored_resfinder_results(username, r):
-    """Get stored resfinder results based on the selected run
+    """Get stored resfinder results based on the selected run.
 
     Arguments:
         username: The user that is logged in.
@@ -1208,8 +1236,34 @@ def get_stored_resfinder_results(username, r):
     return resfinder_dict
 
 
+def get_stored_plasmidfinder_results(username, r):
+    """Get stored plasmidfinder results based on the selected run.
+    
+    Arguments:
+        username: The user that is logged in.
+        r: Name of the selected run.
+    
+    Returns:
+        A dictionary with contigs and gene names.
+    """
+    plasmidfinder_dict = {}
+    plasmidfinder_results = os.listdir(settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/")
+    for bc in plasmidfinder_results:
+        plasmidfile = settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/" + bc + "/data.json"
+        with open(plasmidfile, "r") as plasmidfinder:
+            load = json.loads(plasmidfinder.read())
+            enterobacteriaceae = load["plasmidfinder"]["results"]["Enterobacteriaceae"]["enterobacteriaceae"]
+            for inc in enterobacteriaceae:
+                contig = bc + "_" + enterobacteriaceae[inc]["contig_name"].split(" ")[0]
+                if contig in plasmidfinder_dict.keys():
+                    plasmidfinder_dict[contig].append(inc)
+                else:
+                    plasmidfinder_dict[contig] = [inc]
+    return plasmidfinder_dict
+
+
 def get_stored_assembly_results(username, r):
-    """Get stored assembly results based on the selected run
+    """Get stored assembly results based on the selected run.
 
     Arguments:
         username: The user that is logged in.

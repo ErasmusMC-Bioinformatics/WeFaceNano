@@ -95,6 +95,28 @@
                 {% endfor %}
                 </table>
                 <br>
+                {% if plasmidfinder %}
+                    <h3>Plasmidfinder</h3>
+                    <table class="table">
+                        <th><a>Contig</a></th>
+                        <th><a>Gene(s)</a></th>
+                    {% for contig, data in plasmidfinder.items %}
+                        {% if b in contig %}
+                        <tr>
+                            <td>
+                                {{contig}}
+                            </td>
+                            <td>
+                            {% for d in data %}
+                                {{d}}<br>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                   {% endfor %}
+                   </table>
+                {% endif %}
+                <br>
                 {% if resfinder %}
                     <h3>Resfinder</h3>
                     <table class="table">
