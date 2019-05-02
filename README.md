@@ -12,15 +12,16 @@
 
 * Python 3.6 or higher
 * perl5
-* Biopython 1.70 or higher
-* Django 2.0 or higher
+* Biopython 1.73 or higher
+* Django 2.1.2 or higher
 * Albacore 2.3.4 or higher
 * Porechop 0.2.4 or higher
 * Canu 1.8 or higher
 * Minimap 2.15-r915 or higher
-* Miniasm 0.3-r178 or higher
+* Miniasm 0.3-r179 or higher
 * Racon 1.3.3 or higher
 * Resfinder database
+* Plasmidfinder
 * NCBI-BLAST+ 2.6.0 or higher
 * NCBI-BLAST 2 (version that includes blastall and formatdb needed to run resfinder)
 * NanoPlot 1.20.1 or higher
@@ -33,7 +34,7 @@
 1. Install dependencies:
 
 ```bash
-# Python 3, Perl5, NCBI-BLAST+, NCBI-BLAST 2 libgd
+# Python 3, Perl5, NCBI-BLAST+, NCBI-BLAST 2, libgd
 sudo apt-get update
 sudo apt-get install python3.6 perlbrew cpanminus ncbi-blast+ blast2 libgd-dev cmake
 
@@ -82,6 +83,11 @@ cd kmergenie-1.7051 && make
 
 # Resfinder database
 git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db.git
+
+# Plasmidfinder
+cd /path/to/some/dir
+git clone https://bitbucket.org/genomicepidemiology/plasmidfinder.git
+cd plasmidfinder
 
 # Simple Circularise
 git clone https://github.com/Kzra/Simple-Circularise
