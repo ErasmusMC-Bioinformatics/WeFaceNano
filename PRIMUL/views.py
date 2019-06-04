@@ -241,7 +241,7 @@ def kmergenie(resultfolder, inputfile):
     call(["mkdir", resultfolder + "/kmer"])
     kmergenie_out = Popen(
         ["~/kmergenie-1.7051/kmergenie " + inputfile +
-            " -l 13 -k 28 -s 1 -o " + resultfolder + "/kmer/kmersizeoutput"],
+            " -l 13 -k 21 -s 1 -o " + resultfolder + "/kmer/kmersizeoutput"],
         stdout=PIPE, shell=True).communicate()[0].decode()
     for line in kmergenie_out.split("\n"):
         if "best k:" in line:
