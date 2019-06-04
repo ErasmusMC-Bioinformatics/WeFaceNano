@@ -59,14 +59,16 @@
                 <table class="table">
                     <th><a>Contig</a></th>
                     <th><a>Length</a></th>
-                    <th><a>Contig Topology</a></th>
+                    {% if contigtopology %}
+                        <th><a>Contig Topology</a></th>
+                    {% endif %}
                 {% for barcode, contiglength in assemblyreport.items %}
                     <tr>
                     {% if b in barcode %}
                         <td>{{barcode}}</td>
                         <td>{{contiglength}} bp</td>
-                        <td style="text-align: center;">
                         {% if contigtopology %}
+                            <td style="text-align: center;">
                             {% for ct, ctv in contigtopology.items %}
                                 {% if ct in barcode %}
                                     {% if ctv == 'linear' %}
@@ -86,8 +88,6 @@
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
-                        {% else %}
-                            Unknown
                         </td>
                         {% endif %}
                     {% endif %}
