@@ -1154,8 +1154,8 @@ def get_stored_blast_results(username, r):
                     first_result = first_result.split('\t')
                     try:
                         contig = first_result[0]
-                        pident = sum(coveragelist)/len(coveragelist)
-                        alignment_length = sum(total_length)
+                        # pident = sum(coveragelist)/len(coveragelist)
+                        # alignment_length = sum(total_length)
                         try:
                             handle = Entrez.efetch(
                                 db="nucleotide",
@@ -1172,11 +1172,12 @@ def get_stored_blast_results(username, r):
                     except IndexError:
                         blast_name = ""
                         contig = ""
-                        pident = ""
-                        alignment_length = ""
+                        # pident = ""
+                        # alignment_length = ""
                 if contig:
-                    blast_res_dict[br + "_" + contig] = [
-                        blast_name, pident, alignment_length]
+                    blast_res_dict[br + "_" + contig] = [blast_name]
+                    # blast_res_dict[br + "_" + contig] = [
+                    #     blast_name, pident, alignment_length]
                 else:
                     pass
     blast_dict[r] = blast_results
