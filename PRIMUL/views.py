@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from Bio import Entrez, SeqIO
 from PRIMUL import brigD3
 from subprocess import call, Popen, PIPE
+from json import JSONDecodeError
 
 
 @csrf_exempt
@@ -1112,7 +1113,6 @@ def get_stored_blast_results(username, r):
         r: Name of the selected run
 
     Returns:
-    blast_dict, blast_res_dict, html_plasmid
         A dictionary with BLAST files, BLAST result information and 
         the HTML code to view the plasmid.
 
@@ -1245,20 +1245,27 @@ def get_stored_plasmidfinder_results(username, r):
     
     Returns:
         A dictionary with contigs and gene names.
+
+    Raises:
+        JSONDecodeError: Add no genes found to the plasmidfinder dictionary
+        if a JSONDecodeError occurs.
     """
     plasmidfinder_dict = {}
     plasmidfinder_results = os.listdir(settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/")
     for bc in plasmidfinder_results:
         plasmidfile = settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/" + bc + "/data.json"
         with open(plasmidfile, "r") as plasmidfinder:
-            load = json.loads(plasmidfinder.read())
-            enterobacteriaceae = load["plasmidfinder"]["results"]["Enterobacteriaceae"]["enterobacteriaceae"]
-            for inc in enterobacteriaceae:
-                contig = bc + "_" + enterobacteriaceae[inc]["contig_name"].split(" ")[0]
-                if contig in plasmidfinder_dict.keys():
-                    plasmidfinder_dict[contig].append(inc)
-                else:
-                    plasmidfinder_dict[contig] = [inc]
+            try:
+                load = json.loads(plasmidfinder.read())
+                enterobacteriaceae = load["plasmidfinder"]["results"]["Enterobacteriaceae"]["enterobacteriaceae"]
+                for inc in enterobacteriaceae:
+                    contig = bc + "_" + enterobacteriaceae[inc]["contig_name"].split(" ")[0]
+                    if contig in plasmidfinder_dict.keys():
+                        plasmidfinder_dict[contig].append(inc)
+                    else:
+                        plasmidfinder_dict[contig] = [inc]
+            except JSONDecodeError:
+                plasmidfinder_dict[""] = "No genes found"
     return plasmidfinder_dict
 
 
