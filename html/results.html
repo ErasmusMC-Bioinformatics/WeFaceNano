@@ -59,37 +59,11 @@
                 <table class="table">
                     <th><a>Contig</a></th>
                     <th><a>Length</a></th>
-                    {% if contigtopology %}
-                        <th><a>Contig Topology</a></th>
-                    {% endif %}
                 {% for barcode, contiglength in assemblyreport.items %}
                     <tr>
                     {% if b in barcode %}
                         <td>{{barcode}}</td>
                         <td>{{contiglength}} bp</td>
-                        {% if contigtopology %}
-                            <td style="text-align: center;">
-                            {% for ct, ctv in contigtopology.items %}
-                                {% if ct in barcode %}
-                                    {% if ctv == 'linear' %}
-                                        <figure>
-                                        <img id="{{ctv}}" src="{% static 'img/linear.jpg' %}" width="30px" height="30px">
-                                            <figcaption>
-                                                {{ctv}}
-                                            </figcaption>
-                                        </figure>
-                                    {% elif ctv == 'circular' %}
-                                        <figure>
-                                        <img id="{{ctv}}" src="{% static 'img/circular.png' %}" width="30px" height="30px">
-                                            <figcaption>
-                                                {{ctv}}
-                                            </figcaption>
-                                        </figure>
-                                    {% endif %}
-                                {% endif %}
-                            {% endfor %}
-                        </td>
-                        {% endif %}
                     {% endif %}
                     </tr>
                 {% endfor %}

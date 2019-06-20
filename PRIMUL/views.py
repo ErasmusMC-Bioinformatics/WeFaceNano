@@ -155,78 +155,6 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
         generator.brigD3()
 
 
-def circularize(assembly, inputfolder, resultfolder, kmer, assembler):
-    """Use circulator to check if a contig is circular or linear.
-
-    TODO: Should we keep this tool? It is very slow.
-
-    Arguments:
-        assembly: Filename of the first assembly.
-        inputfolder: The folder containing the reads.
-        resultfolder: Name of the outputfolder to store results.
-        kmer: Kmer-size when using SPAdes assembly.
-        assembler: Selected assembler for use with circlator.
-    """
-    barcodes = os.listdir(inputfolder)
-    out = resultfolder + "/circularize"
-    threads = 8
-    for fasta in assembly:
-        for bc in barcodes:
-            call(["mkdir", out + "/" + bc])
-            if assembler == "canu":
-                if ".fasta" in os.listdir(inputfolder + "/" + bc +
-                                          "/trimmed")[0]:
-                    cmd = (
-                        "circlator all --assembler canu "
-                        "--data_type nanopore-raw --bwa_opts '-x ont2d' "
-                        "--threads " + str(threads) +
-                        " --merge_min_id 85 --merge_breaklen 1000 " + fasta +
-                        " " + inputfolder + "/" + bc +
-                        "/trimmed/cat_reads.fasta " + out + "/" + bc
-                    )
-                elif ".fastq" in os.listdir(inputfolder + "/" + bc +
-                                            "/trimmed")[0]:
-                    cmd = (
-                        "circlator all --assembler canu "
-                        "--data_type nanopore-raw --bwa_opts '-x ont2d' "
-                        "--threads " + str(threads) +
-                        " --merge_min_id 85 --merge_breaklen 1000 " + fasta +
-                        " " + inputfolder + "/" + bc +
-                        "/trimmed/cat_reads.fastq " + out + "/" + bc
-                    )
-            else:
-                if ".fasta" in os.listdir(inputfolder + "/" + bc +
-                                          "/trimmed")[0]:
-                    cmd = (
-                        "circlator all --threads " + str(threads) +
-                        " --bwa_opts '-x ont2d' --assemble_spades_k " + kmer +
-                        " --merge_min_id 85 --merge_breaklen 1000 " + fasta +
-                        " " + inputfolder + "/" + bc +
-                        "/trimmed/cat_reads.fasta " + out + "/" + bc
-                    )
-                elif ".fastq" in os.listdir(inputfolder + "/" + bc +
-                                            "/trimmed")[0]:
-                    cmd = (
-                        "circlator all --threads " + str(threads) +
-                        "--bwa_opts '-x ont2d' --assemble_spades_k " + kmer +
-                        " --merge_min_id 85 --merge_breaklen 1000 " +
-                        fasta + " " + inputfolder + "/" + bc +
-                        "/trimmed/cat_reads.fastq " + out + "/" + bc
-                    )
-            if ".fasta" in os.listdir(inputfolder + "/" + bc + "/trimmed")[0]:
-                call([
-                    "cat " + inputfolder + "/" + bc + "/trimmed/*.fasta >> " +
-                    inputfolder + "/" + bc + "/trimmed/cat_reads.fasta"
-                ], shell=True)
-            elif ".fastq" in os.listdir(inputfolder + "/" + bc +
-                                        "/trimmed")[0]:
-                call([
-                    "cat " + inputfolder + "/" + bc + "/trimmed/*.fastq >> " +
-                    inputfolder + "/" + bc + "/trimmed/cat_reads.fastq"
-                ], shell=True)
-            call([cmd], shell=True)
-
-
 def kmergenie(resultfolder, inputfile):
     """Calculate the kmer-size that will be used when running minimap.
     
@@ -249,54 +177,6 @@ def kmergenie(resultfolder, inputfile):
     return kmer
 
 
-def canu(inputtype, inputfolder, barcode_list, resultfolder, gsize):
-    """Use Canu for assembly and return the assembly as a FASTA file.
-
-    Arguments:
-        inputtype: To see if the inputfiles are FAST5 or FASTQ.
-        inputfolder: Name of the folder with the inputfiles.
-        barcode_list: A list of barcodes.
-        resultfolder: Folder where the results will be stored.
-        gsize: The genome size for the Canu assembler.
-
-    Returns:
-        A list of FASTA paths, FASTA filenames and barcodes.
-    """
-    fasta_list = []
-    file_list = []
-    unitigs_barcode = []
-    call(["mkdir", resultfolder + "/assembly/"])
-    for barcode in barcode_list:
-        call(["mkdir", resultfolder + "/assembly/" + barcode])
-        if barcode != "unclassified":
-            if inputtype == "fast5":
-                call([
-                    "bash ~/PRIMUL/static/canu.sh -p " + barcode + " -d " +
-                    resultfolder + "/assembly/" + barcode + " -g " + gsize +
-                    " -i " + resultfolder + "/workspace/pass/" + barcode
-                ], shell=True)
-            else:
-                call([
-                    "bash ~/PRIMUL/static/canu.sh -p " + barcode + " -d " +
-                    resultfolder + "/assembly/" + barcode + " -g " + gsize +
-                    " -i " + inputfolder + "/" + barcode + "/trimmed/*.fasta"
-                ], shell=True)
-            files = os.listdir(resultfolder + "/assembly/" + barcode)
-            for file in files:
-                if "contigs.fasta" in file:
-                    with open(resultfolder + "/assembly/" + barcode + "/" +
-                              file) as contigfile:
-                        head = contigfile.readline()
-                    if head == '' or head is None:
-                        pass
-                    else:
-                        fasta_list.append(
-                            resultfolder + "/assembly/" + barcode + "/" + file)
-                        file_list.append(file)
-                        unitigs_barcode.append(barcode)
-        return fasta_list, file_list, unitigs_barcode
-
-
 def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig, circularise):
     """Use Miniasm for assembly and return the assembly as a FASTA file. 
     The Kmer-size will be calculated with KmerGenie so the user will not have to 
@@ -316,7 +196,6 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig,
     Returns:
         A list of FASTA paths, FASTA filenames and barcodes.
     """
-    fasta_list = []
     file_list = []
     unitigs_barcode = []
     if mincontig == "" or mincontig is None:
@@ -388,11 +267,9 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig,
                     if head == '' or head is None:
                         pass
                     else:
-                        fasta_list.append(
-                            resultfolder + "/assembly/" + barcode + "/" + file)
                         file_list.append(file)
                         unitigs_barcode.append(barcode)
-    return fasta_list, file_list, unitigs_barcode
+    return file_list, unitigs_barcode
 
 
 def skip_assembly(resultfolder, barcode_list):
@@ -405,7 +282,6 @@ def skip_assembly(resultfolder, barcode_list):
     Returns:
         A list of FASTA paths, FASTA filenames and barcodes.
     """
-    fasta_list = []
     file_list = []
     unitigs_barcode = []
     for barcode in barcode_list:
@@ -419,11 +295,9 @@ def skip_assembly(resultfolder, barcode_list):
                     if head == '' or head is None:
                         pass
                     else:
-                        fasta_list.append(
-                            resultfolder + "/assembly/" + barcode + "/" + file)
                         file_list.append(file)
                         unitigs_barcode.append(barcode)
-    return fasta_list, file_list, unitigs_barcode
+    return file_list, unitigs_barcode
 
 
 def plasmidfinder(barcodes, file_list, resultfolder):
@@ -748,9 +622,7 @@ def create_results(request):
     res = request.POST.get("res")
     mlst = request.POST.get("mlst")
     species = request.POST.get("species")
-    gsize = request.POST.get("gsize")
     assembler = request.POST.get("assembler")
-    c_assembler = request.POST.get("c_assembler")
     blast = request.POST.get("blast")
     blastdb = request.POST.get("blastdb")
     blasttask = request.POST.get("blasttask")
@@ -759,7 +631,6 @@ def create_results(request):
     residentity = request.POST.get("residentity")
     kmer = request.POST.get("kmer")
     mincontig = request.POST.get("min-contig")
-    circulator = request.POST.get("circularize")
     circularise = request.POST.get("circularise")
     resultfolder = (settings.NANOPORE_DRIVE + request.session.get("username") +
                     "/results/" + outfolder)
@@ -811,14 +682,11 @@ def create_results(request):
                 if not os.path.isdir(inputfolder + "/" + bc + "/trimmed"):
                     trim_reads(inputfolder, barcode_list)
     if os.path.exists(resultfolder + "/assembly/"):
-        fasta_list, file_list, barcodes = skip_assembly(
+        file_list, barcodes = skip_assembly(
             resultfolder, barcode_list)
     else:
-        if assembler == "canu":
-            fasta_list, file_list, barcodes = canu(
-                inputtype, inputfolder, barcode_list, resultfolder, gsize)
-        elif assembler == "miniasm":
-            fasta_list, file_list, barcodes = miniasm(
+        if assembler == "miniasm":
+            file_list, barcodes = miniasm(
                 inputtype, inputfolder, barcode_list, resultfolder,
                 kmer, mincontig, circularise
             )
@@ -835,8 +703,6 @@ def create_results(request):
                 extention = "fast5"
             qc_report(extention, barcode, file,
                       resultfolder + "/qc/" + barcode)
-    if circulator == "yes":
-        circularize(fasta_list, inputfolder, resultfolder, kmer, c_assembler)
     plasmidfinder(barcodes, file_list, resultfolder)
     if res == '-r ':
         dummyres_genes, res_loc = resfinder(
@@ -975,7 +841,7 @@ def get_stored_results(request):
     resfinder_dict = {}
     assembly_report = []
     topology = {}
-    contig_topology = {}
+    # contig_topology = {}
     tools = []
     barcodes = []
     Entrez.email = "some_email@somedomain.com"
@@ -1020,9 +886,9 @@ def get_stored_results(request):
                                 username, r)[0]
                             barcodes = get_stored_assembly_results(
                                 username, r)[2]
-                        if t == "circularize":
-                            contig_topology = get_stored_circularize_results(
-                                username, r)
+                        # if t == "circularize":
+                        #     contig_topology = get_stored_circularize_results(
+                        #         username, r)
                         if t == "qc":
                             qc_html = get_stored_qc(username, r)
                 else:
@@ -1045,8 +911,7 @@ def get_stored_results(request):
         "assemblyreport": assembly_report,
         "barcodes": barcodes,
         "topology": topology,
-        "qc": qc_html,
-        "contigtopology": contig_topology})
+        "qc": qc_html})
 
 
 def get_stored_qc(username, r):
@@ -1154,8 +1019,6 @@ def get_stored_blast_results(username, r):
                     first_result = first_result.split('\t')
                     try:
                         contig = first_result[0]
-                        # pident = sum(coveragelist)/len(coveragelist)
-                        # alignment_length = sum(total_length)
                         try:
                             handle = Entrez.efetch(
                                 db="nucleotide",
