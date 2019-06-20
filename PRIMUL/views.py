@@ -841,7 +841,6 @@ def get_stored_results(request):
     resfinder_dict = {}
     assembly_report = []
     topology = {}
-    # contig_topology = {}
     tools = []
     barcodes = []
     Entrez.email = "some_email@somedomain.com"
@@ -886,9 +885,6 @@ def get_stored_results(request):
                                 username, r)[0]
                             barcodes = get_stored_assembly_results(
                                 username, r)[2]
-                        # if t == "circularize":
-                        #     contig_topology = get_stored_circularize_results(
-                        #         username, r)
                         if t == "qc":
                             qc_html = get_stored_qc(username, r)
                 else:
@@ -936,38 +932,6 @@ def get_stored_qc(username, r):
                     qc_html = qcpage.read()
                 qc_dict[bc] = qc_html
     return qc_dict
-
-
-def get_stored_circularize_results(username, r):
-    """Get the stored circularization results created by circulator.
-
-    Arguments:
-        username: The user that is logged in.
-        r: Name of the selected run.
-
-    Returns:
-        Dictionary of the contig topology showing if a contig is circular or linear.
-
-    Raises:
-        IndexError: No circularized data found.
-    """
-    circ_folder = (settings.NANOPORE_DRIVE + username +
-                   "/results/" + r + "/circularize/")
-    circularize_data = os.listdir(circ_folder)
-    contig_topology = {}
-    for cd in circularize_data:
-        if "04.merge.circularise_details.log" in cd:
-            with open(circ_folder + cd) as circ_log:
-                for line in circ_log:
-                    line = line.split("\t")
-                    try:
-                        if "Circularized: no" in line[2]:
-                            contig_topology[line[1]] = "linear"
-                        elif "Circularized: yes" in line[2]:
-                            contig_topology[line[1]] = "circular"
-                    except IndexError:
-                        pass
-    return contig_topology
 
 
 def get_stored_blast_results(username, r):
@@ -1035,12 +999,8 @@ def get_stored_blast_results(username, r):
                     except IndexError:
                         blast_name = ""
                         contig = ""
-                        # pident = ""
-                        # alignment_length = ""
                 if contig:
                     blast_res_dict[br + "_" + contig] = [blast_name]
-                    # blast_res_dict[br + "_" + contig] = [
-                    #     blast_name, pident, alignment_length]
                 else:
                     pass
     blast_dict[r] = blast_results
