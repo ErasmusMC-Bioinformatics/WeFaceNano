@@ -177,6 +177,46 @@ def kmergenie(resultfolder, inputfile):
     return kmer
 
 
+def flye(inputfolder, resultfolder, barcode_list, genomesize):
+    """Use Flye as the assembler and return the assembly as a FASTA file.
+    
+    Arguments:
+        inputfolder: Name of the folder with the inputfiles.
+        resultfolder: Folder where the results will be stored.
+        barcode_list: A list of barcodes.
+        genomesize: The estimated genome size.
+    
+    Returns:
+        A list of FASTA paths, FASTA filenames and barcodes.
+    """
+    call(["mkdir", resultfolder + "/assembly/"])
+    file_list = []
+    unitigs_barcode = []
+    for barcode in barcode_list:
+        call(["mkdir", resultfolder + "/assembly/" + barcode])
+        barcode_content = os.listdir(inputfolder + "/" + barcode)
+        assemblyfolder = resultfolder + "/assembly/" + barcode
+        if len(barcode_content) > 1:
+            call([
+                "cat " + inputfolder + "/" + barcode +
+                "/trimmed/* > " + inputfolder + "/" + barcode +
+                "/trimmed/" + barcode + "_cat.fasta"
+            ], shell=True)
+        file_to_use = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"
+        call(["flye --nano-raw " + file_to_use + " -o " + assemblyfolder + " --genome-size " + genomesize], shell=True)
+        files = os.listdir(resultfolder + "/assembly/" + barcode)
+        for file in files:
+            if "assembly.fasta" in file:
+                with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
+                    head = contigfile.readline()
+                if head == '' or head is None:
+                    pass
+                else:
+                    file_list.append(file)
+                    unitigs_barcode.append(barcode)
+    return file_list, unitigs_barcode
+
+
 def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig, circularise):
     """Use Miniasm for assembly and return the assembly as a FASTA file. 
     The Kmer-size will be calculated with KmerGenie so the user will not have to 
@@ -690,6 +730,8 @@ def create_results(request):
                 inputtype, inputfolder, barcode_list, resultfolder,
                 kmer, mincontig, circularise
             )
+        elif assembler == "flye":
+            file_list, barcodes = flye(inputfolder, resultfolder, barcode_list, "200k")
         else:
             return HttpResponseRedirect(reverse("index"))
     # Create QC pages
@@ -1113,7 +1155,7 @@ def get_stored_assembly_results(username, r):
             settings.NANOPORE_DRIVE + username + "/results/" + r +
             "/assembly/" + assemblyfolder)
         for assembly in assembly_barcode:
-            if ".contigs.fasta" in assembly and ".jpg" not in assembly:
+            if ".contigs.fasta" in assembly or "assembly.fasta" in assembly and ".jpg" not in assembly:
                 contigcount = 0
                 if os.stat(
                     settings.NANOPORE_DRIVE + username + "/results/" + r +
