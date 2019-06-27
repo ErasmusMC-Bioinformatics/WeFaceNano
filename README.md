@@ -16,9 +16,9 @@
 * Django 2.1.2 or higher
 * Albacore 2.3.4 or higher
 * Porechop 0.2.4 or higher
-* Canu 1.8 or higher
 * Minimap 2.15-r915 or higher
 * Miniasm 0.3-r179 or higher
+* Flye 2.4.2 or higher
 * Racon 1.3.3 or higher
 * Resfinder database
 * Plasmidfinder
@@ -63,10 +63,10 @@ cd minimap2 && make
 git clone https://github.com/lh3/miniasm
 cd miniasm && make
 
-# Canu 1.8
-git clone https://github.com/marbl/canu.git
-cd canu/src
-make -j <number of threads>
+# Flye
+git clone https://github.com/fenderglass/Flye
+cd Flye
+python setup.py build
 
 # Racon
 git clone --recursive https://github.com/isovic/racon.git racon
@@ -154,9 +154,7 @@ If the FAST5 option is selected, please select the following Albacore settings:
 * Barcoding [yes or no]
 * Flowcell configuration file.
 
-When selecting the FASTQ option the Albacore basecalling step will be skipped and Canu or Miniasm will use the inputfolder to start the assembly. For the Canu assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped but instead the KmerGenie tool will run to find the optimal kmer-size for the selected reads. If the run is barcoded the tool will run for all barcodes and will calculate the optimal kmer-size for all barcodes.
-
-After the assembly the Simple-Circularise tool will look for repeats and will circularise the contigs.
+When selecting the FASTQ option the Albacore basecalling step will be skipped and Flye or Miniasm will use the inputfolder to start the assembly. For the Flye assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped. If the run is barcoded the tool will run for all barcodes and will calculate the optimal kmer-size for all barcodes. After the Miniasm assembly the Simple-Circularise tool will look for repeats and will try to circularise the contigs.
 
 The plasmid pipeline can run two additional tools (BLAST and resfinder). Please check the tools you want to run during the pipeline.
 
