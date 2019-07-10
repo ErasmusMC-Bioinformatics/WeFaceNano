@@ -59,21 +59,35 @@
                 <table class="table">
                     <th><a>Contig</a></th>
                     <th><a>Length</a></th>
-                {% for barcode, contiglength in assemblyreport.items %}
+                    <th><a>Graph</a></th>
+                {% for barcode, contiginfo in assemblyreport.items %}
                     <tr>
                     {% if b in barcode %}
                         <td>{{barcode}}</td>
-                        <td>{{contiglength}} bp</td>
+                        {% for info in contiginfo %}
+                            {% if forloop.counter == 2 %}
+                                <td>{{info}} bp</td>
+                            {% endif %}
+                        {% endfor %}
+                        <td>
+                            {% if graphs %}
+                                {% for contigname, graph in graphs.items %}
+                                    {% if contigname == contiginfo|first %}
+                                        <iframe srcdoc="{{ graph }}" frameborder="0" scrolling="no" height="280" width="280"></iframe>
+                                    {% endif %}
+                                {%endfor%}
+                            {% endif %}
+                        </td>
                     {% endif %}
                     </tr>
                 {% endfor %}
                 </table>
                 <br>
                 {% if plasmidfinder %}
-                    <h3>Plasmidfinder</h3>
+                    <h3>Incompatibility Factors</h3>
                     <table class="table">
                         <th><a>Contig</a></th>
-                        <th><a>Gene(s)</a></th>
+                        <th><a>Incompatibility factor(s)</a></th>
                     {% for contig, data in plasmidfinder.items %}
                         {% if b in contig %}
                         <tr>
@@ -82,7 +96,7 @@
                             </td>
                             <td>
                             {% for d in data %}
-                                {{d}}<br>
+                                {{d|safe}}<br>
                             {% endfor %}
                             </td>
                         </tr>
@@ -92,7 +106,7 @@
                 {% endif %}
                 <br>
                 {% if resfinder %}
-                    <h3>Resfinder</h3>
+                    <h3>Antibiotic Resistance Genes</h3>
                     <table class="table">
                         <th><a>Contig</a></th>
                         <th><a>Gene(s)</a></th>
@@ -115,15 +129,10 @@
             {% endfor %}
             {% if blastresults %}
                 <h3>BLAST</h3>
-                <!-- <div class="tab">
-                    <button class="tabbutton" onclick="openTab(event, 'plasmid')">Plasmid database</button>
-                </div> -->
                 <div id="plasmid" class="tabdiv" style="display:block;">
                     <table class="table">
                         <th>Contig</th>
                         <th><a>Name or Accession number</a></th>
-                        <!-- <th><a>Percentage identity</a></th> -->
-                        <!-- <th><a>Alignment length</a></th> -->
                         <th><a>Reference Topology</a></th>
                         {% for contig, results in blastresults.items %}
                             {% if b in contig %}
@@ -166,8 +175,8 @@
                 </div>
             {% endif %}
             {% if plasmid %}
-                <div id="d3plasmid" style="text-align:center; width:100%">
                 <h3>Plasmids</h3>
+                <div id="d3plasmid" style="text-align:center; width:100%">
                 {{ html }}
                 <table style="width:100%; text-align:center;">
                     {% for p, html in plasmid.items %}

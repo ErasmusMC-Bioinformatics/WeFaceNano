@@ -192,28 +192,46 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize):
     call(["mkdir", resultfolder + "/assembly/"])
     file_list = []
     unitigs_barcode = []
+    nodes = []
     for barcode in barcode_list:
         call(["mkdir", resultfolder + "/assembly/" + barcode])
-        barcode_content = os.listdir(inputfolder + "/" + barcode)
         assemblyfolder = resultfolder + "/assembly/" + barcode
-        if len(barcode_content) > 1:
-            call([
-                "cat " + inputfolder + "/" + barcode +
-                "/trimmed/* > " + inputfolder + "/" + barcode +
-                "/trimmed/" + barcode + "_cat.fasta"
-            ], shell=True)
-        file_to_use = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"
+        call([
+            "cat " + inputfolder + "/" + barcode +
+            "/trimmed/* > " + inputfolder + "/" + barcode +
+            "/trimmed/" + barcode + "_cat.fasta"
+        ], shell=True)
+        cat_file = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"
+        file_to_use = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_filtered.fasta"
+        call(["awk '/^>/{f=!d[$1];d[$1]=1}f' " + cat_file + " > " + file_to_use], shell=True)
         call(["flye --nano-raw " + file_to_use + " -o " + assemblyfolder + " --genome-size " + genomesize], shell=True)
         files = os.listdir(resultfolder + "/assembly/" + barcode)
         for file in files:
             if "assembly.fasta" in file:
                 with open(resultfolder + "/assembly/" + barcode + "/" + file) as contigfile:
-                    head = contigfile.readline()
-                if head == '' or head is None:
-                    pass
-                else:
+                    for line in contigfile:
+                        if ">" in line:
+                            line = line[1:].split(" ")
+                            nodes.append(line[0].replace("contig", "edge"))
+                if nodes:
                     file_list.append(file)
                     unitigs_barcode.append(barcode)
+            if file == "assembly_graph.gfa":
+                for node in nodes:
+                    call(
+                        [
+                            "Bandage reduce " + resultfolder + "/assembly/" + barcode + "/" + file +
+                            " " + resultfolder + "/assembly/" + barcode + "/" + node.strip('\n') +
+                            ".gfa --scope aroundnodes --nodes " +
+                            node.strip('\n')
+                        ], shell=True)
+                    call(
+                        [
+                            "Bandage image " + resultfolder + "/assembly/" + barcode + "/" + node.strip('\n') +
+                            ".gfa " + resultfolder + "/assembly/" + barcode + "/" +
+                            node.replace("edge", "contig").strip('\n') +
+                            ".svg --height 200 --width 200 --iter 4 --colour random"
+                        ], shell=True)
     return file_list, unitigs_barcode
 
 
@@ -565,47 +583,50 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                             blastfolder + "/" + barcodes[bcount] + "/" +
                             utig[:-6] + ".refseq.fasta"
                         )
-                        for record in SeqIO.parse(refseq, "fasta"):
-                            bplength = len(record)
                         try:
-                            for feature in record.features:
-                                if feature.qualifiers.get('plasmid', []):
-                                    plasmids = feature.qualifiers.get(
-                                        'plasmid')
-                            for plasmid in plasmids:
+                            for record in SeqIO.parse(refseq, "fasta"):
+                                bplength = len(record)
+                            try:
+                                for feature in record.features:
+                                    if feature.qualifiers.get('plasmid', []):
+                                        plasmids = feature.qualifiers.get(
+                                            'plasmid')
+                                for plasmid in plasmids:
+                                    time.sleep(10)
+                                    p = plasmid
+                                    dict_contigfasta[p + "_" +
+                                                    str(plasmidcount)] = utig
+                                    dict_draw[p + "_" + str(plasmidcount) + "_" + barcodes[bcount]] = [
+                                        contigname,
+                                        genbank,
+                                        refseq,
+                                        bplength,
+                                        new_path]
+                                    plasmidcount += 1
+                                blast[barcodes[bcount] + "_" + line[0]] = [
+                                    p, record.description, bplength, bclength]
+                            except:
+                                ext_plasmidcount += 1
                                 time.sleep(10)
-                                p = plasmid
-                                dict_contigfasta[p + "_" +
-                                                 str(plasmidcount)] = utig
-                                dict_draw[p + "_" + str(plasmidcount) + "_" + barcodes[bcount]] = [
+                                dict_contigfasta[line[1].split("_")[-1] + "_" +
+                                                str(ext_plasmidcount)] = utig
+                                dict_draw[line[1].split("_")[-1] + "_" +
+                                        str(ext_plasmidcount) + "_" + barcodes[bcount]] = [
                                     contigname,
                                     genbank,
                                     refseq,
                                     bplength,
                                     new_path]
-                                plasmidcount += 1
-                            blast[barcodes[bcount] + "_" + line[0]] = [
-                                p, record.description, bplength, bclength]
-                        except:
-                            ext_plasmidcount += 1
-                            time.sleep(10)
-                            dict_contigfasta[line[1].split("_")[-1] + "_" +
-                                             str(ext_plasmidcount)] = utig
-                            dict_draw[line[1].split("_")[-1] + "_" +
-                                      str(ext_plasmidcount) + "_" + barcodes[bcount]] = [
-                                contigname,
-                                genbank,
-                                refseq,
-                                bplength,
-                                new_path]
-                            try:
-                                blast[barcodes[bcount] + "_" + line[0]] = [
-                                    line[1],
-                                    record.description,
-                                    bplength,
-                                    bclength]
-                            except:
-                                pass
+                                try:
+                                    blast[barcodes[bcount] + "_" + line[0]] = [
+                                        line[1],
+                                        record.description,
+                                        bplength,
+                                        bclength]
+                                except:
+                                    pass
+                        except FileNotFoundError:
+                            pass
                     else:
                         blast[contigname] = [
                             "No Accession Number", "No Name", "0", bclength]
@@ -671,6 +692,7 @@ def create_results(request):
     residentity = request.POST.get("residentity")
     kmer = request.POST.get("kmer")
     mincontig = request.POST.get("min-contig")
+    genomesize = request.POST.get("gsize")
     circularise = request.POST.get("circularise")
     resultfolder = (settings.NANOPORE_DRIVE + request.session.get("username") +
                     "/results/" + outfolder)
@@ -731,7 +753,7 @@ def create_results(request):
                 kmer, mincontig, circularise
             )
         elif assembler == "flye":
-            file_list, barcodes = flye(inputfolder, resultfolder, barcode_list, "200k")
+            file_list, barcodes = flye(inputfolder, resultfolder, barcode_list, genomesize)
         else:
             return HttpResponseRedirect(reverse("index"))
     # Create QC pages
@@ -927,6 +949,8 @@ def get_stored_results(request):
                                 username, r)[0]
                             barcodes = get_stored_assembly_results(
                                 username, r)[2]
+                            graphs = get_stored_assembly_results(
+                                username, r)[3]
                         if t == "qc":
                             qc_html = get_stored_qc(username, r)
                 else:
@@ -949,7 +973,8 @@ def get_stored_results(request):
         "assemblyreport": assembly_report,
         "barcodes": barcodes,
         "topology": topology,
-        "qc": qc_html})
+        "qc": qc_html,
+        "graphs": graphs})
 
 
 def get_stored_qc(username, r):
@@ -1117,19 +1142,33 @@ def get_stored_plasmidfinder_results(username, r):
         if a JSONDecodeError occurs.
     """
     plasmidfinder_dict = {}
-    plasmidfinder_results = os.listdir(settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/")
+    plasmidfinder_results = (os.listdir(
+        settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/"))
     for bc in plasmidfinder_results:
-        plasmidfile = settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/" + bc + "/data.json"
+        plasmidfile = (settings.NANOPORE_DRIVE + username +
+                       "/results/" + r + "/plasmidfinder/" + bc + "/data.json")
         with open(plasmidfile, "r") as plasmidfinder:
             try:
                 load = json.loads(plasmidfinder.read())
                 enterobacteriaceae = load["plasmidfinder"]["results"]["Enterobacteriaceae"]["enterobacteriaceae"]
                 for inc in enterobacteriaceae:
-                    contig = bc + "_" + enterobacteriaceae[inc]["contig_name"].split(" ")[0]
+                    contig = (
+                        bc + "_" + enterobacteriaceae[inc]["contig_name"].split(" ")[0])
                     if contig in plasmidfinder_dict.keys():
-                        plasmidfinder_dict[contig].append(inc)
+                        plasmidfinder_dict[contig].append(
+                            enterobacteriaceae[inc]["plasmid"] + " - (" +
+                            str(enterobacteriaceae[inc]["identity"]) + "%) - " +
+                            "<b><a href=\"https://www.ncbi.nlm.nih.gov/nuccore/" +
+                            enterobacteriaceae[inc]["accession"] + "\" target=\"_blank\">" +
+                            enterobacteriaceae[inc]["accession"] + "</a></b>")
                     else:
-                        plasmidfinder_dict[contig] = [inc]
+                        plasmidfinder_dict[contig] = [
+                            enterobacteriaceae[inc]["plasmid"] + " - (" +
+                            str(enterobacteriaceae[inc]["identity"]) + "%) - " +
+                            "<b><a href=\"https://www.ncbi.nlm.nih.gov/nuccore/" +
+                            enterobacteriaceae[inc]["accession"] + "\" target=\"_blank\">" +
+                            enterobacteriaceae[inc]["accession"] + "</a></b>"
+                        ]
             except JSONDecodeError:
                 plasmidfinder_dict[""] = "No genes found"
     return plasmidfinder_dict
@@ -1146,6 +1185,7 @@ def get_stored_assembly_results(username, r):
         A dictionary with the assembly and contig lengths.
         A list of files containing the assembly results and barcodes.
     """
+    graphs = {}
     assembly_report = {}
     assembly_results = os.listdir(
         settings.NANOPORE_DRIVE + username + "/results/" + r + "/assembly/")
@@ -1155,22 +1195,26 @@ def get_stored_assembly_results(username, r):
             settings.NANOPORE_DRIVE + username + "/results/" + r +
             "/assembly/" + assemblyfolder)
         for assembly in assembly_barcode:
-            if ".contigs.fasta" in assembly or "assembly.fasta" in assembly and ".jpg" not in assembly:
-                contigcount = 0
-                if os.stat(
-                    settings.NANOPORE_DRIVE + username + "/results/" + r +
-                    "/assembly/" + assemblyfolder + "/" + assembly
-                ).st_size > 0:
-                    assembly_bc.append(assemblyfolder)
-                    for record in SeqIO.parse(
+            if ".contigs.fasta" in assembly or "assembly.fasta" in assembly: 
+                if ".jpg" not in assembly:
+                    contigcount = 0
+                    if os.stat(
                         settings.NANOPORE_DRIVE + username + "/results/" + r +
-                            "/assembly/" + assemblyfolder + "/" + assembly,
-                            "fasta"):
-                        contigcount += 1
-                        contiglength = len(record.seq)
-                        assembly_report[assemblyfolder +
-                                        "_" + record.id] = contiglength
-    return assembly_report, assembly_results, sorted(assembly_bc)
+                        "/assembly/" + assemblyfolder + "/" + assembly
+                    ).st_size > 0:
+                        assembly_bc.append(assemblyfolder)
+                        for record in SeqIO.parse(
+                            settings.NANOPORE_DRIVE + username + "/results/" + r +
+                                "/assembly/" + assemblyfolder + "/" + assembly,
+                                "fasta"):
+                            contigcount += 1
+                            contiglength = len(record.seq)
+                            assembly_report[assemblyfolder +
+                                            "_" + record.id] = [record.id, contiglength]
+            if ".svg" in assembly:
+                with open(settings.NANOPORE_DRIVE + username + "/results/" + r + "/assembly/" + assemblyfolder + "/" + assembly) as svg:
+                    graphs[assembly[:-4]] = svg.read()
+    return assembly_report, assembly_results, sorted(assembly_bc), graphs
 
 
 def delete(request):

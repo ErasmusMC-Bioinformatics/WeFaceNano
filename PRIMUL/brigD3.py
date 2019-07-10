@@ -175,21 +175,32 @@ class Ring:
             "": '#ff7ca8'
         }
         print('Generating Ring:', self.name)
-        if "_utg" in self.name:
+        if "_utg" in self.name or "contig_" in self.name:
             for res, loc in self.res_loc.items():
                 resgroup = res.split("_")[-1]
                 residentity = res.split("_")[-2]
-                contig_name = res.split("_")[0]
-                res_name = res.split("_")[1]
-                if str(contig_name) in str(self.name.strip("\n").split("_")[1]):
-                    pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
-                        '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
-                        '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
-                        '\n</span><br>')
-                    self._positions.append(loc)
-                    self._colors.append(resfinder_dictionary[resgroup]) 
-                    self._popups.append(pop)
-                    self._heights.append(20)
+                if "contig_" in self.name:
+                    contig_name = res.split("_")[0] + "_" + res.split("_")[1]
+                    res_name = res.split("_")[2]
+                    contigcheck = str(self.name.strip("\n").split("_")[1]) + "_" + str(self.name.strip("\n").split("_")[2])
+                else:
+                    contig_name = res.split("_")[0]
+                    res_name = res.split("_")[1]
+                    contigcheck = str(self.name.strip("\n").split("_")[1])
+                if str(contig_name) in contigcheck:
+                    highest_loc = max(int(x[1]) for x in self._positions)
+                    lowest_loc = min(int(x[0]) for x in self._positions)
+                    end_loc = int(loc[1])
+                    start_loc = int(loc[0])
+                    if start_loc >= int(lowest_loc) and end_loc <= int(highest_loc):
+                        pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
+                            '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                            '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
+                            '\n</span><br>')
+                        self._positions.append(loc)
+                        self._colors.append(resfinder_dictionary[resgroup])
+                        self._popups.append(pop)
+                        self._heights.append(20)
         n = len(self._positions)
         for i in range(n):
             data_dict = {}
