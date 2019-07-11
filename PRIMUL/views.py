@@ -220,17 +220,11 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize):
                 for node in nodes:
                     call(
                         [
-                            "Bandage reduce " + resultfolder + "/assembly/" + barcode + "/" + file +
-                            " " + resultfolder + "/assembly/" + barcode + "/" + node.strip('\n') +
-                            ".gfa --scope aroundnodes --nodes " +
-                            node.strip('\n')
-                        ], shell=True)
-                    call(
-                        [
-                            "Bandage image " + resultfolder + "/assembly/" + barcode + "/" + node.strip('\n') +
-                            ".gfa " + resultfolder + "/assembly/" + barcode + "/" +
+                            "Bandage image " + resultfolder + "/assembly/" + barcode + "/assembly_graph.gfa " +
+                            resultfolder + "/assembly/" + barcode + "/" +
                             node.replace("edge", "contig").strip('\n') +
-                            ".svg --height 200 --width 200 --iter 4 --colour random"
+                            ".svg --height 200 --width 200 --iter 4 --colour random --scope aroundnodes --nodes " +
+                            node.strip('\n') + " --nodewidth 3"
                         ], shell=True)
     return file_list, unitigs_barcode
 
