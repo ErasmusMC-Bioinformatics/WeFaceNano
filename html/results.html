@@ -5,6 +5,18 @@
 {% endblock %}
 
 {% block content %}
+<script>
+    function showQC() {
+        var x = document.getElementById("qcreport");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            document.getElementById("showqc").textContent = "Hide report";
+        } else {
+            x.style.display = "none";
+            document.getElementById("showqc").textContent = "Show report";
+        }
+    }
+</script>
 <div class="header">
     <div class="container">
         <div id="menu">
@@ -51,7 +63,12 @@
             {% for r, q in qc.items %}
                 {% if r in b %}
                     <h3>QC report</h3>
-                    <iframe srcdoc="{{ q }}" frameborder="1" scrolling="yes" height="800" width="100%"></iframe>
+                    <div class="tab">
+                        <button id="showqc" onclick="showQC()" class="runbutton">Show report</button>
+                    </div>
+                    <div id="qcreport" style="display:none;">
+                        <iframe srcdoc="{{ q }}" frameborder="0" scrolling="yes" height="800" width="100%"></iframe>
+                    </div>
                 {% endif %}
             {% endfor %}
             {% for res, tools in dict.items %}
