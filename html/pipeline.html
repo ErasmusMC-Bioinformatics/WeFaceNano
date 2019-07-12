@@ -10,7 +10,18 @@ function showLoading() {
     return true
 }
 </script>
-
+<script>
+function showMiniasm(){
+    document.getElementById('mincontig').style.visibility ='visible';
+    document.getElementById('genomesize').style.visibility ='collapse';
+    document.getElementById('circreads').style.visibility ='visible';
+}
+function showFlye(){
+    document.getElementById('mincontig').style.visibility = 'collapse';
+    document.getElementById('genomesize').style.visibility ='visible';
+    document.getElementById('circreads').style.visibility ='collapse';
+}
+</script>
 <script>
 function openResult(evt, rname) {
     // Declare all variables
@@ -160,23 +171,23 @@ function openResult(evt, rname) {
                     <tr>
                         <td>Select assembler:</td>
                         <td>
-                            <input type="radio" name="assembler" id="assembler" value='miniasm'>&nbsp;<label>Miniasm &nbsp;&nbsp;&nbsp;</label>
-                            <input type="radio" name="assembler" id="assembler" value='flye'>&nbsp;<label>Flye &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="assembler" id="assembler" value='miniasm' onclick="showMiniasm();">&nbsp;<label>Miniasm &nbsp;&nbsp;&nbsp;</label>
+                            <input type="radio" name="assembler" id="assembler" value='flye' onclick="showFlye();">&nbsp;<label>Flye &nbsp;&nbsp;&nbsp;</label>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="circreads" style="visibility: collapse;">
                         <td>Circularise reads?</td>
                         <td>
                             <input type="checkbox" name="circularise" id="circularise" value="1">
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="mincontig" style="visibility: collapse;">
                         <td>Remove contigs smaller than</td>
                         <td>
                             <input type="text" id="min-contig" name="min-contig" placeholder="15000">
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="genomesize" style="visibility: collapse;">
                         <td>
                             Enter the genome size <span style="color:red">*</span><br><br>
                             <b>*</b> The genome size should be your best guess of the haploid genome size of what is being
@@ -195,7 +206,7 @@ function openResult(evt, rname) {
                     </tr>
                     <tr>
                         <td>
-                            Select type <b>[ Plasmids -- Strains -- Microbiome ]</b> to see the available tools.<span style="color:red">*</span>
+                            Please select which tools to run.
                         </td>
                         <td>
                             <input type="hidden" required>
