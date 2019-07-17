@@ -352,7 +352,7 @@ def skip_assembly(resultfolder, barcode_list):
     return file_list, unitigs_barcode
 
 
-def plasmidfinder(barcodes, file_list, resultfolder):
+def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
     """Run plasmidfinder on all FASTA files in the list on the 
     plasmidfinder enterobacteriaceae database.
     
@@ -361,6 +361,7 @@ def plasmidfinder(barcodes, file_list, resultfolder):
         file_list: A list of files that contains the assembly.
         resultfolder: The ouputfolder to store the results.
     """
+    plasmidfinder_dict = {}
     call(["mkdir", resultfolder + "/plasmidfinder"])
     count = 0
     for assemblyfile in file_list:
@@ -372,6 +373,19 @@ def plasmidfinder(barcodes, file_list, resultfolder):
             " -o " + outpath + " -p ~/plasmidfinder_db/ -d enterobacteriaceae"
         call([plasmidcmd], shell=True)
         count += 1
+        with open(outpath + "data.json", "r") as plasmidfinder:
+            try:
+                load = json.loads(plasmidfinder.read())
+                enterobacteriaceae = load["plasmidfinder"]["results"]["Enterobacteriaceae"]["enterobacteriaceae"]
+                for inc in enterobacteriaceae:
+                    contig = enterobacteriaceae[inc]["contig_name"].split(" ")[0]
+                    if contig in plasmidfinder_dict.keys():
+                        res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
+                    else:
+                        res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
+            except JSONDecodeError:
+                res_loc[""] = "No genes found"
+    return res_loc
 
 
 def resfinder(barcodes, file_list, resultfolder,
@@ -761,12 +775,13 @@ def create_results(request):
                 extention = "fast5"
             qc_report(extention, barcode, file,
                       resultfolder + "/qc/" + barcode)
-    plasmidfinder(barcodes, file_list, resultfolder)
+    # plasmidfinder(barcodes, file_list, resultfolder)
     if res == '-r ':
         dummyres_genes, res_loc = resfinder(
             barcodes, file_list, resultfolder, resdb, reslength, residentity)
     else:
         res_loc = {}
+    res_loc = plasmidfinder(barcodes, file_list, resultfolder, res_loc)
     if blast == "-b ":
         run_blast(
             barcodes, file_list, resultfolder, blastdb, blasttask, res_loc)

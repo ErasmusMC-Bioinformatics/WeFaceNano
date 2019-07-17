@@ -172,7 +172,8 @@ class Ring:
             "Trimethoprim resistance": '#ff0000',
             "Macrolide resistance": '#faff00',
             "Rifampicin resistance": '#007fff',
-            "": '#ff7ca8'
+            "": '#ff7ca8',
+            "Inc": '#0000ff'
         }
         print('Generating Ring:', self.name)
         if "_utg" in self.name or "contig_" in self.name:
@@ -193,10 +194,16 @@ class Ring:
                     end_loc = int(loc[1])
                     start_loc = int(loc[0])
                     if start_loc >= int(lowest_loc) and end_loc <= int(highest_loc):
-                        pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
-                            '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
-                            '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
-                            '\n</span><br>')
+                        if resgroup == "Inc":
+                            pop = ('<strong><span style="color:#88A2AF">Incompatibility Factor:</span>:</strong><span style="color:white">' + res_name +
+                                '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                                '\n</span><br><strong><span style="color:#88A2AF">Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
+                                '\n</span><br>')
+                        else:
+                            pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
+                                '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                                '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
+                                '\n</span><br>')
                         self._positions.append(loc)
                         self._colors.append(resfinder_dictionary[resgroup])
                         self._popups.append(pop)
