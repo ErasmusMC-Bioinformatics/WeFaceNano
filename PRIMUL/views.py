@@ -177,7 +177,7 @@ def kmergenie(resultfolder, inputfile):
     return kmer
 
 
-def flye(inputfolder, resultfolder, barcode_list, genomesize):
+def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
     """Use Flye as the assembler and return the assembly as a FASTA file.
     
     Arguments:
@@ -185,6 +185,7 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize):
         resultfolder: Folder where the results will be stored.
         barcode_list: A list of barcodes.
         genomesize: The estimated genome size.
+        options: The selected --plasmid and/or --meta options.
     
     Returns:
         A list of FASTA paths, FASTA filenames and barcodes.
@@ -204,7 +205,7 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize):
         cat_file = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"
         file_to_use = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_filtered.fasta"
         call(["awk '/^>/{f=!d[$1];d[$1]=1}f' " + cat_file + " > " + file_to_use], shell=True)
-        call(["flye --nano-raw " + file_to_use + " -o " + assemblyfolder + " --genome-size " + genomesize], shell=True)
+        call(["flye --nano-raw " + file_to_use + " -o " + assemblyfolder + " --genome-size " + genomesize + " " + options], shell=True)
         files = os.listdir(resultfolder + "/assembly/" + barcode)
         for file in files:
             if "assembly.fasta" in file:
@@ -702,6 +703,8 @@ def create_results(request):
     mincontig = request.POST.get("min-contig")
     genomesize = request.POST.get("gsize")
     circularise = request.POST.get("circularise")
+    flyeplasmid = request.POST.get("flyeplasmid")
+    flyemeta = request.POST.get("flyemeta")
     resultfolder = (settings.NANOPORE_DRIVE + request.session.get("username") +
                     "/results/" + outfolder)
     if res is None:
@@ -761,7 +764,15 @@ def create_results(request):
                 kmer, mincontig, circularise
             )
         elif assembler == "flye":
-            file_list, barcodes = flye(inputfolder, resultfolder, barcode_list, genomesize)
+            if flyeplasmid and flyemeta:
+                flyeoptions = flyeplasmid + flyemeta
+            elif flyeplasmid:
+                flyeoptions = flyeplasmid
+            elif flyemeta:
+                flyeoptions = flyemeta
+            else:
+                flyeoptions = ""
+            file_list, barcodes = flye(inputfolder, resultfolder, barcode_list, genomesize, flyeoptions)
         else:
             return HttpResponseRedirect(reverse("index"))
     # Create QC pages

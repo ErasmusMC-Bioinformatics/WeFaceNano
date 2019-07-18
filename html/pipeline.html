@@ -15,11 +15,13 @@ function showMiniasm(){
     document.getElementById('mincontig').style.visibility ='visible';
     document.getElementById('genomesize').style.visibility ='collapse';
     document.getElementById('circreads').style.visibility ='visible';
+    document.getElementById('flyeopt').style.visibility ='collapse';
 }
 function showFlye(){
     document.getElementById('mincontig').style.visibility = 'collapse';
     document.getElementById('genomesize').style.visibility ='visible';
     document.getElementById('circreads').style.visibility ='collapse';
+    document.getElementById('flyeopt').style.visibility ='visible';
 }
 </script>
 <script>
@@ -196,6 +198,13 @@ function openResult(evt, rname) {
                         </td>
                         <td>
                             <input type="text" name="gsize" id="gsize" placeholder="Enter genome size i.e. 4.7m or 4700k or 4700000" required>
+                        </td>
+                    </tr>
+                    <tr id="flyeopt" style="visibility:collapse;">
+                        <td>Select options</td>
+                        <td>
+                            <input type="checkbox" name="flyeplasmid" id="flyeplasmid" value='--plasmid '>&nbsp;<label>--plasmid &nbsp;&nbsp;&nbsp;</label>
+                            <input type="checkbox" name="flyemeta" id="flyemeta" value='--meta '>&nbsp;<label>--meta &nbsp;&nbsp;&nbsp;</label>
                         </td>
                     </tr>
                     <tr>
