@@ -119,8 +119,9 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
     """
     resistance_genes = {}
     for res, loc in res_loc.items():
-        if int(loc[1]) <= int(length):
-            resistance_genes[res] = [loc[0], loc[1]]
+        if loc != "No genes found":
+            if int(loc[1]) <= int(length):
+                resistance_genes[res] = [loc[0], loc[1]]
     if path != '':
         ring_gen = brigD3.AnnotationRing()
         ring_gen.setOptions(color='#000000',
@@ -361,6 +362,10 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
         barcodes: A list of barcodes
         file_list: A list of files that contains the assembly.
         resultfolder: The ouputfolder to store the results.
+    
+    Raises:
+        JSONDecodeError: Incorrect JSON format or missing data.
+        TypeError: No hit is found by Plasmidfinder.
     """
     plasmidfinder_dict = {}
     call(["mkdir", resultfolder + "/plasmidfinder"])
@@ -384,8 +389,9 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
                         res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
                     else:
                         res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
-            except JSONDecodeError:
+            except (JSONDecodeError, TypeError):
                 res_loc[""] = "No genes found"
+                call(["rm", "-rf", outpath])
     return res_loc
 
 

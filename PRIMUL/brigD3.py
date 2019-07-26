@@ -189,25 +189,28 @@ class Ring:
                     res_name = res.split("_")[1]
                     contigcheck = str(self.name.strip("\n").split("_")[1])
                 if str(contig_name) in contigcheck:
-                    highest_loc = max(int(x[1]) for x in self._positions)
-                    lowest_loc = min(int(x[0]) for x in self._positions)
-                    end_loc = int(loc[1])
-                    start_loc = int(loc[0])
-                    if start_loc >= int(lowest_loc) and end_loc <= int(highest_loc):
-                        if resgroup == "Inc":
-                            pop = ('<strong><span style="color:#88A2AF">Incompatibility Factor:</span>:</strong><span style="color:white">' + res_name +
-                                '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
-                                '\n</span><br><strong><span style="color:#88A2AF">Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
-                                '\n</span><br>')
-                        else:
-                            pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
-                                '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
-                                '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
-                                '\n</span><br>')
-                        self._positions.append(loc)
-                        self._colors.append(resfinder_dictionary[resgroup])
-                        self._popups.append(pop)
-                        self._heights.append(20)
+                    try:
+                        highest_loc = max(int(x[1]) for x in self._positions)
+                        lowest_loc = min(int(x[0]) for x in self._positions)
+                        end_loc = int(loc[1])
+                        start_loc = int(loc[0])
+                        if start_loc >= int(lowest_loc) and end_loc <= int(highest_loc):
+                            if resgroup == "Inc":
+                                pop = ('<strong><span style="color:#88A2AF">Incompatibility Factor:</span>:</strong><span style="color:white">' + res_name +
+                                    '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                                    '\n</span><br><strong><span style="color:#88A2AF">Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
+                                    '\n</span><br>')
+                            else:
+                                pop = ('<strong><span style="color:#88A2AF">Resistance Gene:</span>:</strong><span style="color:white">' + res_name +
+                                    '\n</span><br><strong><span style="color:#88A2AF">Location:</span>:</strong><span style="color:white">' + loc[0] + " - " + loc[1] +
+                                    '\n</span><br><strong><span style="color:#88A2AF">ResFinder Identity:</span>:</strong><span style="color:white">' + residentity + "%" +
+                                    '\n</span><br>')
+                            self._positions.append(loc)
+                            self._colors.append(resfinder_dictionary[resgroup])
+                            self._popups.append(pop)
+                            self._heights.append(20)
+                    except ValueError:
+                        pass
         n = len(self._positions)
         for i in range(n):
             data_dict = {}
