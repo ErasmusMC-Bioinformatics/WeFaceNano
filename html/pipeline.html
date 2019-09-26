@@ -23,27 +23,31 @@ function showFlye(){
     document.getElementById('circreads').style.visibility ='collapse';
     document.getElementById('flyeopt').style.visibility ='visible';
 }
-</script>
-<script>
-function openResult(evt, rname) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+function showBlast(){
+    var checkBox = document.getElementById("blast");
+    if (checkBox.checked == true){
+        document.getElementById('blastheader').style.visibility = 'visible';
+        document.getElementById('blastdatabase').style.visibility ='visible';
+        document.getElementById('blasttaskset').style.visibility ='visible';
+    } else {
+        document.getElementById('blastheader').style.visibility = 'collapse';
+        document.getElementById('blastdatabase').style.visibility ='collapse';
+        document.getElementById('blasttaskset').style.visibility ='collapse';
     }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+}
+function showResfinder(){
+    var checkBox = document.getElementById("res");
+    if (checkBox.checked == true){
+        document.getElementById('resheader').style.visibility = 'visible';
+        document.getElementById('resdatabase').style.visibility ='visible';
+        document.getElementById('resthreshold').style.visibility ='visible';
+        document.getElementById('reslengthset').style.visibility ='visible';
+    } else {
+        document.getElementById('resheader').style.visibility = 'collapse';
+        document.getElementById('resdatabase').style.visibility ='collapse';
+        document.getElementById('resthreshold').style.visibility ='collapse';
+        document.getElementById('reslengthset').style.visibility ='collapse';
     }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(rname).style.display = "block";
-    evt.currentTarget.className += " active";
 }
 </script>
 {% endblock %}
@@ -83,32 +87,19 @@ function openResult(evt, rname) {
 </div>
 <div class="container" style="margin-top:100px">
     <div id="pipeline-form" style="display:block;">
-        <div class="tab">
-            <button class="tablinks" onclick="openResult(event, 'plasmids')">Plasmids</button>
-        </div>
-        <br>
         <div id="inputs">
             <form action="{% url 'createresults' %}" method="post" name="run" enctype="multipart/form-data">
                 <span style="color:red">*</span> = required fields <br><br>
                 <table class="table">
                     <tr>
                         <td>
-                            <h3>Input</h3>
+                            <b style="color: rgb(255,100,0)">Input/Output</b>
                         </td>
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <td>
-                            Select input type. (default = FASTQ)
-                        </td>
-                        <td>
-                            <input type="radio" name="inputtype" value='fastq' checked="checked">&nbsp;<label>FASTQ &nbsp;&nbsp;&nbsp;</label>
-                            <input type="radio" name="inputtype" value='fast5'>&nbsp;<label>FAST5 &nbsp;&nbsp;&nbsp;</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Select folder with reads <span style="color:red">*</span>
+                            Select folder with fastq or fasta file(s)<span style="color:red">*</span>
                         </td>
                         <td>
                             <select id="inputfolder" name="inputfolder" class="ddmenu">
@@ -122,51 +113,15 @@ function openResult(evt, rname) {
                     </tr>
                     <tr>
                         <td>
-                            <h3>Output</h3>
-                        </td>
-                        <td>&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Output folder <span style="color:red">*</span>
+                            Enter output folder name<span style="color:red">*</span>
                         </td>
                         <td>
-                            <input type="text" name="albacoreout" id="albacoreout" placeholder="Enter output folder" required>
+                            <input type="text" name="outfolder" id="outfolder" placeholder="Enter output folder" required>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <h3>Albacore Settings</h3>
-                            <b><i>Albacore will only run when the FAST5 input type is selected.</i></b>
-                        </td>
-                        <td>&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>Barcoding [yes/no] (default = no)</td>
-                        <td>
-                            <input type="radio" name="barcoding" id="barcoding" value='1'>&nbsp;<label>yes &nbsp;&nbsp;&nbsp;</label>
-                            <input type="radio" name="barcoding" id="barcoding" value='0' checked="checked">&nbsp;<label>no &nbsp;&nbsp;&nbsp;</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Select flowcell configuration (default = FLO-MIN106)
-                        </td>
-                        <td>
-                            <select id="aconfig" name="aconfig" class="ddmenu">
-                                <optgroup label="Albacore configurations">
-                                    <option value="r94_450bps_linear.cfg">FLO-MIN106</option>
-                                    <option value="r94_70bps_rna_linear.cfg">FLO-MIN106 RNA</option>
-                                    <option value="r95_450bps_linear.cfg">FLO-MIN107</option>
-                                    <option value="r95_70bps_rna_linear.cfg">FLO-MIN107 RNA</option>
-                                    <option value="r941_450bps_linear_prom.cfg">FLO-PRO001</option>
-                                </optgroup>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <h3>Assembly Settings</h3>
+                            <b style="color: rgb(255,100,0)">Assembler Selection</b>
                         </td>
                         <td>&nbsp;</td>
                     </tr>
@@ -209,7 +164,7 @@ function openResult(evt, rname) {
                     </tr>
                     <tr>
                         <td>
-                            <h3>Analysis Tools Selection</h3>
+                            <b style="color: rgb(255,100,0)">Analysis Tools Selection</b>
                         </td>
                         <td>&nbsp;</td>
                     </tr>
@@ -220,18 +175,18 @@ function openResult(evt, rname) {
                         <td>
                             <input type="hidden" required>
                             <div id="plasmids" class="tabcontent" style="display:block;">
-                                <input type="checkbox" name="blast" id="blast" value='-b '>&nbsp;<label>BLAST &nbsp;&nbsp;&nbsp;</label>
-                                <input type="checkbox" name="res" id="res" value='-r '>&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>
+                                <input type="checkbox" name="blast" id="blast" value='-b ' onclick="showBlast()">&nbsp;<label>BLAST &nbsp;&nbsp;&nbsp;</label>
+                                <input type="checkbox" name="res" id="res" value='-r ' onclick="showResfinder()">&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>
                             </div>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="blastheader" style="visibility: collapse;">
                         <td>
-                            <h3>BLAST Settings</h3>
+                            <b>BLAST Settings</b>
                         </td>
                         <td>&nbsp;</td>
                     </tr>
-                    <tr>
+                    <tr id="blastdatabase" style="visibility: collapse;">
                         <td>
                             Select a BLAST database:
                         </td>
@@ -250,19 +205,19 @@ function openResult(evt, rname) {
                             </select>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="blasttaskset" style="visibility: collapse;">
                         <td>Select BLAST task</td>
                         <td>
                             <input type="radio" name="blasttask" id="blasttask" value='megablast' checked="checked">&nbsp;<label>megablast &nbsp;&nbsp;&nbsp;</label>
                             <input type="radio" name="blasttask" id="blasttask" value='blastn'>&nbsp;<label>blastn &nbsp;&nbsp;&nbsp;</label>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="resheader" style="visibility: collapse;">
                         <td>
-                            <h3>ResFinder Settings</h3>
+                            <b>ResFinder Settings</b>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="resdatabase" style="visibility: collapse;">
                         <td>Select a database to search for specific resistance genes or select all databases</td>
                         <td>
                             <select id="resdb" name="resdb" class="ddmenu">
@@ -275,7 +230,7 @@ function openResult(evt, rname) {
                             </select>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="resthreshold" style="visibility: collapse;">
                         <td>The threshold for % identity</td>
                         <td>
                             <select id="residentity" name="residentity" class="ddmenu">
@@ -289,7 +244,7 @@ function openResult(evt, rname) {
                             </select>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="reslengthset" style="visibility: collapse;">
                         <td>The minimum length of the overlap ex 0.60 for an overlap of minimum 60 %</td>
                         <td>
                              <select id="reslength" name="reslength" class="ddmenu">

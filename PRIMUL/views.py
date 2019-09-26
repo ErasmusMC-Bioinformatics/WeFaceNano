@@ -205,8 +205,13 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
         ], shell=True)
         cat_file = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"
         file_to_use = inputfolder + "/" + barcode + "/trimmed/" + barcode + "_filtered.fasta"
-        call(["awk '/^>/{f=!d[$1];d[$1]=1}f' " + cat_file + " > " + file_to_use], shell=True)
-        call(["flye --nano-raw " + file_to_use + " -o " + assemblyfolder + " --genome-size " + genomesize + " " + options], shell=True)
+        call([
+            "awk '/^>/{f=!d[$1];d[$1]=1}f' " + cat_file + " > " + file_to_use
+        ], shell=True)
+        call([
+            "flye --nano-raw " + file_to_use + " -o " + assemblyfolder +
+            " --genome-size " + genomesize + " " + options
+        ], shell=True)
         files = os.listdir(resultfolder + "/assembly/" + barcode)
         for file in files:
             if "assembly.fasta" in file:
@@ -231,7 +236,7 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
     return file_list, unitigs_barcode
 
 
-def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig, circularise):
+def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularise):
     """Use Miniasm for assembly and return the assembly as a FASTA file. 
     The Kmer-size will be calculated with KmerGenie so the user will not have to 
     manually enter this value. A minimum contig size can be entered to filter out
@@ -260,58 +265,35 @@ def miniasm(inputtype, inputfolder, barcode_list, resultfolder, kmer, mincontig,
     for barcode in barcode_list:
         if barcode != "unclassified":
             call(["mkdir", resultfolder + "/assembly/" + barcode])
-            if inputtype == "fast5":
-                barcode_content = os.listdir(
-                    resultfolder + "/workspace/pass/" + barcode)
-                if len(barcode_content) > 1:
-                    kmer = kmergenie(resultfolder, resultfolder + "/workspace/pass/" + barcode + "/" + barcode + "_cat.fastq")
-                    call([
-                        "cat " + resultfolder + "/workspace/pass/" + barcode +
-                        "/* > " + resultfolder + "/workspace/pass/" + barcode +
-                        "/" + barcode + "_cat.fastq"
-                    ], shell=True)
-                    call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
-                        str(circularise) + " -i " + resultfolder + "/workspace/pass/" + barcode + "/" +
-                        barcode + "_cat.fastq -o " + resultfolder + "/assembly/" + barcode + "/" + "_cat.contigs"
-                    ], shell=True)
-                else:
-                    kmer = kmergenie(resultfolder, resultfolder + "/workspace/pass/" + barcode + "/" + barcode_content[0])
-                    call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
-                        str(circularise) + " -i " + resultfolder + "/workspace/pass/" + barcode + "/" +
-                        barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" + barcode_content[0] + ".contigs"
-                    ], shell=True)
+            fastacount = 0
+            barcode_content = os.listdir(inputfolder + "/" + barcode)
+            for fasta in barcode_content:
+                if os.path.isfile(inputfolder + "/" + barcode + "/" + fasta):
+                    fastacount += 1
+            if len(barcode_content) > 1:
+                call([
+                    "cat " + inputfolder + "/" + barcode +
+                    "/trimmed/* > " + inputfolder + "/" + barcode +
+                    "/trimmed/" + barcode + "_cat.fasta"
+                ], shell=True)
+                kmer = kmergenie(resultfolder, str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
+                call([
+                    "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode +
+                    "_cat.fasta -o " + resultfolder + "/assembly/" + barcode + "/" + barcode + "_cat.contigs"
+                ], shell=True)
+                call([
+                    "rm", "-r", inputfolder + "/" + barcode +
+                    "/trimmed/" + barcode + "_cat.fasta"
+                ])
             else:
-                fastacount = 0
-                barcode_content = os.listdir(inputfolder + "/" + barcode)
-                for fasta in barcode_content:
-                    if os.path.isfile(inputfolder + "/" + barcode + "/" + fasta):
-                        fastacount += 1
-                if len(barcode_content) > 1:
-                    call([
-                        "cat " + inputfolder + "/" + barcode +
-                        "/trimmed/* > " + inputfolder + "/" + barcode +
-                        "/trimmed/" + barcode + "_cat.fasta"
-                    ], shell=True)
-                    kmer = kmergenie(resultfolder, str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
-                    call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
-                        str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode +
-                        "_cat.fasta -o " + resultfolder + "/assembly/" + barcode + "/" + barcode + "_cat.contigs"
-                    ], shell=True)
-                    call([
-                        "rm", "-r", inputfolder + "/" + barcode +
-                        "/trimmed/" + barcode + "_cat.fasta"
-                    ])
-                else:
-                    kmer = kmergenie(resultfolder, inputfolder + "/" + barcode + "/" + barcode_content[0])
-                    call([
-                        "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
-                        str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" +
-                        barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" + 
-                        barcode_content[0] + ".contigs"
-                    ], shell=True)
+                kmer = kmergenie(resultfolder, inputfolder + "/" + barcode + "/" + barcode_content[0])
+                call([
+                    "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" +
+                    barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" + 
+                    barcode_content[0] + ".contigs"
+                ], shell=True)
             files = os.listdir(resultfolder + "/assembly/" + barcode)
             for file in files:
                 if "contigs.fasta" in file and ".jpg" not in file:
@@ -375,8 +357,8 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
         inpath = resultfolder + "/assembly/" + \
             barcodes[count] + "/" + assemblyfile
         outpath = str(resultfolder + "/plasmidfinder/" + barcodes[count] + "/")
-        plasmidcmd = "python3 ~/plasmidfinder/plasmidfinder.py -i " + inpath + \
-            " -o " + outpath + " -p ~/plasmidfinder_db/ -d enterobacteriaceae"
+        plasmidcmd = ("python3 ~/plasmidfinder/plasmidfinder.py -i " + inpath +
+                      " -o " + outpath + " -p ~/plasmidfinder_db/ -d enterobacteriaceae")
         call([plasmidcmd], shell=True)
         count += 1
         with open(outpath + "data.json", "r") as plasmidfinder:
@@ -386,9 +368,11 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
                 for inc in enterobacteriaceae:
                     contig = enterobacteriaceae[inc]["contig_name"].split(" ")[0]
                     if contig in plasmidfinder_dict.keys():
-                        res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
+                        res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(
+                            enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
                     else:
-                        res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
+                        res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(
+                            enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
             except (JSONDecodeError, TypeError):
                 res_loc[""] = "No genes found"
                 call(["rm", "-rf", outpath])
@@ -692,9 +676,9 @@ def create_results(request):
         request: Request information to get information to run the pipeline.
     """
     inputfolder = request.POST.get("inputfolder")
-    inputtype = request.POST.get("inputtype")
-    configuration = request.POST.get("aconfig")
-    outfolder = request.POST.get("albacoreout").replace(" ", "_")
+    # inputtype = request.POST.get("inputtype")
+    # configuration = request.POST.get("aconfig")
+    outfolder = request.POST.get("outfolder").replace(" ", "_")
     res = request.POST.get("res")
     mlst = request.POST.get("mlst")
     species = request.POST.get("species")
@@ -721,52 +705,23 @@ def create_results(request):
         species = ''
     request.session['stored_results'] = request.POST
     call(["mkdir", resultfolder])
-    if request.POST.get("barcoding") == '1' and inputtype == "fast5":
-        call(["mkdir", resultfolder + "/workspace/pass"])
-        call(["mkdir", resultfolder + "/qc"])
-        call([
-            "bash ~/PRIMUL/static/albacore.sh " + res + mlst + species +
-            "-b -c " + configuration + " -i" + inputfolder + "/fast5 -o " +
-            resultfolder + " -f fastq"
-        ], shell=True)
-    elif request.POST.get("barcoding") == '0' and inputtype == "fast5":
-        call(["mkdir", resultfolder + "/workspace/pass"])
-        call(["mkdir", resultfolder + "/qc"])
-        call([
-            "bash ~/PRIMUL/static/albacore.sh " + res + mlst + species +
-            "-c " + configuration + " -i" + inputfolder + "/fast5 -o " +
-            resultfolder + " -f fastq"
-        ], shell=True)
-    if inputtype == "fast5":
-        barcode_list = []
-        time.sleep(15)
-        while True:
-            if os.path.isfile(resultfolder + "/finished.dat"):
-                break
-        albacore_list = os.listdir(resultfolder + "/workspace/pass")
-        for al in albacore_list:
-            if os.path.isdir(resultfolder + "/workspace/pass/" + al):
-                barcode_list.append(al)
-        if not barcode_list:
-            barcode_list = ["fast5"]
+    if os.path.isdir(resultfolder + "/assembly"):
+        barcode_list = os.listdir(resultfolder + "/assembly")
+        for bc in os.listdir(inputfolder):
+            if not os.path.isdir(inputfolder + "/" + bc + "/trimmed"):
+                trim_reads(inputfolder, barcode_list)
     else:
-        if os.path.isdir(resultfolder + "/assembly"):
-            barcode_list = os.listdir(resultfolder + "/assembly")
-            for bc in os.listdir(inputfolder):
-                if not os.path.isdir(inputfolder + "/" + bc + "/trimmed"):
-                    trim_reads(inputfolder, barcode_list)
-        else:
-            barcode_list = os.listdir(inputfolder)
-            for bc in barcode_list:
-                if not os.path.isdir(inputfolder + "/" + bc + "/trimmed"):
-                    trim_reads(inputfolder, barcode_list)
+        barcode_list = os.listdir(inputfolder)
+        for bc in barcode_list:
+            if not os.path.isdir(inputfolder + "/" + bc + "/trimmed"):
+                trim_reads(inputfolder, barcode_list)
     if os.path.exists(resultfolder + "/assembly/"):
         file_list, barcodes = skip_assembly(
             resultfolder, barcode_list)
     else:
         if assembler == "miniasm":
             file_list, barcodes = miniasm(
-                inputtype, inputfolder, barcode_list, resultfolder,
+                inputfolder, barcode_list, resultfolder,
                 kmer, mincontig, circularise
             )
         elif assembler == "flye":
@@ -786,13 +741,8 @@ def create_results(request):
         files = os.listdir(inputfolder + "/" + barcode + "/trimmed")
         for file in files:
             file = inputfolder + "/" + barcode + "/trimmed/" + file
-            if file.split(".")[1] != "fast5":
-                extention = "fasta"
-            else:
-                extention = "fast5"
-            qc_report(extention, barcode, file,
+            qc_report("fasta", barcode, file,
                       resultfolder + "/qc/" + barcode)
-    # plasmidfinder(barcodes, file_list, resultfolder)
     if res == '-r ':
         dummyres_genes, res_loc = resfinder(
             barcodes, file_list, resultfolder, resdb, reslength, residentity)
