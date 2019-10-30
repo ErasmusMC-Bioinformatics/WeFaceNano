@@ -37,98 +37,13 @@
     <p>
         <h2>Pipeline Tools</h2>
         <ul>
-            <li>Albacore 2.3.4</li>
-            <li>Miniamp 2.15</li>
-            <li>Miniasm 0.3</li>
+            <li>Flye 2.4.2</li>
+            <li>Miniamp 2.15-r915</li>
+            <li>Miniasm 0.3-r179</li>
             <li>resFinder 2.1</li>
             <li>BLAST+ 2.8.1</li>
         </ul>
     </p>
-    <h2>Flowcell Configurations</h2>
-    <table class="table">
-        <th>Flowcell</th>
-        <th>Kit(s)</th>
-        <th>Barcoding</th>
-        <th>Config file</th>
-        <tr>
-            <td>FLO-MIN106</td>
-            <td>
-                SQK-DCS108 <br>
-                SQK-LSK108 <br>
-                SQK-LWP001 <br>
-                SQK-PCS108 <br>
-                SQK-RAD002 <br>
-                SQK-RAD003 <br>
-                SQK-RAD004 <br>
-                SQK-RAS201 <br>
-                SQK-RLI001 <br>
-                VSK-VBK001 <br>
-                VSK-VSK001 <br>
-            </td>
-            <td>NO</td>
-            <td>r94_450bps_linear.cfg</td>
-        </tr>
-        <tr>
-            <td>FLO-MIN106</td>
-            <td>
-                SQK-LWB001 <br>
-                SQK-RAB201 <br>
-                SQK-RBK001 <br>
-                SQK-RBK004 <br>
-                SQK-RLB001 <br>
-            </td>
-            <td>YES</td>
-            <td>r94_450bps_linear.cfg</td>
-        </tr>
-        <tr>
-            <td>FLO-MIN106 RNA</td>
-            <td>SQK-RNA001</td>
-            <td>NO</td>
-            <td>r94_70bps_rna_linear.cfg</td>
-        </tr>
-        <tr>
-            <td>FLO-MIN107</td>
-            <td>
-                SQK-DCS108 <br>
-                SQK-LSK108 <br>
-                SQK-LWP001 <br>
-                SQK-PCS108 <br>
-                SQK-RAD002 <br>
-                SQK-RAD003 <br>
-                SQK-RAD004 <br>
-                SQK-RAS201 <br>
-                SQK-RLI001 <br>
-                VSK-VBK001 <br>
-                VSK-VSK001 <br>
-            </td>
-            <td>NO</td>
-            <td>r95_450bps_linear.cfg</td>
-        </tr>
-        <tr>
-            <td>FLO-MIN107</td>
-            <td>
-                SQK-LWB001 <br>
-                SQK-RAB201 <br>
-                SQK-RBK001 <br>
-                SQK-RBK004 <br>
-                SQK-RLB001 <br>
-            </td>
-            <td>YES</td>
-            <td>r95_450bps_linear.cfg</td>
-        </tr>
-        <tr>
-            <td>FLO-MIN107 RNA</td>
-            <td>SQK-RNA001</td>
-            <td>NO</td>
-            <td>r94_70bps_rna_linear.cfg</td>
-        </tr>
-        <tr>
-            <td>FLO-PRO001</td>
-            <td>SQK-LSK108</td>
-            <td>NO</td>
-            <td>r941_450bps_linear_prom.cfg</td>
-        </tr>
-    </table>
     <div id="read_analysis">
         <h2>Nanopore Analysis Pipeline</h2>
         <h3>Basecalling, de-barcoding and FASTQ conversion</h3>
@@ -144,29 +59,49 @@
         </p>
         <h3>Circularize contigs</h3>
         <p>
-            Circlator 1.5.5 can be used to try and circularize the contigs. <br>
-            This option can be selected in the pipeline settings menu and is set to OFF by default. <br>
-            Running the circularize option can take a long time.
-            <br>
-            SPAdes 3.7.1 will be used for reassembling by Circlator.
+            Simple-Circularise is used to try and circularize the contigs when using Miniasm. <br>
+            This option can be selected in the pipeline settings menu and after selecting the Miniasm assembler and is set to OFF by default. <br>
         </p>
         <h3>Plasmid Detection</h3>
         <p>
-            BLAST 2.7.1 is used for plasmid detection.<br>
-            BLAST can be used with a remote database (NT or NR) or with a local NT or toxoplasma database.
+            BLAST+ is used for plasmid detection.<br>
+            BLAST can be used with a remote database (NT or NR) or with a local NT or plasmid database.
         </p>
         <h3>Antibiotic Resistance</h3>
         <p>
-            Resfinder is used to find antimicrobial resistance genes based on the contig file created by Miniasm.<br>
+            resFinder is used to find antibiotic resistance genes based on the contig file created by the assembler.<br>
+            The user can select a specific gene to search or to find all available resistance genes present on the contig.<br>
+            The minimum length cutoff can be entered when using resFinder, this option can be selected from the pipeline menu <br>
+            and has the options 80%, 85%, 90%, 95% and 100%.<br>
+            The % of identity cutoff can be selected from the pipeline menu, the option are 60%, 70%, 80%, 90% and 100%.
+        </p>
+        <h3>Incompatibility factors</h3>
+        <p>
+            plasmidFinder is used to find incompatibility factors based on the contig file created by the assembler.<br>
+            The enterobacteriaceae database will be used by default.
         </p>
     </div>
     <div id="read_results">
         <h2>View Results</h2>
-        <h3>Antibiotic Resistance and BLAST</h3>
+        <h3>QC</h3>
+        <p>
+            A QC report will be shown at the top of the result page. Click on the Show QC button to view the report.<br>
+            The report contains a general summary with the mean read length, median read length, number of reads,<br>
+            read length N50 and total bases. This report includes the following plots: 
+            <ul>
+                <li>Histogram of read length</li>
+                <li>Histogram of read lengths after log transformation</li>
+                <li>Weighted Histogram of read lengths</li>
+                <li>Weighted Histogram of read lengths after log transformation</li>
+                <li>Yield by length</li>
+            </ul>
+        </p>
+        <h3>Antibiotic Resistance, incompatibility factors and BLAST results</h3>
         <p>
             The results will be presented in different headers (Assembly, Resfinder, BLAST and Plasmids). <br>
             The Assembly header will show the contigs created by Miniasm and the length of these contigs. <br>
-            The Resfinder header will show the antibiotic resistance genese found per contig. It will also show the percentage identity of the found gene. <br>
+            The Resfinder header will show the antibiotic resistance genese found per contig.<br>
+            It will also show the percentage identity of the found gene.<br>
         </p>
     </div>
     <div style="clear:both;"></div>
