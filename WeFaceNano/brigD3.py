@@ -173,7 +173,7 @@ class Ring:
             "Macrolide resistance": '#faff00',
             "Rifampicin resistance": '#007fff',
             "": '#ff7ca8',
-            "Inc": '#0000ff'
+            "Inc": '#000000'
         }
         print('Generating Ring:', self.name)
         if "_utg" in self.name or "contig_" in self.name:
