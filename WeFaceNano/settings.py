@@ -1,5 +1,5 @@
 """
-Django settings for PRIMUL project.
+Django settings for WeFaceNano project.
 """
 
 import os
@@ -18,7 +18,7 @@ SECRET_KEY = 'h3_bx^$qo=&3h(rgb95ueo1r%jtk%lbeldxtcw*78a_-zxe$z6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'PRIMUL',
+    'WeFaceNano',
 ]
 
 MIDDLEWARE = [
@@ -43,12 +43,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'PRIMUL.urls'
+ROOT_URLCONF = 'WeFaceNano.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['./PRIMUL', 'PRIMUL/html'],
+        'DIRS': ['./WeFaceNano', 'html'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,7 +61,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'PRIMUL.wsgi.application'
+WSGI_APPLICATION = 'WeFaceNano.wsgi.application'
 
 
 # Database

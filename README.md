@@ -1,4 +1,4 @@
-# Plasmid and Resistance Identification by MinION ULtrafast (PRIMUL)
+# WeFaceNano
 
 [Dependencies](#dependencies)
 
@@ -12,9 +12,10 @@
 
 * Python 3.6 or higher
 * perl5
+* R 3.6.1 or higher
 * Biopython 1.73 or higher
-* Django 2.1.2 or higher
-* Albacore 2.3.4 or higher
+* Django 2.2.8
+* Bandage 0.8.1 or higher
 * Porechop 0.2.4 or higher
 * Minimap 2.15-r915 or higher
 * Miniasm 0.3-r179 or higher
@@ -31,81 +32,37 @@
 
 ## <a name="installation"></a>How to install
 
-1. Install dependencies:
+### Install from source
 
-```bash
-# Python 3, Perl5, NCBI-BLAST+, NCBI-BLAST 2, libgd
-sudo apt-get update
-sudo apt-get install python3.6 perlbrew cpanminus ncbi-blast+ blast2 libgd-dev cmake
+1. Install dependencies by running the install.sh script.
 
-# Django, Biopython, NanoPlot
-pip install django biopython NanoPlot --user
+2. Clone the latest version of WeFaceNano from GitHub [```git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano```]
 
-# PRIMUL
-git clone https://github.com/ErasmusMC-Bioinformatics/PRIMUL
-python PRIMUL/manage.py migrate
+3. Add the static folder to PATH.
 
-# Albacore 2.3.4
-wget https://mirror.oxfordnanoportal.com/software/analysis/ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl
-sudo pip install ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl
-rm ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl
+4. Mount a network drive to the Nanopore path (/mnt/d/Nanopore) to start using WeFaceNano with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
 
-# Porechop
-git clone https://github.com/rrwick/Porechop.git
-cd Porechop
-python3 setup.py install
+5. Start the WeFaceNano server by running the wefacenano_start.sh script.
 
-# Minimap
-git clone https://github.com/lh3/minimap2
-cd minimap2 && make
+6. Log in using admin.
 
-# Miniasm
-git clone https://github.com/lh3/miniasm
-cd miniasm && make
+7. Go to 127.0.0.1:8008 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
 
-# Flye
-git clone https://github.com/fenderglass/Flye
-cd Flye
-python setup.py build
+### Build docker
 
-# Racon
-git clone --recursive https://github.com/isovic/racon.git racon
-cd racon
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
+1. Clone the latest version of WeFaceNano from GitHub [```git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano```].
 
-# KmerGenie
-wget http://kmergenie.bx.psu.edu/kmergenie-1.7051.tar.gz
-tar -xvzf kmergenie-1.7051.tar.gz
-cd kmergenie-1.7051 && make
+2. Open the command line (Windows) or terminal (Linux).
 
-# Resfinder database
-git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db.git
+3. Build the docker: ```docker build -f wefacenano.Dockerfile -t wefacenano .```
 
-# Plasmidfinder
-cd /path/to/some/dir
-git clone https://bitbucket.org/genomicepidemiology/plasmidfinder.git
-cd plasmidfinder
+4. Create a Nanopore working folder and add the blast database and plasmid database to this folder. The BLAST database folder should have the name blastdb with the database name called nt and nr. The plasmid folder and database should have the name plasmidb.
 
-# Simple Circularise
-git clone https://github.com/Kzra/Simple-Circularise
+5. Run the docker: ```docker run -p 8008:8008 -v /path/to/Nanopore_Folder:/mnt/d/Nanopore -it wefacenano```.
 
-# cpan packages
-cpan install Getopt::Long, Bio::SeqIO, Bio::SearchIO, Try::Tiny::Retry and GD
-```
+6. Log in using admin.
 
-2. Mount a network drive to /mnt/d/Nanopore to start using PRIMUL with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
-
-3. Create a django superuser and start the PRIMUL server:
-
-```bash
-django-admin createsuperuser --username username --password password --database path/to/PRIMUL/db.sqlite3
-python path/to/PRIMUL/manage.py runserver 0.0.0.0:8080
-```
-
-4. Go to 127.0.0.1:8080 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
+7. Go to 127.0.0.1:8008 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
 
 ## <a name="usage"></a>Plasmid Pipeline Usage
 
@@ -137,22 +94,10 @@ The default drive will be /mnt/d/Nanopore. In the Nanopore folder, the data stru
     |               |---> reads02.fastq
     |               |---> ...
     |
-    |---> Run03 (not barcoded FAST5)
-    |       |
-    |       |---> fast5
-    |               |---> read01.fast5
-    |               |---> read02.fast5
-    |               |---> ...
-    |
     |---> Run ...
 ```
 
 Click on the pipelines button to start. Select FAST5 is you want to basecall using Albacore 2. If you want to skip the basecalling because you already have the FASTQ files, please select the FASTQ option. Select the project folder and enter a name for your output folder. This folder will be created in the results folder on the network drive. Using the default settings the results will be stored in this folder: <b>/mnt/d/Nanopore/[username]/results/</b>. When using a different path the results will be stored in that location.
-
-If the FAST5 option is selected, please select the following Albacore settings:
-
-* Barcoding [yes or no]
-* Flowcell configuration file.
 
 When selecting the FASTQ option the Albacore basecalling step will be skipped and Flye or Miniasm will use the inputfolder to start the assembly. For the Flye assembly, please enter the genome size. Try to guess if you don't know the exact size. For Miniasm this step can be skipped. If the run is barcoded the tool will run for all barcodes and will calculate the optimal kmer-size for all barcodes. After the Miniasm assembly the Simple-Circularise tool will look for repeats and will try to circularise the contigs.
 
@@ -167,6 +112,7 @@ The options are the threshold % (80%, 85%, 90%, 95%, 100%) and the minimum lengt
 There is also an option to search for a specific gene or search for all available genes within resfinder.
 
 ## <a name="results"></a>View Pipeline Results
+
 When the pipeline is finished running you will be send back to the homepage. On this page you will see a dropdown menu with all generated resultfolders for the user that is logged in. To see any of the generated results select the result you want to view and click the VIEW button. After a few minutes/seconds a resultpage will be shown with the following information:
 
 1. Plots created with NanoPlot (readlength and yield histogram)

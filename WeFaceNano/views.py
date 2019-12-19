@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
 from Bio import Entrez, SeqIO
-from PRIMUL import brigD3
+from WeFaceNano import brigD3
 from subprocess import call, Popen, PIPE
 from json import JSONDecodeError
 
@@ -40,6 +40,13 @@ def signup(request):
             else:
                 call(["mkdir", settings.NANOPORE_DRIVE + username + "/results"])
             return redirect('index')
+        else:
+            message = form.errors
+            return render(request, 'signup.html', context={
+                'form': form,
+                'user': request.session.get("username"),
+                'super': True,
+                'message': message})
     else:
         superusers = User.objects.filter(
             is_superuser=True).values_list('username')
@@ -83,12 +90,36 @@ def index(request):
     else:
         superuser = False
     if request.session.get("username"):
-        network_drive = settings.NANOPORE_DRIVE + request.session.get("username")
-        folders = os.walk(network_drive).__next__()[1]
-        files = os.walk(network_drive).__next__()[2]
-        results_folder = (settings.NANOPORE_DRIVE +
-                          request.session.get("username") + "/results")
-        results = os.walk(results_folder).__next__()[1]
+        if os.path.exists(settings.NANOPORE_DRIVE + request.session.get("username") + "/results"):
+            network_drive = settings.NANOPORE_DRIVE + \
+                request.session.get("username")
+            folders = os.walk(network_drive).__next__()[1]
+            files = os.walk(network_drive).__next__()[2]
+            results_folder = (settings.NANOPORE_DRIVE +
+                              request.session.get("username") + "/results")
+            results = os.walk(results_folder).__next__()[1]
+        else:
+            if not os.path.exists(settings.NANOPORE_DRIVE + request.session.get("username")):
+                call(["mkdir", settings.NANOPORE_DRIVE +
+                      request.session.get("username")])
+                call(["mkdir", settings.NANOPORE_DRIVE +
+                      request.session.get("username") + "/results"])
+            elif os.path.exists(
+                settings.NANOPORE_DRIVE + request.session.get("username")
+            ) and not os.path.exists(
+                settings.NANOPORE_DRIVE +
+                    request.session.get("username") + "/results"
+            ):
+                call(["mkdir", settings.NANOPORE_DRIVE +
+                      request.session.get("username") + "/results"])
+            network_drive = settings.NANOPORE_DRIVE + \
+                request.session.get("username")
+            folders = os.walk(network_drive).__next__()[1]
+            files = os.walk(network_drive).__next__()[2]
+            results_folder = (settings.NANOPORE_DRIVE +
+                              request.session.get("username") + "/results")
+            results = os.walk(results_folder).__next__()[1]
+            redirect('index')
     else:
         folders = []
         files = []
@@ -137,7 +168,7 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
         blaster.runBLAST()
         blast_rings = []
         for i in range(len(blaster.results)):
-            def r(): return random.randint(40, 120)
+            def r(): return random.randint(150, 150)
             color = ('#%02X%02X%02X' % (r(), r(), r()))
             ring_blast = brigD3.BlastRing()
             ring_blast.setOptions(color=color,
@@ -227,7 +258,7 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
                 for node in nodes:
                     call(
                         [
-                            "Bandage image " + resultfolder + "/assembly/" + barcode + "/assembly_graph.gfa " +
+                            "~/./Bandage image " + resultfolder + "/assembly/" + barcode + "/assembly_graph.gfa " +
                             resultfolder + "/assembly/" + barcode + "/" +
                             node.replace("edge", "contig").strip('\n') +
                             ".svg --height 200 --width 200 --iter 4 --colour random --scope aroundnodes --nodes " +
@@ -278,7 +309,7 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
                 ], shell=True)
                 kmer = kmergenie(resultfolder, str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
                 call([
-                    "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    "bash miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
                     str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode +
                     "_cat.fasta -o " + resultfolder + "/assembly/" + barcode + "/" + barcode + "_cat.contigs"
                 ], shell=True)
@@ -289,7 +320,7 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
             else:
                 kmer = kmergenie(resultfolder, inputfolder + "/" + barcode + "/" + barcode_content[0])
                 call([
-                    "bash ~/PRIMUL/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    "bash miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
                     str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" +
                     barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" + 
                     barcode_content[0] + ".contigs"
@@ -407,7 +438,7 @@ def resfinder(barcodes, file_list, resultfolder,
     for file in file_list:
         call(["mkdir", resultfolder + "/resfinder/" + barcodes[count]])
         call([
-            "bash ~/PRIMUL/static/splitfasta.sh " + resultfolder +
+            "splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[count] + "/" + file + " " + resultfolder +
             "/resfinder/" + barcodes[count]
         ], shell=True)
@@ -417,7 +448,7 @@ def resfinder(barcodes, file_list, resultfolder,
                             barcodes[count] + "/" + unitig)
             if resdb != "all":
                 call([
-                    "perl ~/PRIMUL/static/resfinder.pl "
+                    "resfinder.pl "
                     "-d ~/resfinder_db -i " + fasta_unitig +
                     " -a " + resdb + " -o " + resultfolder + "/resfinder/" +
                     barcodes[count] + " -k " + residentity + " -l " + reslength
@@ -425,7 +456,7 @@ def resfinder(barcodes, file_list, resultfolder,
             else:
                 for db in db_all:
                     call([
-                        "perl ~/PRIMUL/static/resfinder.pl -d "
+                        "resfinder.pl -d "
                         "~/resfinder_db -i " + fasta_unitig +
                         " -a " + db + " -o " + resultfolder + "/resfinder/" +
                         barcodes[count] + " -k " + residentity +
@@ -491,7 +522,7 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
         unitig_bc = []
         call(["mkdir", resultfolder + "/BLAST/" + barcodes[bcount]])
         call([
-            "bash ~/PRIMUL/static/splitfasta.sh " + resultfolder +
+            "splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[bcount] + "/" + fasta + " " +
             blastfolder + "/" + barcodes[bcount]
         ], shell=True)
