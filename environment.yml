@@ -1,0 +1,31 @@
+name: WeFaceNano
+channels:
+  - anaconda
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.6
+  - pip
+  - bandage
+  - libiconv
+  - gcc_linux-64
+  - gxx_linux-64
+  - perl
+  - perl-app-cpanminus
+  - perl-bioperl
+  - perl-xml-libxml
+  - perl-gd
+  - perl-db-file
+  - perl-try-tiny-retry
+  - r-base=3.5.1
+  - biopython
+  - django=2.2.8
+  - porechop
+  - minimap2
+  - miniasm
+  - Flye
+  - racon
+  - plasmidfinder
+  - blast
+  - blast-legacy
+  - nanoplot
