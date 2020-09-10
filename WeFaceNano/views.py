@@ -200,7 +200,7 @@ def kmergenie(resultfolder, inputfile):
     kmer = "15"
     call(["mkdir", resultfolder + "/kmer"])
     kmergenie_out = Popen(
-        ["~/kmergenie-1.7051/kmergenie " + inputfile +
+        ["$HOME/kmergenie-1.7051/kmergenie " + inputfile +
             " -l 13 -k 21 -s 1 -o " + resultfolder + "/kmer/kmersizeoutput"],
         stdout=PIPE, shell=True).communicate()[0].decode()
     for line in kmergenie_out.split("\n"):
@@ -258,7 +258,7 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
                 for node in nodes:
                     call(
                         [
-                            "~/./Bandage image " + resultfolder + "/assembly/" + barcode + "/assembly_graph.gfa " +
+                            "Bandage image " + resultfolder + "/assembly/" + barcode + "/assembly_graph.gfa " +
                             resultfolder + "/assembly/" + barcode + "/" +
                             node.replace("edge", "contig").strip('\n') +
                             ".svg --height 200 --width 200 --iter 4 --colour random --scope aroundnodes --nodes " +
@@ -309,7 +309,7 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
                 ], shell=True)
                 kmer = kmergenie(resultfolder, str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
                 call([
-                    "bash miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    "bash $HOME/WeFaceNano/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
                     str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode +
                     "_cat.fasta -o " + resultfolder + "/assembly/" + barcode + "/" + barcode + "_cat.contigs"
                 ], shell=True)
@@ -320,7 +320,7 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
             else:
                 kmer = kmergenie(resultfolder, inputfolder + "/" + barcode + "/" + barcode_content[0])
                 call([
-                    "bash miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    "bash $HOME/WeFaceNano/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
                     str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" +
                     barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" + 
                     barcode_content[0] + ".contigs"
@@ -388,8 +388,8 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
         inpath = resultfolder + "/assembly/" + \
             barcodes[count] + "/" + assemblyfile
         outpath = str(resultfolder + "/plasmidfinder/" + barcodes[count] + "/")
-        plasmidcmd = ("python3 ~/plasmidfinder/plasmidfinder.py -i " + inpath +
-                      " -o " + outpath + " -p ~/plasmidfinder_db/ -d enterobacteriaceae")
+        plasmidcmd = ("plasmidfinder.py -i " + inpath +
+                      " -o " + outpath + " -p $HOME/plasmidfinder_db/ -d enterobacteriaceae")
         call([plasmidcmd], shell=True)
         count += 1
         with open(outpath + "data.json", "r") as plasmidfinder:
@@ -438,7 +438,7 @@ def resfinder(barcodes, file_list, resultfolder,
     for file in file_list:
         call(["mkdir", resultfolder + "/resfinder/" + barcodes[count]])
         call([
-            "splitfasta.sh " + resultfolder +
+            "bash $HOME/WeFaceNano/static/splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[count] + "/" + file + " " + resultfolder +
             "/resfinder/" + barcodes[count]
         ], shell=True)
@@ -448,16 +448,16 @@ def resfinder(barcodes, file_list, resultfolder,
                             barcodes[count] + "/" + unitig)
             if resdb != "all":
                 call([
-                    "resfinder.pl "
-                    "-d ~/resfinder_db -i " + fasta_unitig +
+                    "perl $HOME/WeFaceNano/static/resfinder.pl "
+                    "-d $HOME/resfinder_db -i " + fasta_unitig +
                     " -a " + resdb + " -o " + resultfolder + "/resfinder/" +
                     barcodes[count] + " -k " + residentity + " -l " + reslength
                 ], shell=True)
             else:
                 for db in db_all:
                     call([
-                        "resfinder.pl -d "
-                        "~/resfinder_db -i " + fasta_unitig +
+                        "perl $HOME/WeFaceNano/static/resfinder.pl -d "
+                        "$HOME/resfinder_db -i " + fasta_unitig +
                         " -a " + db + " -o " + resultfolder + "/resfinder/" +
                         barcodes[count] + " -k " + residentity +
                         " -l " + reslength
@@ -522,7 +522,7 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
         unitig_bc = []
         call(["mkdir", resultfolder + "/BLAST/" + barcodes[bcount]])
         call([
-            "splitfasta.sh " + resultfolder +
+            "bash $HOME/WeFaceNano/static/splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[bcount] + "/" + fasta + " " +
             blastfolder + "/" + barcodes[bcount]
         ], shell=True)
