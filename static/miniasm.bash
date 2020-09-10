@@ -49,8 +49,8 @@ case "$VERSION"
 in
 0) echo "Select a MiniMap version (-v1 or -v2)"
 	exit 1;;
-1) time ~/minimap/minimap -Sw5 -L100 -m0 -k "$KMER" "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
-2) time ~/minimap2/minimap2 -x ava-ont -k "$KMER" "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
+1) time minimap -Sw5 -L100 -m0 -k "$KMER" "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
+2) time minimap2 -x ava-ont -k "$KMER" "$FASTQFile" "$FASTQFile" | gzip -1 > "$TEMPPAF";;
 esac
 echo
 echo -n "MiniMap End: "
@@ -59,7 +59,7 @@ echo
 ### 2) Miniasm
 echo -n "Miniasm Start: "
 date
-time ~/miniasm/miniasm -f "$FASTQFile" "$TEMPPAF" > "$GFAOUTPUT"
+time miniasm -f "$FASTQFile" "$TEMPPAF" > "$GFAOUTPUT"
 echo -n "Miniasm End: "
 date
 echo
@@ -70,7 +70,7 @@ echo "Concensus build"
 echo
 echo "Run Minimap against the concensus"
 echo
-time ~/minimap2/minimap2 "$FASTQFile.raw.fasta" "$FASTQFile" > "$FASTQFile.mapped.paf"
+time minimap2 "$FASTQFile.raw.fasta" "$FASTQFile" > "$FASTQFile.mapped.paf"
 echo
 echo "Run racon"
 echo
@@ -110,6 +110,6 @@ echo -n "Removing temp racon file ..... "
 rm "$FASTQFile.racon.fasta"
 echo -n "-Finishing MiniMap / Miniasm pipeline at: "
 if [ "${CIRCULARISE}" = "1" ]; then
-time python3 ~/Simple-Circularise/simple_circularise.py -p 0.0001 "$FASTAOUT" "$FASTAOUT"
+time python3 $HOME/Simple-Circularise/simple_circularise.py -p 0.0001 "$FASTAOUT" "$FASTAOUT"
 fi
 date
