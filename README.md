@@ -12,7 +12,7 @@
 
 * Python 3.6 or higher
 * perl5
-* R 3.6.1 or higher
+* R 3.5.1 or higher
 * Biopython 1.73 or higher
 * Django 2.2.8
 * Bandage 0.8.1 or higher
@@ -34,35 +34,26 @@
 
 ### Install from source
 
-1. Install dependencies by running the install.sh script.
+1. Install Conda and set permissions.
 
-2. Clone the latest version of WeFaceNano from GitHub [```git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano```]
+2. Clone the latest version of WeFaceNano from GitHub to your home directory [```git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano```]
 
-3. Add the static folder to PATH.
+3. Create conda environment using the environment.yml file [```conda env create -f $HOME/WeFaceNano/environment.yml --name WeFaceNano```]
 
-4. Mount a network drive to the Nanopore path (/mnt/d/Nanopore) to start using WeFaceNano with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
+4. Activate the environment [```conda activate WeFaceNano```]
 
-5. Start the WeFaceNano server by running the wefacenano_start.sh script.
+5. Use the install file to download and install the resfinder and plasmidfinder databases, Simple-Circularize and KmerGenie [```bash $HOME/WeFaceNano/install.sh```]
 
-6. Log in using admin.
+5. Mount a network drive to the Nanopore path (/mnt/d/Nanopore) to start using WeFaceNano with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
 
-7. Go to 127.0.0.1:8008 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
+6. Add the BLAST databases to the Nano path. Add them to the blastdb and/or plasmidb folders.
 
-### Build docker
+7. Start the WeFaceNano server by running the wefacenano_start.sh script.
 
-1. Clone the latest version of WeFaceNano from GitHub [```git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano```].
+8. Log in using admin.
 
-2. Open the command line (Windows) or terminal (Linux).
+9. Go to 127.0.0.1:8008 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
 
-3. Build the docker: ```docker build -f wefacenano.Dockerfile -t wefacenano .```
-
-4. Create a Nanopore working folder and add the blast database and plasmid database to this folder. The BLAST database folder should have the name blastdb with the database name called nt and nr. The plasmid folder and database should have the name plasmidb.
-
-5. Run the docker: ```docker run -p 8008:8008 -v /path/to/Nanopore_Folder:/mnt/d/Nanopore -it wefacenano```.
-
-6. Log in using admin.
-
-7. Go to 127.0.0.1:8008 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
 
 ## <a name="usage"></a>Plasmid Pipeline Usage
 
