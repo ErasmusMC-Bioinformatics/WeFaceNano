@@ -69,7 +69,7 @@
    ```bash
    bash wefacenano_start.sh
    ```
-9. Open a browser, and navigate to [127.0.0.1:80008](127.0.0.1:8008).
+9. Open a browser, and navigate to [127.0.0.1:8008](http://127.0.0.1:8008).
 
 10. You can now log in and start using the plasmid pipeline (default admin credentials are:
    ```
