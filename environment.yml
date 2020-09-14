@@ -1,6 +1,5 @@
 name: WeFaceNano
 channels:
-  - anaconda
   - conda-forge
   - bioconda
 dependencies:
