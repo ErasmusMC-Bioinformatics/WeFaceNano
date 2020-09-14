@@ -2,7 +2,7 @@
 
 [Dependencies](#dependencies)
 
-[installation](#installation)
+[Installation](#installation)
 
 [Usage](#usage)
 
@@ -34,33 +34,56 @@
 
 ### Install from source
 
-1. Install Conda and set permissions.
+1. Install Conda according to the [official instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/).
 
-2. Clone the latest version of WeFaceNano from GitHub to your home directory [```git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano```]
+2. Clone the latest version of WeFaceNano from GitHub:
+   ```bash
+   git clone https://github.com/ErasmusMC-Bioinformatics/WeFaceNano
+   ```
 
-3. Create conda environment using the environment.yml file [```conda env create -f $HOME/WeFaceNano/environment.yml --name WeFaceNano```]
+3. Install the conda environment using the environment.yml file
+   ```bash
+   cd WeFaceNano
+   conda env create -f environment.yml --name WeFaceNano
+   ```
 
-4. Activate the environment [```conda activate WeFaceNano```]
+4. Activate the environment
+   ```bash
+   conda activate WeFaceNano
+   ```
 
-5. Use the install file to download and install the resfinder and plasmidfinder databases, Simple-Circularize and KmerGenie [```bash $HOME/WeFaceNano/install.sh```]
+5. Install the resfinder and plasmidfinder databases, and the Simple-Circularize and KmerGenie tools
+   ```bash
+   bash install.sh
+   ```
 
-5. Mount a network drive to the Nanopore path (/mnt/d/Nanopore) to start using WeFaceNano with the default settings. You can change the default nanopore drive in the settings.py by changing the NANOPORE_DRIVE variable.
+5. Configure a location for the input datasets.
+   - This defautls to `/mnt/d/Nanopore`
+   - This can be changed by editing the `settings.py` file and updating the `NANOPORE_DRIVE` variable.
+   - This should be a location you can easily share with all users
 
-6. Add the BLAST databases to the Nano path. Add them to the blastdb and/or plasmidb folders.
+6. Add the BLAST databases to the Nanopore path.
+   - Add them to folders named `blastdb` and `plasmidb` respectively.
 
-7. Start the WeFaceNano server by running the wefacenano_start.sh script.
+7. Start the WeFaceNano server by running the `wefacenano_start.sh` script:
+   ```bash
+   bash wefacenano_start.sh
+   ```
+9. Open a browser, and navigate to [127.0.0.1:80008](127.0.0.1:8008).
 
-8. Log in using admin.
-
-9. Go to 127.0.0.1:8008 to see if the server is running and the homepage is visible. If the homepage is visible you can now log in and start using the plasmid pipeline.
+10. You can now log in and start using the plasmid pipeline (default admin credentials are:
+   ```
+   username: `admin`
+   password: `admin`
+   ```
 
 
 ## <a name="usage"></a>Plasmid Pipeline Usage
 
-To start using the Nanopore pipeline a user account has to be created by a superuser.
+To start using the Nanopore pipeline a user account has to be created by a superuser (admin).
 
 If you are logged in as a superuser, a new user can be created by clicking the sign up button and entering a username and password. When the new user is created a new folder will appear on the network drive with the username. This drive can be mounted on the users local machine and new data can be added using that mounted drive.
-The default drive will be /mnt/d/Nanopore. In the Nanopore folder, the data structure should be as follows:
+The default drive will be `/mnt/d/Nanopore`. In the Nanopore folder, the data structure should be as follows:
 
 ```text
 [username]
