@@ -18,4 +18,12 @@ cd nanopore-drive
 git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db
 git clone https://bitbucket.org/genomicepidemiology/plasmidfinder_db
 
+cd plasmidfinder_db
+./INSTALL.py
+cd ../resfinder_db
+./INSTALL.py
+cd ../
+ln -s plasmidfinder_db plasmidb
+
+
 
