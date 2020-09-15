@@ -61,7 +61,6 @@
     {% for b in barcodes %}
         <div id="{{ b }}" class="tabcontent" style="display:none;">
             {% for r, q in qc.items %}
-                {% if r in b %}
                     <h3>QC report</h3>
                     <div class="tab">
                         <button id="showqc" onclick="showQC()" class="runbutton">Show report</button>
@@ -69,7 +68,6 @@
                     <div id="qcreport" style="display:none;">
                         <iframe srcdoc="{{ q }}" frameborder="0" scrolling="yes" height="800" width="100%"></iframe>
                     </div>
-                {% endif %}
             {% endfor %}
             {% for res, tools in dict.items %}
                 <h3>Assembly</h3>
@@ -122,8 +120,8 @@
                    </table>
                 {% endif %}
                 <br>
-                {% if resfinder %}
                     <h3>Antibiotic Resistance Genes</h3>
+                {% if resfinder %}
                     <table class="table">
                         <th><a>Contig</a></th>
                         <th><a>Gene(s)</a></th>
@@ -142,6 +140,8 @@
                         {% endif %}
                     {% endfor %}
                     </table>
+				{% else %}
+				No results
                 {% endif %}
             {% endfor %}
             {% if blastresults %}
