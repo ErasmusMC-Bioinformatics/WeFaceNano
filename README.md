@@ -48,8 +48,8 @@
 
 7. Log in using the default admin credentials:
    ```
-   username: `admin`
-   password: `admin`
+   username: admin
+   password: admin
    ```
 
 
@@ -57,7 +57,7 @@
 
 In this section, we will guide you through running a pipeline on some testdata
 
-1. First, we download some test data (data from [Lin et al. 2017](http://gigadb.org/dataset/100387)):
+1. First, we download some test data (~150MB; data from [Lin et al. 2017](http://gigadb.org/dataset/100387)):
    ```
    make download-testdata
    ```
@@ -67,15 +67,15 @@ In this section, we will guide you through running a pipeline on some testdata
 
 4. Configure the workflow
   - Select the input folder `testdata-small`
-  - Choose a name for the output files
+  - Choose a name for the results directory
   - Select `miniasm` as the assembler
   - Check the box for `resFinder` tool
-  - Leave everything else on their default settings
+  - Leave everything else on their default settings:
     ![](screenshot.png)
 
 5. Click **Run**
 
-6. The pipeline will take some time to complete
+6. The pipeline will take quite some time to complete
   - You can view the progress in the terminal
 
 7. Once the pipeline has finished, you will be able to view the results in the webpage.
@@ -130,13 +130,6 @@ The default drive will be `nanopore-drive` (inside the WeFaceNano folder). In th
     |               |---> reads01.fastq
     |               |---> reads02.fastq
     |               |---> ...
-    |
-    |---> Run03 (not barcoded FASTA)
-    |      |
-    |      |---> fasta
-    |              |--> reads01.fasta
-    |              |--> reads02.fasta
-    |              |--> ...
     |
     |---> Run ...
 ```
