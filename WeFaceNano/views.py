@@ -389,7 +389,7 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
             barcodes[count] + "/" + assemblyfile
         outpath = str(resultfolder + "/plasmidfinder/" + barcodes[count] + "/")
         plasmidcmd = ("plasmidfinder.py -i " + inpath +
-                      " -o " + outpath + " -p "+ settings.BASE_DIR + "/plasmidfinder_db/ -d enterobacteriaceae")
+                      " -o " + outpath + " -p "+ settings.BASE_DIR + "/" + settings.NANOPORE_DRIVE + "plasmidfinder_db/ -d enterobacteriaceae")
         print(plasmidcmd)
         call([plasmidcmd], shell=True)
         count += 1
@@ -450,7 +450,7 @@ def resfinder(barcodes, file_list, resultfolder,
             if resdb != "all":
                 call([
                     "perl " + settings.BASE_DIR + "/static/resfinder.pl "
-                    "-d " + settings.BASE_DIR + "/resfinder_db -i " + fasta_unitig +
+                    "-d " + settings.BASE_DIR + "/" + settings.NANOPORE_DRIVE + "resfinder_db -i " + fasta_unitig +
                     " -a " + resdb + " -o " + resultfolder + "/resfinder/" +
                     barcodes[count] + " -k " + residentity + " -l " + reslength
                 ], shell=True)
@@ -458,7 +458,7 @@ def resfinder(barcodes, file_list, resultfolder,
                 for db in db_all:
                     call([
                         "perl " + settings.BASE_DIR + "/static/resfinder.pl -d " +
-                        settings.BASE_DIR + "/resfinder_db -i " + fasta_unitig +
+                        settings.BASE_DIR + "/" + settings.NANOPORE_DRIVE + "/resfinder_db -i " + fasta_unitig +
                         " -a " + db + " -o " + resultfolder + "/resfinder/" +
                         barcodes[count] + " -k " + residentity +
                         " -l " + reslength
