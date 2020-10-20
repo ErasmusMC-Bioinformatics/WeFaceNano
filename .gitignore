@@ -1,2 +1,4 @@
 WeFaceNano/__pycache__/
 .vscode/settings.json
+*.swp
+*.swo

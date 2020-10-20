@@ -76,8 +76,8 @@ def index(request):
     Shows the homepage where you can select a result from the users results folder.
 
     Arguments:
-        request: Request information when user is logged in. 
-        Shows information about the users network drive 
+        request: Request information when user is logged in.
+        Shows information about the users network drive
         and if user is a superuser.
     """
     superusers = User.objects.filter(is_superuser=True).values_list('username')
@@ -145,7 +145,7 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
         name: A list of plasmid names.
         length: The length of the plasmid.
         path: The path to store te HTML output.
-        res_loc: The names and locations of the 
+        res_loc: The names and locations of the
         antibiotic resistance genes.
     """
     resistance_genes = {}
@@ -189,18 +189,18 @@ def draw_plasmid(contigfasta, contigname, genbank, refseq,
 
 def kmergenie(resultfolder, inputfile):
     """Calculate the kmer-size that will be used when running minimap.
-    
+
     Arguments:
         inputfile: The path to the nanopore reads to calculate the kmer-size
         resultfolder: Path to store the kmergenie output files.
-    
+
     Returns:
         The calculated kmer-size.
     """
     kmer = "15"
     call(["mkdir", resultfolder + "/kmer"])
     kmergenie_out = Popen(
-        ["$HOME/kmergenie-1.7051/kmergenie " + inputfile +
+        [settings.BASE_DIR + "/kmergenie-1.7051/kmergenie " + inputfile +
             " -l 13 -k 21 -s 1 -o " + resultfolder + "/kmer/kmersizeoutput"],
         stdout=PIPE, shell=True).communicate()[0].decode()
     for line in kmergenie_out.split("\n"):
@@ -211,14 +211,14 @@ def kmergenie(resultfolder, inputfile):
 
 def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
     """Use Flye as the assembler and return the assembly as a FASTA file.
-    
+
     Arguments:
         inputfolder: Name of the folder with the inputfiles.
         resultfolder: Folder where the results will be stored.
         barcode_list: A list of barcodes.
         genomesize: The estimated genome size.
         options: The selected --plasmid and/or --meta options.
-    
+
     Returns:
         A list of FASTA paths, FASTA filenames and barcodes.
     """
@@ -268,10 +268,10 @@ def flye(inputfolder, resultfolder, barcode_list, genomesize, options):
 
 
 def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularise):
-    """Use Miniasm for assembly and return the assembly as a FASTA file. 
-    The Kmer-size will be calculated with KmerGenie so the user will not have to 
+    """Use Miniasm for assembly and return the assembly as a FASTA file.
+    The Kmer-size will be calculated with KmerGenie so the user will not have to
     manually enter this value. A minimum contig size can be entered to filter out
-    all contigs smaller than this value. The default value will be 15000 when 
+    all contigs smaller than this value. The default value will be 15000 when
     no value is entered.
 
     Arguments:
@@ -280,7 +280,7 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
         barcode_list: A list of barcodes.
         resultfolder: Folder where the results will be stored.
         kmer: Kmer-size calculated with KmerGenie.
-        mincontig: The minimum contig length. 
+        mincontig: The minimum contig length.
         All contig smaller will be filtered out.
 
     Returns:
@@ -309,7 +309,7 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
                 ], shell=True)
                 kmer = kmergenie(resultfolder, str(inputfolder + "/" + barcode + "/trimmed/" + barcode + "_cat.fasta"))
                 call([
-                    "bash $HOME/WeFaceNano/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    "bash " + settings.BASE_DIR + "/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " +
                     str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" + barcode +
                     "_cat.fasta -o " + resultfolder + "/assembly/" + barcode + "/" + barcode + "_cat.contigs"
                 ], shell=True)
@@ -320,9 +320,9 @@ def miniasm(inputfolder, barcode_list, resultfolder, kmer, mincontig, circularis
             else:
                 kmer = kmergenie(resultfolder, inputfolder + "/" + barcode + "/" + barcode_content[0])
                 call([
-                    "bash $HOME/WeFaceNano/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " + 
+                    "bash " + settings.BASE_DIR + "/static/miniasm.bash -v2 -m " + mincontig + " -k " + kmer + " -c " +
                     str(circularise) + " -i " + inputfolder + "/" + barcode + "/trimmed/" +
-                    barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" + 
+                    barcode_content[0] + " -o " + resultfolder + "/assembly/" + barcode + "/" +
                     barcode_content[0] + ".contigs"
                 ], shell=True)
             files = os.listdir(resultfolder + "/assembly/" + barcode)
@@ -368,14 +368,14 @@ def skip_assembly(resultfolder, barcode_list):
 
 
 def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
-    """Run plasmidfinder on all FASTA files in the list on the 
+    """Run plasmidfinder on all FASTA files in the list on the
     plasmidfinder enterobacteriaceae database.
-    
+
     Arguments:
         barcodes: A list of barcodes
         file_list: A list of files that contains the assembly.
         resultfolder: The ouputfolder to store the results.
-    
+
     Raises:
         JSONDecodeError: Incorrect JSON format or missing data.
         TypeError: No hit is found by Plasmidfinder.
@@ -389,11 +389,12 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
             barcodes[count] + "/" + assemblyfile
         outpath = str(resultfolder + "/plasmidfinder/" + barcodes[count] + "/")
         plasmidcmd = ("plasmidfinder.py -i " + inpath +
-                      " -o " + outpath + " -p $HOME/plasmidfinder_db/ -d enterobacteriaceae")
+                      " -o " + outpath + " -p "+ settings.BASE_DIR + "/" + settings.NANOPORE_DRIVE + "plasmidfinder_db/ -d enterobacteriaceae")
+        print(plasmidcmd)
         call([plasmidcmd], shell=True)
         count += 1
-        with open(outpath + "data.json", "r") as plasmidfinder:
-            try:
+        try:
+            with open(outpath + "data.json", "r") as plasmidfinder:
                 load = json.loads(plasmidfinder.read())
                 enterobacteriaceae = load["plasmidfinder"]["results"]["Enterobacteriaceae"]["enterobacteriaceae"]
                 for inc in enterobacteriaceae:
@@ -404,15 +405,15 @@ def plasmidfinder(barcodes, file_list, resultfolder, res_loc):
                     else:
                         res_loc[contig + "_" + enterobacteriaceae[inc]["plasmid"] + "_" + str(
                             enterobacteriaceae[inc]["identity"]) + "_Inc"] = enterobacteriaceae[inc]["positions_in_contig"].split("..")
-            except (JSONDecodeError, TypeError):
-                res_loc[""] = "No genes found"
-                call(["rm", "-rf", outpath])
+        except (JSONDecodeError, TypeError):
+            res_loc[""] = "No genes found"
+            call(["rm", "-rf", outpath])
     return res_loc
 
 
 def resfinder(barcodes, file_list, resultfolder,
               resdb, reslength, residentity):
-    """Runs resfinder on all FASTA files in the list on the 
+    """Runs resfinder on all FASTA files in the list on the
     selected database or all databases.
 
     Arguments:
@@ -424,7 +425,7 @@ def resfinder(barcodes, file_list, resultfolder,
         residentity: The % of identity cutoff when using resfinder.
 
     Returns:
-        A dictionary with the contigs and the found genes and 
+        A dictionary with the contigs and the found genes and
         the gene locations within the contigs.
     """
     call(["mkdir", resultfolder + "/resfinder"])
@@ -438,7 +439,7 @@ def resfinder(barcodes, file_list, resultfolder,
     for file in file_list:
         call(["mkdir", resultfolder + "/resfinder/" + barcodes[count]])
         call([
-            "bash $HOME/WeFaceNano/static/splitfasta.sh " + resultfolder +
+            "bash " + settings.BASE_DIR + "/static/splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[count] + "/" + file + " " + resultfolder +
             "/resfinder/" + barcodes[count]
         ], shell=True)
@@ -448,16 +449,16 @@ def resfinder(barcodes, file_list, resultfolder,
                             barcodes[count] + "/" + unitig)
             if resdb != "all":
                 call([
-                    "perl $HOME/WeFaceNano/static/resfinder.pl "
-                    "-d $HOME/resfinder_db -i " + fasta_unitig +
+                    "perl " + settings.BASE_DIR + "/static/resfinder.pl "
+                    "-d " + settings.BASE_DIR + "/" + settings.NANOPORE_DRIVE + "resfinder_db -i " + fasta_unitig +
                     " -a " + resdb + " -o " + resultfolder + "/resfinder/" +
                     barcodes[count] + " -k " + residentity + " -l " + reslength
                 ], shell=True)
             else:
                 for db in db_all:
                     call([
-                        "perl $HOME/WeFaceNano/static/resfinder.pl -d "
-                        "$HOME/resfinder_db -i " + fasta_unitig +
+                        "perl " + settings.BASE_DIR + "/static/resfinder.pl -d " +
+                        settings.BASE_DIR + "/" + settings.NANOPORE_DRIVE + "/resfinder_db -i " + fasta_unitig +
                         " -a " + db + " -o " + resultfolder + "/resfinder/" +
                         barcodes[count] + " -k " + residentity +
                         " -l " + reslength
@@ -495,7 +496,7 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
     Arguments:
         barcodes: A list of barcodes that contains contigs.
         file_list: A list of filenames to use with BLAST.
-        resultfolder: The folder where the 
+        resultfolder: The folder where the
         BLAST results will be stored.
         blastdb: The selected BLAST database.
         task: The selected task in BLAST (blastn or megablast)
@@ -522,7 +523,7 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
         unitig_bc = []
         call(["mkdir", resultfolder + "/BLAST/" + barcodes[bcount]])
         call([
-            "bash $HOME/WeFaceNano/static/splitfasta.sh " + resultfolder +
+            "bash " + settings.BASE_DIR + "/static/splitfasta.sh " + resultfolder +
             "/assembly/" + barcodes[bcount] + "/" + fasta + " " +
             blastfolder + "/" + barcodes[bcount]
         ], shell=True)
@@ -603,9 +604,9 @@ def run_blast(barcodes, file_list, resultfolder, blastdb, task, res_loc):
                                                      ref_folder + "/" +
                                                      ref_file) as ref_rb_file:
                                                with open(blastfolder + "/" +
-                                                         barcodes[bcount] + 
-                                                         "/" + utig[:-6] + 
-                                                         ".refseq.fasta", 
+                                                         barcodes[bcount] +
+                                                         "/" + utig[:-6] +
+                                                         ".refseq.fasta",
                                                          "w") as ref:
                                                    ref.write(
                                                        ref_rb_file.read())
@@ -792,7 +793,7 @@ def qc_report(extention, barcode, filename, outfolder):
     """Runs the NanoPot QC tool on the FASTA or FASTQ file. Generates
     an HTML page with QC stats and read distribution plots. When using a
     FASTQ file quality score information will be shown.
-    
+
     Arguments:
         extention: File extention (fasta or fastq).
         barcode: Barcode name.
@@ -898,7 +899,7 @@ def pipeline_start(request):
 
 @csrf_exempt
 def get_stored_results(request):
-    """Gets stored results from the network drive after the user selects a 
+    """Gets stored results from the network drive after the user selects a
     previously run analysis from the homepage.
 
     Arguments:
@@ -911,6 +912,7 @@ def get_stored_results(request):
     blast_res_dict = {}
     resfinder_dict = {}
     assembly_report = []
+    plasmidfinder_dict = {}
     topology = {}
     tools = []
     barcodes = []
@@ -934,6 +936,7 @@ def get_stored_results(request):
                                    username + "/results/" + r)
                 if tools:
                     for t in tools:
+                        print('hxr', t)
                         if "." not in t:
                             tool_list.append(t)
                             res_dict[r] = tool_list
@@ -952,6 +955,7 @@ def get_stored_results(request):
                             plasmidfinder_dict = get_stored_plasmidfinder_results(
                                 username, r)
                         if t == "assembly":
+                            print(get_stored_assembly_results(username, r))
                             assembly_report = get_stored_assembly_results(
                                 username, r)[0]
                             barcodes = get_stored_assembly_results(
@@ -966,7 +970,7 @@ def get_stored_results(request):
                         "super": superuser,
                         "user": username,
                         'error': err})
-    return render_to_response("results.html", context={
+    ctx = {
         "super": superuser,
         "user": username,
         "results": results,
@@ -981,16 +985,20 @@ def get_stored_results(request):
         "barcodes": barcodes,
         "topology": topology,
         "qc": qc_html,
-        "graphs": graphs})
+        "graphs": graphs}
+
+    for k, v in ctx.items():
+        print(k, str(v)[0:25])
+    return render_to_response("results.html", context=ctx)
 
 
 def get_stored_qc(username, r):
     """Get the QC pages stored on the drive.
-    
+
     Arguments:
         username: The user that is logged in.
         r: Name of the selected run.
-    
+
     Returns:
         Dictionary with qc html page.
     """
@@ -1000,11 +1008,10 @@ def get_stored_qc(username, r):
     for bc in os.listdir(qc_bc):
         folder = (settings.NANOPORE_DRIVE + username +
                   "/results/" + r + "/qc/" + bc)
-        for qc in os.listdir(folder):
-            if ".html" in qc:
-                with open(folder + "/" + qc) as qcpage:
-                    qc_html = qcpage.read()
-                qc_dict[bc] = qc_html
+        html = sorted([x for x in os.listdir(folder) if '.html' in x])[::-1]
+        with open(folder + "/" + html[0]) as qcpage:
+            qc_html = qcpage.read()
+        qc_dict[bc] = qc_html
     return qc_dict
 
 
@@ -1016,7 +1023,7 @@ def get_stored_blast_results(username, r):
         r: Name of the selected run
 
     Returns:
-        A dictionary with BLAST files, BLAST result information and 
+        A dictionary with BLAST files, BLAST result information and
         the HTML code to view the plasmid.
 
     Raises:
@@ -1089,9 +1096,9 @@ def get_stored_resfinder_results(username, r):
         r: Name of the selected run.
 
     Returns:
-        A dictionary with resfinder results 
+        A dictionary with resfinder results
         (Contig name, antibiotic resistance genes and percentag identity).
-    
+
     Raises:
         IndexError: No resfinder information available.
     """
@@ -1108,7 +1115,7 @@ def get_stored_resfinder_results(username, r):
             if os.stat(
                 settings.NANOPORE_DRIVE + username + "/results/" + r +
                     "/resfinder/" + resfolder + "/results_tab.txt"
-            ).st_size > 0:
+            ).st_size >= 0:
                 with open(settings.NANOPORE_DRIVE + username + "/results/" + r +
                           "/resfinder/" + resfolder +
                           "/results_tab.txt") as resfinderfile:
@@ -1136,11 +1143,11 @@ def get_stored_resfinder_results(username, r):
 
 def get_stored_plasmidfinder_results(username, r):
     """Get stored plasmidfinder results based on the selected run.
-    
+
     Arguments:
         username: The user that is logged in.
         r: Name of the selected run.
-    
+
     Returns:
         A dictionary with contigs and gene names.
 
@@ -1150,9 +1157,9 @@ def get_stored_plasmidfinder_results(username, r):
     """
     plasmidfinder_dict = {}
     plasmidfinder_results = (os.listdir(
-        settings.NANOPORE_DRIVE + username + "/results/" + r + "/plasmidfinder/"))
+        settings.NANOPORE_DRIVE + "/" + username + "/results/" + r + "/plasmidfinder/"))
     for bc in plasmidfinder_results:
-        plasmidfile = (settings.NANOPORE_DRIVE + username +
+        plasmidfile = (settings.NANOPORE_DRIVE + "/" + username +
                        "/results/" + r + "/plasmidfinder/" + bc + "/data.json")
         with open(plasmidfile, "r") as plasmidfinder:
             try:
@@ -1202,13 +1209,13 @@ def get_stored_assembly_results(username, r):
             settings.NANOPORE_DRIVE + username + "/results/" + r +
             "/assembly/" + assemblyfolder)
         for assembly in assembly_barcode:
-            if ".contigs.fasta" in assembly or "assembly.fasta" in assembly: 
+            if ".contigs.fasta" in assembly or "assembly.fasta" in assembly:
                 if ".jpg" not in assembly:
                     contigcount = 0
                     if os.stat(
                         settings.NANOPORE_DRIVE + username + "/results/" + r +
                         "/assembly/" + assemblyfolder + "/" + assembly
-                    ).st_size > 0:
+                    ).st_size >= 0:
                         assembly_bc.append(assemblyfolder)
                         for record in SeqIO.parse(
                             settings.NANOPORE_DRIVE + username + "/results/" + r +
@@ -1226,9 +1233,9 @@ def get_stored_assembly_results(username, r):
 
 def delete(request):
     """Checks if user is superuser and gets the results created by the user.
-    Shows a dropdown menu on the delete page to select a result the user wants 
+    Shows a dropdown menu on the delete page to select a result the user wants
     to delete.
-    
+
     Arguments:
         request: Request information to visit the delete page.
     """
@@ -1253,9 +1260,9 @@ def delete(request):
 def remove_result(request):
     """Remove the selected result from the users results folder on the
     network drive. This cannot be undone.
-    
+
     Arguments:
-        request: Get the username and resultname to remove the 
+        request: Get the username and resultname to remove the
         selected result from the network drive.
     """
     result = request.POST.get("resultname")
@@ -1269,7 +1276,7 @@ def logout(request):
     """Flush the session to logout the current user.
 
     Arguments:
-        request: Request the session of the current user to 
+        request: Request the session of the current user to
         flush the session.
     """
     request.session.flush()
@@ -1278,12 +1285,12 @@ def logout(request):
 
 @csrf_exempt
 def login(request):
-    """Authenticate user. 
+    """Authenticate user.
     Check if user is in the mysql database and password is correct.
     Store username in a session.
 
     Arguments:
-        request: Request the username and password for login 
+        request: Request the username and password for login
         and store information in session.
     """
     if request.session.get('username') is None:

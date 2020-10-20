@@ -4,8 +4,9 @@ Django settings for WeFaceNano project.
 
 import os
 
+# location of input files and results
+NANOPORE_DRIVE = "nanopore-drive/"
 
-NANOPORE_DRIVE = "/mnt/d/Nanopore/"
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
