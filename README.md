@@ -81,7 +81,7 @@ In this section, we will guide you through running a pipeline on some testdata
 7. Once the pipeline has finished, you will be able to view the results in the webpage from the homepage.
 
 8. In the results page, choose the sample you are interested in to view the output report, it should look something like this:
-  ![](screenshot_results.jpg)
+  ![](screenshot_results.png)
 
 
 
