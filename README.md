@@ -69,8 +69,8 @@ In this section, we will guide you through running a pipeline on some testdata
   - Select the input folder `testdata-small`
   - Choose a name for the results directory
   - Select `miniasm` as the assembler
-  - Check the box for `resFinder` tool
-  - Leave everything else on their default settings:
+  - Check the box for `BLAST` tool
+  - Leave everything else on the default settings:
     ![](screenshot.png)
 
 5. Click **Run**
@@ -78,7 +78,11 @@ In this section, we will guide you through running a pipeline on some testdata
 6. The pipeline will take quite some time to complete
   - You can view the progress in the terminal
 
-7. Once the pipeline has finished, you will be able to view the results in the webpage.
+7. Once the pipeline has finished, you will be able to view the results in the webpage from the homepage.
+
+8. In the results page, choose the sample you are interested in to view the output report, it should look something like this:
+  ![](screenshot_results.jpg)
+
 
 
 
