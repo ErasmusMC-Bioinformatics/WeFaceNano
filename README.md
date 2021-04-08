@@ -15,12 +15,13 @@
 
 ### With Docker (recommended)
 
-1. Install Docker according to the [official installation instructions]()
+1. Install Docker according to the [official installation instructions](https://docs.docker.com/get-docker/)
+   - Docker can be installed on Linux, Mac and Windows
 
 2. Run the WeFaceNano Docker image with the following command
 
    ```
-   docker run -p 8008:8008 quay.io/erasmusmc-bioinformatics/wefacenano
+   docker run -p 8008:8008 quay.io/erasmusmc_bioinformatics/wefacenano
    ```
 
 3. Open a browser, and navigate to [127.0.0.1:8008](http://127.0.0.1:8008).
