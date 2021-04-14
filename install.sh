@@ -14,6 +14,8 @@ cd ../
 
 # get reference databases
 mkdir -p nanopore-drive/blastdb
+mv RB_REF/ nanopore-drive/
+mv plasmidb/ nanopore-drive/
 cd nanopore-drive
 git clone https://git@bitbucket.org/genomicepidemiology/resfinder_db
 git clone https://bitbucket.org/genomicepidemiology/plasmidfinder_db
@@ -23,7 +25,7 @@ cd plasmidfinder_db
 cd ../resfinder_db
 ./INSTALL.py
 cd ../
-ln -s plasmidfinder_db plasmidb
+# ln -s plasmidfinder_db plasmidb
 
 
 
