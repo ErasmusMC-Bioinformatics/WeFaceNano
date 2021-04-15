@@ -23,18 +23,18 @@ function showFlye(){
     document.getElementById('circreads').style.visibility ='collapse';
     document.getElementById('flyeopt').style.visibility ='visible';
 }
-function showBlast(){
-    var checkBox = document.getElementById("blast");
-    if (checkBox.checked == true){
-        document.getElementById('blastheader').style.visibility = 'visible';
-        document.getElementById('blastdatabase').style.visibility ='visible';
-        document.getElementById('blasttaskset').style.visibility ='visible';
-    } else {
-        document.getElementById('blastheader').style.visibility = 'collapse';
-        document.getElementById('blastdatabase').style.visibility ='collapse';
-        document.getElementById('blasttaskset').style.visibility ='collapse';
-    }
-}
+// function showBlast(){
+//     var checkBox = document.getElementById("blast");
+//     if (checkBox.checked == true){
+//         document.getElementById('blastheader').style.visibility = 'visible';
+//         document.getElementById('blastdatabase').style.visibility ='visible';
+//         document.getElementById('blasttaskset').style.visibility ='visible';
+//     } else {
+//         document.getElementById('blastheader').style.visibility = 'visible';
+//         document.getElementById('blastdatabase').style.visibility ='visible';
+//         document.getElementById('blasttaskset').style.visibility ='visible';
+//     }
+// }
 function showResfinder(){
     var checkBox = document.getElementById("res");
     if (checkBox.checked == true){
@@ -175,18 +175,18 @@ function showResfinder(){
                         <td>
                             <input type="hidden" required>
                             <div id="plasmids" class="tabcontent" style="display:block;">
-                                <input type="checkbox" name="blast" id="blast" value='-b ' onclick="showBlast()">&nbsp;<label>BLAST &nbsp;&nbsp;&nbsp;</label>
+                                <input type="checkbox" name="blast" id="blast" value='-b ' checked disabled>&nbsp;<label>BLAST &nbsp;&nbsp;&nbsp;</label>
                                 <input type="checkbox" name="res" id="res" value='-r ' onclick="showResfinder()">&nbsp;<label>resFinder &nbsp;&nbsp;&nbsp;</label>
                             </div>
                         </td>
                     </tr>
-                    <tr id="blastheader" style="visibility: collapse;">
+                    <tr id="blastheader" style="visibility: visible;">
                         <td>
                             <b>BLAST Settings</b>
                         </td>
                         <td>&nbsp;</td>
                     </tr>
-                    <tr id="blastdatabase" style="visibility: collapse;">
+                    <tr id="blastdatabase" style="visibility: visible;">
                         <td>
                             Select a BLAST database:
                         </td>
@@ -197,14 +197,14 @@ function showResfinder(){
                                     <option value="nr -remote">Remote NR Database</option>
                                 </optgroup>
                                 <optgroup label="Local BLAST Databases">
+                                    <option value="{{drive}}plasmidb/plasmidb" selected>Local Plasmid Database</option>
                                     <option value="{{drive}}blastdb/nt">Local NT Database</option>
                                     <option value="{{drive}}blastdb/nr">Local NR Database</option>
-                                    <option value="{{drive}}plasmidb/plasmidb">Local Plasmid Database</option>
                                 </optgroup>
                             </select>
                         </td>
                     </tr>
-                    <tr id="blasttaskset" style="visibility: collapse;">
+                    <tr id="blasttaskset" style="visibility: visible;">
                         <td>Select BLAST task</td>
                         <td>
                             <input type="radio" name="blasttask" id="blasttask" value='megablast' checked="checked">&nbsp;<label>megablast &nbsp;&nbsp;&nbsp;</label>
