@@ -13,45 +13,7 @@
 
 ## How to run
 
-### With Docker (recommended)
-
-1. Install Docker according to the [official installation instructions](https://docs.docker.com/get-docker/)
-   - Docker can be installed on Linux, Mac and Windows
-
-2. Run the WeFaceNano Docker image with the following command
-
-   ```
-   docker run -p 8008:8008 quay.io/erasmusmc_bioinformatics/wefacenano
-   ```
-
-3. Open a browser, and navigate to [127.0.0.1:8008](http://127.0.0.1:8008).
-
-4. Log in using the default admin credentials:
-   ```
-   username: admin
-   password: admin
-   ```
-
-3. Click on `Pipelines` in the top menu bar
-
-4. Configure the workflow (below are some settings for a test run)
-  - Select the input folder `testdata-small`
-  - Choose a name for the results directory
-  - Select `miniasm` as the assembler
-  - Check the box for `BLAST` tool
-  - Leave everything else on the default settings:
-    ![](screenshot.png)
-
-5. Click **Run**
-
-6. The pipeline will take quite some time to complete
-  - You can view the progress in the terminal
-
-7. Once the pipeline has finished, you will be able to view the results in the webpage from the homepage.
-
-8. In the results page, choose the sample you are interested in to view the output report, it should look something like this:
-  ![](screenshot_results.png)
-
+We offer two options for installing WeFaceNano, via Makefile (using Conda for dependencies), or via Docker.
 
 
 ### From Source
@@ -95,10 +57,29 @@
    password: admin
    ```
 
+### With Docker
+
+1. Install Docker according to the [official installation instructions](https://docs.docker.com/get-docker/)
+   - Docker can be installed on Linux, Mac and Windows
+
+2. Run the WeFaceNano Docker image with the following command
+
+   ```
+   docker run -p 8008:8008 quay.io/erasmusmc_bioinformatics/wefacenano
+   ```
+
+3. Open a browser, and navigate to [127.0.0.1:8008](http://127.0.0.1:8008).
+
+4. Log in using the default admin credentials:
+   ```
+   username: admin
+   password: admin
+   ```
+
 
 ### Example run
 
-In this section, we will guide you through running a pipeline on some testdata
+In this section, we will guide you through running a pipeline on some testdata (this data is included in the Docker image)
 
 
 1. First, we download some test data (~150MB; data from [Lin et al. 2017](http://gigadb.org/dataset/100387)):
