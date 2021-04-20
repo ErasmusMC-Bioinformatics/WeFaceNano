@@ -103,6 +103,7 @@ In this section, we will guide you through running a pipeline on some testdata (
   - Select the input folder `testdata-small`
   - Choose a name for the results directory
   - Select `flye` as the assembler
+    - Select `100000` as the genome size 
     - Select `--meta` option for Flye
   - Check the box for `Resfinder` tool
   - Leave everything else on the default settings:
