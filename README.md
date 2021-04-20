@@ -11,11 +11,11 @@
 [Dependencies](#dependencies)
 
 
-Disclaimer: The quality of the assembly relies on several factors. The quality and amount of the input DNA, the library kit used, the sequence coverage, and assembly parameters and options chosen may influence the final result and interpretation.  
+Disclaimer: The quality of the assembly relies on several factors. The quality and amount of the input DNA, the library kit used, the sequence coverage, and assembly parameters and options chosen may influence the final result and interpretation.
 
 ## How to run
 
-We offer two options for installing WeFaceNano, via Makefile (using Conda for dependencies), or via Docker.
+We offer two options for installing WeFaceNano, from source via Makefile (using Conda for dependencies), or via Docker.
 
 
 ### From Source
@@ -88,6 +88,8 @@ In this section, we will guide you through running a pipeline on some testdata (
    ```
    make download-testdata
    ```
+   (You can skip this step when using the Docker image)
+
 2. Go to WeFaceNano [127.0.0.1:8008](https://127.0.0.1:8008), and make sure you are logged in as admin (username: `admin`, password: `admin`)
 
 3. Click on `Pipelines` in the top menu bar
@@ -95,8 +97,9 @@ In this section, we will guide you through running a pipeline on some testdata (
 4. Configure the workflow
   - Select the input folder `testdata-small`
   - Choose a name for the results directory
-  - Select `miniasm` as the assembler
-  - Check the box for `BLAST` tool
+  - Select `flye` as the assembler
+    - Select `--meta` option for Flye
+  - Check the box for `Resfinder` tool
   - Leave everything else on the default settings:
     ![](screenshot.png)
 
