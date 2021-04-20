@@ -2,6 +2,9 @@
 
 Quickstart: [view an example resulst report](https://erasmusmc-bioinformatics.github.io/WeFaceNano/)
 
+
+Disclaimer: The quality of the assembly relies on several factors. The quality and amount of the input DNA, the library kit used, the sequence coverage, and assembly parameters and options chosen may influence the final result and interpretation.
+
 ## Table of Contents
 
 [Installation](#how-to-install)
@@ -14,8 +17,6 @@ Quickstart: [view an example resulst report](https://erasmusmc-bioinformatics.gi
 
 [Dependencies](#dependencies)
 
-
-Disclaimer: The quality of the assembly relies on several factors. The quality and amount of the input DNA, the library kit used, the sequence coverage, and assembly parameters and options chosen may influence the final result and interpretation.
 
 ## How to run
 
