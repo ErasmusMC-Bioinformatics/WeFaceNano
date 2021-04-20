@@ -10,4 +10,4 @@ unrar e MinION_reads-12_samples.rar .
 
 # create a folde with a subset of the data for speed
 cp RB01.fasta ../../testrun-small/RB01/
-cp RB02.fasta ../../testrun-small/RB02/
+cp RB04.fasta ../../testrun-small/RB04/
