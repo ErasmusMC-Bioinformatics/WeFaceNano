@@ -103,7 +103,7 @@ In this section, we will guide you through running a pipeline on some testdata (
   - Select the input folder `testdata-small`
   - Choose a name for the results directory
   - Select `flye` as the assembler
-    - Select `100000` as the genome size 
+    - Select `100000` as the genome size
     - Select `--meta` option for Flye
   - Check the box for `Resfinder` tool
   - Leave everything else on the default settings:
@@ -117,7 +117,10 @@ In this section, we will guide you through running a pipeline on some testdata (
 7. Once the pipeline has finished, you will be able to view the results in the webpage from the homepage.
 
 8. In the results page, choose the sample you are interested in to view the output report, it should look something like this:
-   [Example HTML output report](https://erasmusmc-bioinformatics.github.io/WeFaceNano/)
+
+   ![gif of wefacenano web report](docs/wefacenano.gif)
+
+   See here for the full [Example HTML output report](https://erasmusmc-bioinformatics.github.io/WeFaceNano/)
 
 
 
