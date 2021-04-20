@@ -11,6 +11,8 @@
 [Dependencies](#dependencies)
 
 
+Disclaimer: The quality of the assembly relies on several factors. The quality and amount of the input DNA, the library kit used, the sequence coverage, and assembly parameters and options chosen may influence the final result and interpretation.  
+
 ## How to run
 
 We offer two options for installing WeFaceNano, via Makefile (using Conda for dependencies), or via Docker.
