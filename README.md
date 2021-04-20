@@ -1,5 +1,9 @@
 # WeFaceNano
 
+Quickstart: [view an example resulst report](https://erasmusmc-bioinformatics.github.io/WeFaceNano/)
+
+## Table of Contents
+
 [Installation](#how-to-install)
 
 [Usage](#plasmid-pipeline-usage)
