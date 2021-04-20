@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)file:///C:/Users/Rick/Desktop/New%20folder/RB04_Meta_Old.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Nanopore Pipeline GUI">
+    <meta name="author" content="Rick Jansen">
+    
+
+
+    <title>Nanopore Pipeline GUI</title>
+    <link href="./WeFaceNano_output_files/style.css" rel="stylesheet">
+    <link href="./WeFaceNano_output_files/bootstrap.min.css" rel="stylesheet">
+    <script src="./WeFaceNano_output_files/d3.v3.min.js.download" charset="utf-8"></script>
+    <script type="application/json" id="data"></script>
+    <script src="./WeFaceNano_output_files/results.js.download"></script>
+</head>
+<body>
+    
+<script>
+    function showQC() {
+        var x = document.getElementById("qcreport");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            document.getElementById("showqc").textContent = "Hide report";
+        } else {
+            x.style.display = "none";
+            document.getElementById("showqc").textContent = "Show report";
+        }
+    }
+</script>
+<div class="header">
+    <div class="container">
+        <div id="menu">
+            <ul id="menubar">
+                <li><a href="http://127.0.0.1:8000/">HOME</a></li>
+                
+                    <li><a href="http://127.0.0.1:8000/pipeline">PIPELINES</a></li>
+                
+                <li><a href="http://127.0.0.1:8000/delete">DELETE</a></li>
+                <li><a href="http://127.0.0.1:8000/readme">README</a></li>
+                <div id="smenubar">
+                    
+                        <li>
+                            <b><small style="color:rgb(136,162,175); font-size:9pt;">Logged in as: <span style="color:rgb(255,100,0);">Rick</span></small></b>
+                        </li>
+                        <li><a href="http://127.0.0.1:8000/logout">LOGOUT</a></li>
+                        
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
+                            <li><a href="http://127.0.0.1:8000/signup/">SIGN UP</a></li>
+                        
+                    
+                </div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top:100px">
+    
+        <h1>RB04_Meta</h1>
+    
+    <div class="tab">
+        
+            <button class="tablinks active" onclick="openResult(event, &#39;RB04&#39;)">RB04</button>
+        
+    </div>
+    
+        <div id="RB04" class="tabcontent" style="display: block;">
+            
+                
+                    <h3>QC report</h3>
+                    <div class="tab">
+                        <button id="showqc" onclick="showQC()" class="runbutton">Show report</button>
+                    </div>
+                    <div id="qcreport" style="display:none;">
+                        <iframe frameborder="0" scrolling="yes" height="800" width="100%" src="./WeFaceNano_output_files/saved_resource.html"></iframe>
+                    </div>
+                
+            
+            
+                <h3>Assembly</h3>
+                <table class="table">
+                    <tbody><tr><th><a>Contig</a></th>
+                    <th><a>Length</a></th>
+                    <th><a>Graph</a></th>
+                
+                    </tr><tr>
+                    
+                        <td>RB04_contig_1</td>
+                        
+                            
+                        
+                            
+                                <td>15473 bp</td>
+                            
+                        
+                        <td>
+                            
+                                
+                                    
+                                        <iframe frameborder="0" scrolling="no" height="280" width="280" src="./WeFaceNano_output_files/saved_resource(1).html"></iframe>
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                            
+                        </td>
+                    
+                    </tr>
+                
+                    <tr>
+                    
+                        <td>RB04_contig_2</td>
+                        
+                            
+                        
+                            
+                                <td>3023 bp</td>
+                            
+                        
+                        <td>
+                            
+                                
+                                    
+                                
+                                    
+                                        <iframe frameborder="0" scrolling="no" height="280" width="280" src="./WeFaceNano_output_files/saved_resource(2).html"></iframe>
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                            
+                        </td>
+                    
+                    </tr>
+                
+                    <tr>
+                    
+                        <td>RB04_contig_3</td>
+                        
+                            
+                        
+                            
+                                <td>114405 bp</td>
+                            
+                        
+                        <td>
+                            
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                        <iframe frameborder="0" scrolling="no" height="280" width="280" src="./WeFaceNano_output_files/saved_resource(3).html"></iframe>
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                            
+                        </td>
+                    
+                    </tr>
+                
+                    <tr>
+                    
+                        <td>RB04_contig_4</td>
+                        
+                            
+                        
+                            
+                                <td>134537 bp</td>
+                            
+                        
+                        <td>
+                            
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                        <iframe frameborder="0" scrolling="no" height="280" width="280" src="./WeFaceNano_output_files/saved_resource(4).html"></iframe>
+                                    
+                                
+                                    
+                                
+                            
+                        </td>
+                    
+                    </tr>
+                
+                    <tr>
+                    
+                        <td>RB04_contig_5</td>
+                        
+                            
+                        
+                            
+                                <td>234535 bp</td>
+                            
+                        
+                        <td>
+                            
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                
+                                    
+                                        <iframe frameborder="0" scrolling="no" height="280" width="280" src="./WeFaceNano_output_files/saved_resource(5).html"></iframe>
+                                    
+                                
+                            
+                        </td>
+                    
+                    </tr>
+                
+                </tbody></table>
+                <br>
+                
+                    <h3>Incompatibility Factors</h3>
+                    <table class="table">
+                        <tbody><tr><th><a>Contig</a></th>
+                        <th><a>Incompatibility factor(s)</a></th>
+                    
+                        
+                        </tr><tr>
+                            <td>
+                                RB04_contig_3
+                            </td>
+                            <td>
+                            
+                                IncFIB(AP001918) - (97.51%) - <b><a href="https://www.ncbi.nlm.nih.gov/nuccore/AP001918" target="_blank">AP001918</a></b><br>
+                            
+                                IncFIC(FII) - (93.23%) - <b><a href="https://www.ncbi.nlm.nih.gov/nuccore/AP001918" target="_blank">AP001918</a></b><br>
+                            
+                            </td>
+                        </tr>
+                        
+                   
+                        
+                        <tr>
+                            <td>
+                                RB04_contig_4
+                            </td>
+                            <td>
+                            
+                                IncY - (98.69%) - <b><a href="https://www.ncbi.nlm.nih.gov/nuccore/K02380" target="_blank">K02380</a></b><br>
+                            
+                            </td>
+                        </tr>
+                        
+                   
+                        
+                        <tr>
+                            <td>
+                                RB04_contig_5
+                            </td>
+                            <td>
+                            
+                                IncA/C2 - (99.28%) - <b><a href="https://www.ncbi.nlm.nih.gov/nuccore/JN157804" target="_blank">JN157804</a></b><br>
+                            
+                                IncX3 - (98.68%) - <b><a href="https://www.ncbi.nlm.nih.gov/nuccore/JN247852" target="_blank">JN247852</a></b><br>
+                            
+                            </td>
+                        </tr>
+                        
+                   
+                   </tbody></table>
+                
+                <br>
+                
+                    <h3>Antibiotic Resistance Genes</h3>
+                    <table class="table">
+                        <tbody><tr><th><a>Contig</a></th>
+                        <th><a>Gene(s)</a></th>
+                    
+                        
+                        </tr><tr>
+                            <td>
+                                RB04_contig_3
+                            </td>
+                            <td>
+                                
+                                    aadA1 - (99.50%) - Aminoglycoside resistance<br>
+                                
+                                    aadA2 - (99.75%) - Aminoglycoside resistance<br>
+                                
+                                    cmlA1 - (99.52%) - Phenicol resistance<br>
+                                
+                                    floR - (97.53%) - Phenicol resistance<br>
+                                
+                                    sul2 - (99.14%) - Sulphonamide resistance<br>
+                                
+                                    tet(A) - (99.17%) - Tetracycline resistance<br>
+                                
+                                    tet(M) - (95.44%) - Tetracycline resistance<br>
+                                
+                                    dfrA12 - (99.20%) - Trimethoprim resistance<br>
+                                
+                            </td>
+                        </tr>
+                        
+                    
+                        
+                        <tr>
+                            <td>
+                                RB04_contig_5
+                            </td>
+                            <td>
+                                
+                                    aph(3')-Ia - (98.05%) - Aminoglycoside resistance<br>
+                                
+                                    aph(6)-Id - (96.21%) - <br>
+                                
+                                    aac(6')-Ib-cr - (98.17%) - Fluoroquinolone and aminoglycoside resistance<br>
+                                
+                                    blaNDM-1 - (99.14%) - Beta-lactam resistance<br>
+                                
+                                    blaCMY-2 - (96.17%) - Beta-lactam resistance<br>
+                                
+                                    blaOXA-1 - (98.33%) - Beta-lactam resistance<br>
+                                
+                                    blaDHA-1 - (97.81%) - Beta-lactam resistance<br>
+                                
+                                    mph(A) - (97.63%) - Macrolide resistance<br>
+                                
+                                    floR - (96.96%) - Phenicol resistance<br>
+                                
+                                    catB3 - (99.53%) - Phenicol resistance<br>
+                                
+                                    aac(6')-Ib-cr - (98.17%) - Fluoroquinolone and aminoglycoside resistance<br>
+                                
+                                    qnrB4 - (97.84%) - <br>
+                                
+                                    ARR-3 - (97.36%) - Rifampicin resistance<br>
+                                
+                                    sul1 - (98.51%) - Sulphonamide resistance<br>
+                                
+                                    sul2 - (92.78%) - Sulphonamide resistance<br>
+                                
+                                    sul1 - (98.73%) - Sulphonamide resistance<br>
+                                
+                                    tet(A) - (96.48%) - Tetracycline resistance<br>
+                                
+                            </td>
+                        </tr>
+                        
+                    
+                    </tbody></table>
+                
+            
+            
+                <h3>BLAST</h3>
+                <div id="plasmid" class="tabdiv" style="display:block;">
+                    <table class="table">
+                        <tbody><tr><th>Contig</th>
+                        <th><a>Name or Accession number</a></th>
+                        <th><a>Reference Topology</a></th>
+                        
+                            
+                            </tr><tr>
+                                <td class="contig">
+                                    RB04_contig_3
+                                </td>
+                            
+                                <td>
+                                    RB04-SZ584-1T-IncF-TET-114056
+                                </td>
+                            
+                                <td style="text-align:center;">
+                                    
+                                        
+                                            
+                                                <figure>
+                                                <img id="circular" src="./WeFaceNano_output_files/circular.png" width="30px" height="30px">
+                                                    <figcaption>
+                                                        circular
+                                                    </figcaption>
+                                                </figure>
+                                            
+                                        
+                                    
+                                        
+                                    
+                                        
+                                    
+                                </td>
+                            </tr>
+                            
+                        
+                            
+                            <tr>
+                                <td class="contig">
+                                    RB04_contig_4
+                                </td>
+                            
+                                <td>
+                                    RB04-SZ584-1T-IncY-130821
+                                </td>
+                            
+                                <td style="text-align:center;">
+                                    
+                                        
+                                    
+                                        
+                                            
+                                                <figure>
+                                                <img id="circular" src="./WeFaceNano_output_files/circular.png" width="30px" height="30px">
+                                                    <figcaption>
+                                                        circular
+                                                    </figcaption>
+                                                </figure>
+                                            
+                                        
+                                    
+                                        
+                                    
+                                </td>
+                            </tr>
+                            
+                        
+                            
+                            <tr>
+                                <td class="contig">
+                                    RB04_contig_5
+                                </td>
+                            
+                                <td>
+                                    RB02-JN105-IncX-NDM5-45823
+                                </td>
+                            
+                                <td style="text-align:center;">
+                                    
+                                        
+                                    
+                                        
+                                    
+                                        
+                                            
+                                                <figure>
+                                                <img id="circular" src="./WeFaceNano_output_files/circular.png" width="30px" height="30px">
+                                                    <figcaption>
+                                                        circular
+                                                    </figcaption>
+                                                </figure>
+                                            
+                                        
+                                    
+                                </td>
+                            </tr>
+                            
+                        
+                    </tbody></table>
+                </div>
+            
+            
+                <h3>Plasmids</h3>
+                <div id="d3plasmid" style="text-align:center; width:100%">
+                
+                <table style="width:100%; text-align:center;">
+                    
+                        
+                            <tbody><tr>
+                                
+                                <td>
+                                
+                                    <h2>RB04_RB02-JN105-IncX-NDM5-45823</h2>
+                                    <iframe frameborder="0" scrolling="no" width="100%" height="800" src="./WeFaceNano_output_files/saved_resource(6).html"></iframe>
+                                
+                                
+                                </td>
+                            </tr>
+                        
+                    
+                        
+                            <tr>
+                                
+                                <td>
+                                
+                                    <h2>RB04_RB04-SZ584-1T-IncF-TET-114056</h2>
+                                    <iframe frameborder="0" scrolling="no" width="100%" height="800" src="./WeFaceNano_output_files/saved_resource(7).html"></iframe>
+                                
+                                
+                                </td>
+                            </tr>
+                        
+                    
+                        
+                            <tr>
+                                
+                                <td>
+                                
+                                    <h2>RB04_RB04-SZ584-1T-IncY-130821</h2>
+                                    <iframe frameborder="0" scrolling="no" width="100%" height="800" src="./WeFaceNano_output_files/saved_resource(8).html"></iframe>
+                                
+                                
+                                </td>
+                            </tr>
+                        
+                    
+                </tbody></table>
+                </div>
+            
+        </div>
+    
+</div>
+
+
+</body></html>
